@@ -1,0 +1,113 @@
+<html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="public/style.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      <title>board jobs (chat)</title>
+    </head>
+    <body>
+        <h1><b>Board</b></h1><br />    
+        <form class="backForm">            
+            <table style="width: 100%;">
+                <tr>
+                  <td style="width: 15%;">
+                    <%if(typeuser=="professional"){%>            
+                      <ul>
+                        <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Board</a></li>
+                        <li><a href="?menu=ganho&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Ganhos Financeiros</a></li>
+                        <li><a href="?menu=fincadPro&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Cadastro Financeiro</a></li>
+                        <li><a href="?menu=fichaCad&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">ficha Cadastral</a></li>
+                        <li><a href="?menu=chatP&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Chat com o Cliente</a></li>
+                        <li><a href="?menu=ProdutosCaju&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Produtos Caju</a></li>
+                    </ul>   
+                        <%}else if(typeuser=="contractor"){%>
+                            <ul>
+                                <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Board</a></li>
+                                <li><a href="?menu=createTask&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Criar Serviço</a></li>
+                                <li><a href="?menu=historico&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Historico de serviços</a></li>
+                                <li><a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Cadastro Financeiro</a></li>
+                                <li><a href="?menu=fichaCad&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">ficha Cadastral</a></li>
+                                <li><a href="?menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">serviços Concluidos</a></li>
+                                <li><a href="?menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Chat com os contratados</a></li>
+                                <li><a href="?menu=ProdutosCaju&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Produtos Caju</a></li>
+                              </ul>    
+                        <%}%>
+                  </td>
+                  <td id="conteudo" name="conteudo" style="width: 80%;" >
+                    CHAT do <%=typeuser%><br><br>
+                    <table style="width: 96%;">
+                      <thead>
+                        <tr>
+                          <td style="width: 20%;"></td>
+                          <td style="width: 20%;"></td>
+                        </tr>
+                      </thead>                      
+                      <tbody>
+                        <tr>
+                          <td class="contactsScroll">
+                            <table class="chatcontacts">
+                            <%for(let x = 0; x < task.length; x++ ){%>
+                              <tr>                                 
+                                <%if(typeuser=="professional"){%>                                                                 
+                                <td>
+                                  <%if(remetente == task[x].developer){%>
+                                    <a href="?usuario=<%=task[x].email%>&menu=chatP&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">
+                                      <b><%=task[x].email%></b>
+                                    </a>
+                                  <%}%>
+                                </td>
+                              <%}else if(typeuser=="contractor"){%>
+                                <td>
+                                  <%if(remetente == task[x].email){%>
+                                    <a href="?usuario=<%=task[x].developer%>&menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">
+                                      <b><%=task[x].developer%></b>
+                                    </a>
+                                  <%}%>
+                                </td>
+                              </tr>
+                              <%}%>    
+                            <%}%>
+                            </table>
+                          </td>                         
+                          <td class="chatBackAreaTalk">
+                            <div style="width: 100%; height: 400px; overflow-y: scroll;">
+                              <%for(let x = 0; x < chatmensagem.length; x++ ){%>                            
+                                <%if(chatmensagem[x].destinatario == email ){%>
+                                  <p id="destinatario" class="chatBallonReturn"><%=chatmensagem[x].mensagem%></p>
+                                <%}%>
+                                <%if(chatmensagem[x].remetente == email){%>
+                                  <p id="remetente" class="chatBallonTalk"><%=chatmensagem[x].mensagem%></p>
+                                <%}%>
+                              <%}%>
+                          </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="width: 20%;">
+                          </td>
+                          <td style="width: 80%;">
+                            <input type="text" id="mensagem" style="width: 84%;" name="mensagem" placeholder="Escreva aqui" /> 
+                            <input type="submit" style="width: 15%;" id="conversa" name="conversa" value="Enviar" />  
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>             
+                  </td>
+                </tr>
+              </table>  
+              <input type="hidden" id="usuario" name="usuario" value="<%=usuario%>"  />
+              <input type="hidden" id="senha" name="senha" value="<%=senha%>"  />
+              <input type="hidden" id="email" name="email" value="<%=email%>"  />              
+              <%if(typeuser=="professional"){%>
+                <input type="hidden" id="menu" name="menu" value="chatP" />
+                <input type="hidden" id="typeuser" name="typeuser" value="professional" />  
+              <%}else if(typeuser=="contractor"){%>
+                <input type="hidden" id="menu" name="menu" value="chatC" />
+                <input type="hidden" id="typeuser" name="typeuser" value="contractor" />  
+              <%}%>              
+        </form>   
+    </body>
+</html>

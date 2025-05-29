@@ -1,0 +1,23 @@
+<html>
+    <head>
+      <meta charset="utf-8">
+      <link href="public/style.css" rel="stylesheet">
+      <title>board jobs</title>
+    </head>
+    <body>
+      <form>
+        <a href="?opcao=home">Home</a>
+      </form>                 
+        <form>
+          <h1><b>Board Jobs</b></h1><br />    
+          <h3><b>LOGIN</b></h3><br />   
+          <%=user%><br />    
+          <input type="text" id="email" name="email" placeholder="E-Mail" /><br />
+          <input type="password" id="senha" name="senha" placeholder="Senha" /><br />
+          <input type="hidden" id="typeuser" name="typeuser" value="<%=user%>"  />
+          <input type="submit" id="opcao" name="opcao" value="Entrar" />          
+        <form>       
+        </form>
+        </form>
+    </body>
+</html>

@@ -1,0 +1,142 @@
+<html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="public/style.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      <title>board jobs (Pagamentos)</title>
+    </head>
+    <body>
+      <h1><b>Fazer o Pagamento</b></h1><br />
+      <form>
+      <table style="width: 98%;">
+        <tr>
+          <td style="width: 15%;">
+              <%if(typeuser=="contractor"){%>
+                <ul>
+                  <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Board</a></li>
+                  <li><a href="?menu=createTask&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Criar Serviço</a></li>
+                  <li><a href="?menu=historico&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Historico de serviços</a></li>
+                  <li><a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Cadastro Financeiro</a></li>
+                  <li><a href="?menu=fichaCad&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">ficha Cadastral</a></li>
+                  <li><a href="?menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">serviços Concluidos</a></li>
+                  <li><a href="?menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Chat com os contratados</a></li>
+                  <li><a href="?menu=ProdutosCaju&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Produtos Caju</a></li>
+                </ul>
+              <%}%>
+          </td>
+          <td id="conteudo" name="conteudo" style="width: 80%;"> 
+              Profissional:
+              <select  name="profissionalSel" id="profissionalSel" onchange="this.form.submit()">
+                <option value="" ></option>
+                <%for(var x=0;x<profissional.length;x++){%>
+                  <%if(estadoPg == "postPag"){%>
+                    <option value="<%=profissional[0].nome%>" selected ><%=profissional[0].nome%></option>
+                  <%}else{%>
+                    <%if(profissionalSel != null){%>
+                      <option value="<%=profissional[0].nome%>" selected ><%=profissional[0].nome%></option>
+                    <%}else{%>
+                      <option value="<%=profissional[0].nome%>" ><%=profissional[0].nome%></option>
+                    <%}%>
+                  <%}%>
+                <%}%>
+              </select>
+              Serviço:
+              <select  name="taskservice" id="taskservice" onchange="this.form.submit()">
+                <option value="" ></option>
+                <%for(var x=0;x<task.length;x++){%>
+                  <%if(estadoPg == "postPag" && idtask == task[x].idtask){%>
+                    <option value="<%=task[x].titleService%>" selected ><%=task[x].titleService%></option>
+                  <%}else if( task[x].column == "postEnd" && taskservice == null){%>
+                    <option value="<%=task[x].titleService%>" ><%=task[x].titleService%></option>
+                  <%}else if(task[x].titleService == taskservice){%>
+                    <%tipoPagamento = task[x].tipoPagamento%>
+                    <option value="<%=task[x].titleService%>" selected ><%=task[x].titleService%></option>
+                  <%}else if( task[x].column == "postEnd"){%>
+                    <option value="<%=task[x].titleService%>" ><%=task[x].titleService%></option>
+                  <%}%>
+                <%}%>
+              </select>
+              Pagamento:
+              <select name="tipoPagamento" id="tipoPagamento" onchange="this.form.submit()">
+                <%if(tipoPagamento == "" || tipoPagamento == null){%>
+                  <option value="" selected ></option>
+                  <option value="Boleto" >Boleto</option>
+                  <option value="PIX" >PIX</option>
+                  <option value="Bitcoin" >Bitcoin</option>
+                  <option value="bancodeposito" >Cartão de crédito</option>
+                  <%}else if(tipoPagamento == "Boleto"){%>
+                    <option value="" ></option>
+                    <option value="Boleto" selected >Boleto</option>
+                    <option value="PIX" >PIX</option>
+                    <option value="Bitcoin" >Bitcoin</option>
+                    <option value="bancodeposito" >Cartão de crédito</option>
+                  <%}else if(tipoPagamento == "PIX"){%>
+                    <option value="" ></option>
+                    <option value="Boleto" >Boleto</option>
+                    <option value="PIX" selected>PIX</option>
+                    <option value="Bitcoin" >Bitcoin</option>
+                    <option value="bancodeposito" >Cartão de crédito</option>
+                  <%}else if(tipoPagamento == "Bitcoin"){%>
+                    <option value="" ></option>
+                    <option value="Boleto" >Boleto</option>
+                    <option value="PIX" >PIX</option>
+                    <option value="Bitcoin" selected>Bitcoin</option>
+                    <option value="bancodeposito" >Cartão de crédito</option>
+                  <%}else if(tipoPagamento == "bancodeposito"){%>
+                    <option value="" ></option>
+                    <option value="Boleto" >Boleto</option>
+                    <option value="PIX" >PIX</option>
+                    <option value="Bitcoin" >Bitcoin</option>
+                    <option value="bancodeposito" selected>Cartão de crédito</option>
+                  <%}%>
+                </select><br /><br />
+                <%if(tipoPagamento == ""){%>
+                  <div class="divMensagens">escolha uma forma de pagamento</div>
+                  <%}else if(tipoPagamento == "bancodeposito"){%>
+                    <input type="text" id="nomecliente" name="nomecliente" value="<%=profissional[0].nome%>" placeholder="Nome do Cliente que esta no cartão" style="width: 50%;" /><br />
+                    <input type="text" id="cpf_cnpj" name="cpf_cnpj" value="<%=profissional[0].cpf_cnpj%>" placeholder="CPF / CNPJ" style="width: 50%;" /><br />
+                    <input type="text" id="banco" name="banco" value="<%=profissional[0].banco%>" placeholder="código" style="width: 50%;" /><br /> 
+                    <input type="text" id="numeroconta" value="<%=profissional[0].conta%>" name="numeroconta" placeholder="Número da conta" style="width: 50%;" /><br /> 
+                    <input type="text" id="agencia" name="agencia" value="<%=profissional[0].agencia%>" placeholder="Agência" style="width: 50%;" /><br />
+                    <input type="text" id="valorpagamento" value="<%=task[0].valor%>" name="valorpagamento" placeholder="valor do deposito" style="width: 50%;" />                     
+                  <%}else if(tipoPagamento == "PIX"){%>
+                    <input type="text" id="nomepix" name="Nomepix" value="<%=profissional[0].nome%>" placeholder="Nome Completo" style="width: 50%;" /><br />
+                    <input type="text" id="cpf_cnpj_pix" name="cpf_cnpj_pix" value="<%=profissional[0].cpf_cnpj%>" placeholder="CPF / CNPJ" style="width: 30%;" /><br />
+                    <input type="text" id="telefone" name="telefone" value="<%=profissional[0].telefone%>" placeholder="Telefone" style="width: 15%;" />
+                    <input type="text" id="email" name="email" value="<%=profissional[0].email%>" placeholder="E-Mail" style="width: 25%;" />
+                    <br />
+                    Chave do Pix:
+                    <select name="bandeira" id="bandeira" style="width: 10%;" >
+                      <option value="" selected ></option>
+                      <option value="documento" >CPF / CNPJ</option>
+                      <option value="telefone" >Telefone</option>
+                      <option value="email" >E-Mail</option>
+                    </select>
+                    <%}else if(tipoPagamento == "Boleto"){%>
+                      <br /><br />
+                      <input type="submit" id="apresentaBoleto" name="apresentaBoleto" value="Apresentar Boleto" />
+                      <div style="overflow-y: scroll; height:250px;">
+                      <object id="boletoPDF" name="boletoPDF" data="" type="application/pdf" width="600" height="700">                        
+                      </object>
+                      </div>
+                      <br />
+                    <%}else if(tipoPagamento == "Bitcoin"){%>
+                      <input type="text" id="carteiraBit" name="carteiraBit" value="<%=profissional[0].carteiraBitcoin%>" placeholder="id da carteira bitcoin" style="width: 50%;" /><br />
+                      R$<input type="text" id="valorBitcoin" name="valorBitcoin" value="<%=task[0].valor%>" placeholder="Valor à Pagar" style="width: 10%;" />                      
+                    <%}%>
+                    <br />
+                    <input type="hidden" id="typeuser" name="typeuser" value="<%=typeuser%>" />
+                    <input type="hidden" id="email" name="email" value="<%=email%>" />
+                    <input type="hidden" id="senha" name="senha" value="<%=senha%>" />
+                    <input type="hidden" id="menu" name="menu" value="fincadCont" />
+                    <br /><br />
+                    <input type="submit" id="buttonPay" name="buttonPay" value="Pagar" />
+                </td>
+              </tr>
+            </table>   
+    </form>
+  </body>
+</html>

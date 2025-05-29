@@ -1,0 +1,174 @@
+<html></html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="public/style.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      <title>board jobs (Ficha de cadastral)</title>
+    </head>
+    <body>
+        <h1><b>Board</b></h1><br />
+        <form>
+            <%=typeuser%>
+            <table style="width: 100%;">
+                <tr>
+                  <td style="width: 15%;">
+                    <ul>
+                      <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=professional">Board</a></li>
+                      <li><a href="?menu=ganho&senha=<%=senha%>&email=<%=email%>&typeuser=professional">Ganhos Financeiros</a></li>
+                      <li><a href="?menu=fincadPro&senha=<%=senha%>&email=<%=email%>&typeuser=professional">Cadastro Financeiro</a></li>
+                      <li><a href="?menu=fichaCad&senha=<%=senha%>&email=<%=email%>&typeuser=professional">ficha Cadastral</a></li>
+                      <li><a href="?menu=chatP&senha=<%=senha%>&email=<%=email%>&typeuser=professional">Chat com o Cliente</a></li>
+                      <li><a href="?menu=ProdutosCaju&senha=<%=senha%>&email=<%=email%>&typeuser=professional">Produtos Caju</a></li>
+                  </ul>   
+                  </td>
+                  <td id="conteudo" name="conteudo" style="width: 85%;" >
+                    Cadastro do Profissional<br />
+                    <form> 
+                        <a href="?opcao=home">Home</a><br />
+                        <input type="text" id="nome" name="nome" placeholder="Nome e sobrenome" style="width: 50%;" value="<%=profissional[0].nome%>" /><br />
+                        <input type="text" id="endereco" name="endereco" placeholder="Endereço" style="width: 50%;" value="<%=profissional[0].endereco%>" /><br />
+                        <input type="text" id="cidade" name="cidade" placeholder="Cidade" style="width: 50%;" value="<%=profissional[0].cidade%>" />
+                        <input type="text" id="estado" name="estado" placeholder="Estado" style="width: 50%;" value="<%=profissional[0].estado%>" />
+                        <input type="text" id="cep" name="cep" placeholder="CEP" style="width: 50%;" value="<%=profissional[0].cep%>" /><br />
+                        <input type="text" id="pais" name="pais" placeholder="País" style="width: 50%;" value="<%=profissional[0].pais%>" /><br />     
+                        <input type="text" id="rg" name="rg" placeholder="RG" style="width: 50%;" value="<%=profissional[0].rg%>" />
+                        <input type="text" id="cpf_cnpj" name="cpf_cnpj" placeholder="CPF ou CNPJ" style="width: 50%;" value="<%=profissional[0].cpf_cnpj%>" /><br />
+                        <input type="text" id="email" name="email" placeholder="E-Mail" style="width: 50%;" value="<%=profissional[0].email%>" /><br />
+                        <input type="password" id="senha" name="senha" placeholder="Senha" style="width: 50%;" value="<%=profissional[0].senha%>" /><br />
+                        <input type="password" id="senha2" name="senha2" placeholder="Repetir a Senha" style="width: 50%;" value="<%=senha2%>" /><br />
+                        <%if(sexo == null || sexo == ""){%>
+                        <select name="sexo" id="sexo" style="width: 50%;" onchange="this.form.submit()">
+                          <option value="" selected ></option>
+                          <option value="Masculino" >Masculino</option>
+                          <option value="Feminino" >Feminino</option>
+                        </select><br /><br />  
+                        <%}%>                        
+                        <%if(sexo == "Masculino"){%>
+                          <select name="sexo" id="sexo" style="width: 50%;" onchange="this.form.submit()">
+                            <option value="" ></option>
+                            <option value="Masculino" selected >Masculino</option>
+                            <option value="Feminino" >Feminino</option>
+                          </select><br /><br /> 
+                        <%}%> 
+                        <%if(sexo == "Feminino"){%>
+                          <select name="sexo" id="sexo" style="width: 50%;" onchange="this.form.submit()">
+                            <option value="" ></option>
+                            <option value="Masculino" >Masculino</option>
+                            <option value="Feminino" selected >Feminino</option>
+                          </select><br /><br /> 
+                        <%}%>
+                        <br /> 
+                        <div>Curriculo</div>
+                        <br /><br />
+                        <input type="text" id="profissao" name="profissao" placeholder="Profissão" style="width: 50%;" value="<%=profissional[0].profissao%>" /><br /><br />
+                        Historico Profissional<br />
+                        <textarea id="historico" name="historico" placeholder="Historico Profissional" rows="10" cols="33" style="width: 50%;" >
+                            <%=profissional[0].historico.trim()%>
+                        </textarea><br />
+                        Conhecimento<br />
+                        <textarea id="conhecimento" name="conhecimento" placeholder="Conhecimento" rows="10" cols="33" style="width: 50%;" >
+                            <%=profissional[0].conhecimento.trim()%>
+                        </textarea><br />
+                        <br /><br />  
+                      <form>   
+                        <%if(tipoPagamento == null || tipoPagamento == ""){%> 
+                          <select style="width: 20%;" name="tipoPagamento" id="tipoPagamento" onchange="this.form.submit()">                            
+                            <option value="" selected ></option>
+                            <option value="Boleto" >Boleto</option>
+                            <option value="PIX" >PIX</option>
+                            <option value="Bitcoin" >Bitcoin</option>
+                            <option value="bancodeposito" >Deposito Bancario</option>                            
+                          </select>
+                          <%}else if(tipoPagamento == "Boleto"){%>
+                            <select style="width: 20%;" name="tipoPagamento" id="tipoPagamento" onchange="this.form.submit()">                            
+                              <option value="" ></option>
+                              <option value="Boleto" selected >Boleto</option>
+                              <option value="PIX" >PIX</option>
+                              <option value="Bitcoin" >Bitcoin</option>
+                              <option value="bancodeposito" >Deposito Bancario</option>                            
+                            </select>
+                            <br /><br />                                                
+                          <%}else if(tipoPagamento == "PIX"){%>
+                            <select style="width: 20%;" name="tipoPagamento" id="tipoPagamento" onchange="this.form.submit()">                            
+                              <option value="" ></option>
+                              <option value="Boleto" >Boleto</option>
+                              <option value="PIX" selected >PIX</option>
+                              <option value="Bitcoin" >Bitcoin</option>
+                              <option value="bancodeposito" >Deposito Bancario</option>                            
+                            </select>
+                            <br /><br />    
+                            <%if(chavePixSel == ""){%>
+                              <select style="width: 20%;" name="chavePixSel" id="chavePixSel">                            
+                                <option value="" selected ></option>
+                                <option value="celular" >Celular</option>
+                                <option value="e-mail" >E-Mail</option>  
+                                <option value="doc" >cpf ou cnpj</option>                    
+                             </select><br />   
+                             <%}%>
+                             <%if(chavePixSel == "celular"){%>
+                              <select style="width: 20%;" name="chavePixSel" id="chavePixSel">                            
+                                <option value="" ></option>
+                                <option value="celular" selected >Celular</option>
+                                <option value="e-mail" >E-Mail</option>  
+                                <option value="doc" >cpf ou cnpj</option>                    
+                             </select><br />   
+                             <%}%>
+                             <%if(chavePixSel == "e-mail"){%>
+                              <select style="width: 20%;" name="chavePixSel" id="chavePixSel">                            
+                                <option value="" ></option>
+                                <option value="celular"  >Celular</option>
+                                <option value="e-mail" selected >E-Mail</option>  
+                                <option value="doc" >cpf ou cnpj</option>                    
+                             </select><br />   
+                             <%}%>
+                             <%if(chavePixSel == "doc"){%>
+                              <select style="width: 20%;" name="chavePixSel" id="chavePixSel">                            
+                                <option value="" ></option>
+                                <option value="celular" >Celular</option>
+                                <option value="e-mail" >E-Mail</option>  
+                                <option value="doc" selected >cpf ou cnpj</option>                    
+                             </select><br />   
+                             <%}%>  
+                           <input type="text" id="txtBanco" value="<%=profissional[0].bancopix%>" name="txtBanco" placeholder="Banco" style="width: 50%;" /><br />                                          
+                           <input type="text" id="txtChavePix" value="<%=profissional[0].chavepix%>" name="txtChavePix" placeholder="sua chave pix" style="width: 50%;" /><br />
+                           <%}else if(tipoPagamento == "Bitcoin"){%>
+                            <select style="width: 20%;" name="tipoPagamento" id="tipoPagamento" onchange="this.form.submit()">                            
+                              <option value="" ></option>
+                              <option value="Boleto" >Boleto</option>
+                              <option value="PIX" >PIX</option>
+                              <option value="Bitcoin" selected >Bitcoin</option>
+                              <option value="bancodeposito" >Deposito Bancario</option>                            
+                            </select>
+                            <br /><br />                                                 
+                           <input type="text" id="carteiraBitcoin" name="carteiraBitcoin" value="<%=profissional[0].carteiraBitcoin%>"  placeholder="numero da carteira" style="width: 50%;" /><br />                   
+                          <%}else if(tipoPagamento == "bancodeposito"){%>
+                            <select style="width: 20%;" name="tipoPagamento" id="tipoPagamento" onchange="this.form.submit()">                            
+                              <option value="" ></option>
+                              <option value="Boleto" >Boleto</option>
+                              <option value="PIX" >PIX</option>
+                              <option value="Bitcoin" >Bitcoin</option>
+                              <option value="bancodeposito" selected >Deposito Bancário</option>                            
+                            </select>
+                            <br /><br />                  
+                          <input type="number" id="conta" name="conta" value="<%=profissional[0].conta%>"  placeholder="numero da conta" style="width: 50%;" /><br />
+                          <input type="number" id="agencia" name="agencia" value="<%=profissional[0].agencia%>" placeholder="Agência" style="width: 50%;" /><br /> 
+                          <input type="text" id="banco" name="banco" value="<%=profissional[0].banco%>" placeholder="Banco" style="width: 50%;" /><br />
+                          <input type="text" id="tipoconta" name="tipoconta" value="<%=profissional[0].tipoconta%>" placeholder="Tipo de conta" style="width: 50%;" /><br />                          
+                          <%}%>
+                          <input type="hidden" id="opcaoPag" name="opcaoPag" value="cadastroPro" /><br />            
+                          <input type="hidden" id="menu" name="menu" value="fichaCad" /><br />
+                          <input type="hidden" id="typeuser" name="typeuser" value="professional" /> 
+                          <input type="hidden" id="produto" name="produto" value="jobBoard" /> 
+                        </form>  
+                        <br /><br />     
+                    <input type="submit" id="alteraProf" name="alteraProf" value="Alterar" style="width: 50%;" />        
+                    </form>
+                  </td>
+                </tr>
+              </table>    
+        </form>        
+    </body>
+</html>

@@ -1,0 +1,91 @@
+<html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="public/style.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      <title>board jobs (serviços concluidos)</title>
+    </head>
+    <body>
+        <h1><b>Seviços Concluidos</b></h1><br />    
+        <form class="backForm">
+            <%=typeuser%>
+            <table style="width: 100%;">
+                <tr>
+                  <td style="width: 15%;">
+                    <%if(typeuser=="contractor"){%>
+                            <ul>
+                                <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Board</a></li>
+                                <li><a href="?menu=createTask&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Criar Serviço</a></li>
+                                <li><a href="?menu=historico&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Historico de serviços</a></li>
+                                <li><a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Cadastro Financeiro</a></li>
+                                <li><a href="?menu=fichaCad&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">ficha Cadastral</a></li>
+                                <li><a href="?menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">serviços Concluidos</a></li>
+                                <li><a href="?menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Chat com os contratados</a></li>
+                                <li><a href="?menu=ProdutosCaju&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Produtos Caju</a></li>
+                              </ul>    
+                    <%}%>
+                  </td>
+                  <td id="conteudo" name="conteudo" style="width: 85%;" >
+                    <div style="height: 390px; overflow-y: scroll;">
+                    <table style="width: 99%;">
+                      <thead>
+                        <tr>
+                          <td style="width: 10%;">
+                            repositorio github
+                          </td>
+                          <td style="width: 10%;">
+                            Titulo do Serviço
+                          </td>
+                          <td style="width: 10%;">
+                            E-Mail
+                          </td>
+                          <td style="width: 10%;">
+                           valor
+                          </td>
+                          <td style="width: 10%;">
+                            estado do pagamento
+                          </td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <%for(let x =0; x<task.length; x++){%>
+                          <%if(task[x].column == "postEnd"){%>
+                        <tr>
+                          <td style="width: 10%;">
+                            <%=task[x].gitLocal%>
+                          </td>
+                          <td style="width: 10%;">
+                            <%=task[x].titleService%>
+                          </td>
+                          <td style="width: 10%;">
+                            <%=task[x].developer%>
+                          </td>
+                          <td style="width: 10%;">
+                            <%=task[x].valor%>
+                          </td>
+                          <td style="width: 10%;">
+                            <%if(task[x].column == "postEnd"){%>
+                              <a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&idtask=<%=task[x].idtask%>&emailDev=<%=task[x].developer%>&estadoPg=postPag&tipoPagamento=<%=task[x].tipoPagamento%>">
+                                Pagar
+                              </a>                              
+                            <%}else{%>
+                              <div class="divMensagensPago">
+                                Pago
+                              </div>
+                            <%}%>
+                          </td>
+                        </tr>
+                        <%}%>
+                      <%}%>
+                      </tbody>
+                    </table>
+                  </div>
+                  </td>
+                </tr>
+              </table>    
+        </form>        
+    </body>
+</html>

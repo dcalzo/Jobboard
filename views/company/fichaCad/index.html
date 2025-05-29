@@ -1,0 +1,72 @@
+<html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="public/style.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      <title>board jobs (ficha Cadastral)</title>
+    </head>
+    <body>
+        <h1><b>Cadastro do Contratante</b></h1><br />  
+        <form class="backForm">
+            <%=typeuser%>
+            <table style="width: 100%;">
+                <tr>
+                  <td style="width: 15%;">
+                    <ul>
+                      <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">Board</a></li>
+                      <li><a href="?menu=createTask&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">Criar Serviço</a></li>
+                      <li><a href="?menu=historico&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">Historico de Serviços</a></li>
+                      <li><a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">Cadastro Financeiro</a></li>
+                      <li><a href="?menu=fichaCad&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">ficha Cadastral</a></li>
+                      <li><a href="?menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">serviços Concluidos</a></li>
+                      <li><a href="?menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">Chat com os contratados</a></li>
+                      <li><a href="?menu=ProdutosCaju&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">Produtos Caju</a></li>
+                  </ul>
+                  </td>
+                  <td id="conteudo" name="conteudo" style="width: 85%;" >
+                    <form>
+                      <a href="?opcao=home">Home</a>
+                    </form><br /><br />     
+                      <br /><br />
+                      <form>
+                        <%if(contratante.count == 0){%>
+                          <input type="text" id="nome" name="nome" value=""  placeholder="Nome e sobrenome" style="width: 50%;" /><br />
+                          <input type="text" id="endereco" name="endereco" value="" placeholder="Endereço" style="width: 50%;" /><br />
+                          <input type="text" id="cidade" name="cidade" value="" placeholder="Cidade" style="width: 50%;" />
+                          <input type="text" id="estado" name="estado" value="" placeholder="Estado" style="width: 50%;" />
+                          <input type="text" id="cep" name="cep" value="" placeholder="CEP" style="width: 50%;" /><br />
+                          <input type="text" id="pais" name="pais" value="" placeholder="País" style="width: 50%;" /><br /> 
+                          <input type="text" id="cpf_cnpj" name="cpf_cnpj" value="" placeholder="CPF/CNPJ" style="width: 50%;" /><br />
+                          <input type="text" id="email" name="email" value="" placeholder="E-Mail" style="width: 50%;" /><br />
+                          <input type="password" id="senhaCad" name="senhaCad" value="" placeholder="Senha" style="width: 50%;" /><br />
+                          <input type="password" id="senhaCad2" name="senhaCad2" value="" placeholder="Repetir a Senha" style="width: 50%;" /><br />                        
+                        <%}else{%>
+                          <input type="text" id="nome" name="nome" value="<%=contratante[0].nome%>"  placeholder="Nome e sobrenome" style="width: 50%;" /><br />
+                          <input type="text" id="endereco" name="endereco" value="<%=contratante[0].endereco%>" placeholder="Endereço" style="width: 50%;" /><br />
+                          <input type="text" id="cidade" name="cidade" value="<%=contratante[0].cidade%>" placeholder="Cidade" style="width: 50%;" />
+                          <input type="text" id="estado" name="estado" value="<%=contratante[0].estado%>" placeholder="Estado" style="width: 50%;" />
+                          <input type="text" id="cep" name="cep" value="<%=contratante[0].cep%>" placeholder="CEP" style="width: 50%;" /><br />
+                          <input type="text" id="pais" name="pais" value="<%=contratante[0].pais%>" placeholder="País" style="width: 50%;" /><br /> 
+                          <input type="text" id="cpf_cnpj" name="cpf_cnpj" value="<%=contratante[0].cpf_cnpj%>" placeholder="CPF/CNPJ" style="width: 50%;" /><br />
+                          <input type="text" id="email" name="email" value="<%=contratante[0].email%>" placeholder="E-Mail" style="width: 50%;" /><br />
+                          <input type="password" id="senha" name="senha" value="<%=contratante[0].senha%>" placeholder="Senha" style="width: 50%;" /><br />
+                          <input type="password" id="senha2" name="senha2" value="<%=senha2%>" placeholder="Repetir a Senha" style="width: 50%;" /><br />
+                        <%}%>
+                        <br /><br />
+                        <input type="hidden" id="opcaoPag" name="opcaoPag" value="cadastroCon" /><br />                     
+                        <input type="hidden" id="opcao" name="opcao" value="cadastroCon" /><br />
+                        <input type="hidden" id="menu" name="menu" value="fichaCad" /><br />
+                        <input type="hidden" id="typeuser" name="typeuser" value="contractor" />    
+                        <input type="hidden" id="produto" name="produto" value="jobBoard" />                      
+                        <br /><br />     
+                        <input type="submit" id="alteraContractor" name="alteraContractor" value="Alterar" style="width: 15%;"/>        
+                      </form>
+                  </td>
+                </tr>
+              </table>    
+        </form>        
+    </body>
+</html>

@@ -1,0 +1,38 @@
+<html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="public/style.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      <title>board jobs (produtos Caju)</title>
+    </head>
+    <body>
+        <h1><b>Board</b></h1><br />    
+        <form>
+            <%=typeuser%>
+            <table style="width: 100%;">
+                <tr>
+                  <td style="width: 15%;">
+                    <%if(typeuser=="contractor"){%>
+                            <ul>
+                                <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Board</a></li>
+                                <li><a href="?menu=createTask&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Criar Serviço</a></li>
+                                <li><a href="?menu=historico&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Historico de Serviços</a></li>
+                                <li><a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Cadastro Financeiro</a></li>
+                                <li><a href="?menu=fichaCad&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">ficha Cadastral</a></li>
+                                <li><a href="?menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">serviços Concluidos</a></li>
+                                <li><a href="?menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Chat com os contratados</a></li>
+                                <li><a href="?menu=ProdutosCaju&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Produtos Caju</a></li>
+                              </ul>    
+                    <%}%>
+                  </td>
+                  <td id="conteudo" name="conteudo" style="width: 85%;" >
+                    CAJU
+                  </td>
+                </tr>
+              </table>    
+        </form>        
+    </body>
+</html>

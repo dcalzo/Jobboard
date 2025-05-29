@@ -1,0 +1,200 @@
+<html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="public/style.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>      
+      <title>board jobs (Board)</title>
+    </head>
+    <body>
+        <h1><b>Board</b></h1><br />    
+        <form class="backForm"> 
+            <table style="width: 100%;">
+                <tr>
+                  <td style="width: 15%;">
+                    <%if(typeuser=="professional"){%>            
+                        <ul>
+                            <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Board</a></li>
+                            <li><a href="?menu=ganho&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Ganhos Financeiros</a></li>
+                            <li><a href="?menu=fincadPro&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Cadastro Financeiro</a></li>
+                            <li><a href="?menu=fichaCad&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">ficha Cadastral</a></li>
+                            <li><a href="?menu=chatP&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Chat com o Cliente</a></li>
+                            <li><a href="?menu=ProdutosCaju&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Produtos Caju</a></li>
+                        </ul>    
+                        <%}else if(typeuser=="contractor"){%>
+                            <ul>
+                                <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Board</a></li>
+                                <li><a href="?menu=createTask&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Criar Serviço</a></li>
+                                <li><a href="?menu=historico&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Historico de serviços</a></li>
+                                <li><a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Cadastro Financeiro</a></li>
+                                <li><a href="?menu=fichaCad&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">ficha Cadastral</a></li>
+                                <li><a href="?menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">serviços Concluidos</a></li>
+                                <li><a href="?menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Chat com os contratados</a></li>
+                                <li><a href="?menu=ProdutosCaju&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Produtos Caju</a></li>
+                              </ul>    
+                        <%}%>
+                  </td>
+                  <td id="conteudo" name="conteudo" style="width: 80%;" >
+                    <table class="boardtable">
+                        <thead class="boardhead">
+                            <tr>
+                                <td class="columntable">Services</td>
+                                <td class="columntable">Under development</td>
+                                <td class="columntable">Revision</td>
+                                <td class="columntable">Concluded</td>
+                            </tr>
+                        </thead>
+                        <tbody class="boardbody">  
+                            <tr> 
+                                <%let intWidth=130;%>        
+                                <td class="columntable">
+                                    <div style="width: 220px; height: 400px; overflow-y: scroll;">
+                                    <%for(let x = 0; x < taskList.length; x++ ){%>
+                                        <%if(taskList[x].column=="post"){%>
+                                            <button type="button" style="background: rgb(54, 144, 248); top: <%=intWidth%>;" 
+                                                class="post" data-toggle="modal" data-target="#myModal"
+                                                onclick="jobTask(
+                                                    '<%=taskList[x].titleService%>', 
+                                                    '<%=taskList[x].description%>', 
+                                                    'R$<%=taskList[x].valor%>',
+                                                    '<%=taskList[x].developer%>',
+                                                    '<%=taskList[x].email%>'
+                                                    )">
+                                                        <b><%=taskList[x].titleService%></b><br />
+                                                         R$<%=taskList[x].valor%><br />
+                                                         <%=taskList[x].description.substring(0,25).trim()%>...<br />
+                                                         <%=taskList[x].email%><br />
+                                                         <%if(typeuser=="professional"){%>
+                                                         <a href="?taskServ=altera&id=<%=taskList[x]._id%>&menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postDev&count=<%=taskList[x].idtask%>">
+                                                              próxima coluna
+                                                         </a>  
+                                                         <%}%> 
+                                                         <%intWidth = intWidth+50%>
+                                            </button>
+                                        <%}%>  
+                                    <%}%>  
+                                    </div>                     
+                                </td>
+                                <%intWidth=0;%>   
+                                <td class="columntable">  
+                                    <div style="width: 220px; height: 400px; overflow-y: scroll;">
+                                            <%for(let x = 0; x < taskList.length; x++ ){%>
+                                                <%if(taskList[x].column=="postDev"){%>
+                                                        <button type="button" style="background: rgb(54, 144, 248); top: <%=intWidth%>;"
+                                                            class="postDev" data-toggle="modal" data-target="#myModal" 
+                                                            onclick="jobTask(
+                                                                '<%=taskList[x].titleService%>', 
+                                                                '<%=taskList[x].description%>', 
+                                                                'R$<%=taskList[x].valor%>',
+                                                                '<%=taskList[x].developer%>',
+                                                                '<%=taskList[x].email%>'
+                                                                )">
+                                                                <b><%=taskList[x].titleService%></b><br />
+                                                                R$<%=taskList[x].valor%><br />
+                                                                <%=taskList[x].description.substring(0,25).trim()%>...<br />
+                                                                <%=taskList[x].developer%><br />
+                                                                <%=taskList[x].email%><br />
+                                                                 <%if(typeuser=="professional"){%>
+                                                                    <a href="?taskServ=altera&id=<%=taskList[x]._id%>&menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postRev&count=<%=taskList[x].idtask%>">
+                                                                        próxima coluna
+                                                                    </a>
+                                                                <%}%>
+                                                                <%intWidth = intWidth+50%>
+                                                        </button>
+                                            <%}%> 
+                                        <%}%> 
+                                    </div>                               
+                                </td>
+                                <%intWidth=130;%>   
+                                <td class="columntable">
+                                    <div style="width: 220px; height: 400px; overflow-y: scroll;">
+                                        <%for(let x = 0; x < taskList.length; x++ ){%>
+                                            <%if(taskList[x].column=="postRev"){%>
+                                                    <button type="button" style="background: rgb(54, 144, 248); top: <%=intWidth%>;" 
+                                                        class="postRev" data-toggle="modal" data-target="#myModal" 
+                                                        onclick="jobTask(
+                                                            '<%=taskList[x].titleService%>', 
+                                                            '<%=taskList[x].description%>', 
+                                                            'R$<%=taskList[x].valor%>',
+                                                            '<%=taskList[x].developer%>',
+                                                            '<%=taskList[x].email%>'
+                                                            )">
+                                                            <b><%=taskList[x].titleService%></b><br />
+                                                            R$<%=taskList[x].valor%><br />
+                                                            <%=taskList[x].description.substring(0,25).trim()%>...<br />
+                                                            <%=taskList[x].developer%><br />
+                                                            <%=taskList[x].email%><br />
+                                                            <%if(typeuser=="contractor"){%>
+                                                                <a href="?taskServ=altera&id=<%=taskList[x]._id%>&menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=taskList[x].idtask%>">
+                                                                     próxima coluna
+                                                                </a>
+                                                            <%}%>
+                                                            <%intWidth = intWidth+50%>
+                                                    </button>
+                                            <%}%> 
+                                        <%}%> 
+                                    </div>
+                                </td>
+                                <%intWidth=130;%>   
+                                <td class="columntable">
+                                    <div style="width: 220px; height: 400px; overflow-y: scroll;">
+                                            <%for(let x = 0; x < taskList.length; x++ ){%>
+                                                <%if(taskList[x].column=="postEnd"){%>                                                    
+                                                    <button type="button" style="background: rgb(54, 144, 248); top: <%=intWidth%>;"
+                                                         class="postEnd" data-toggle="modal" data-target="#myModal" 
+                                                         onclick="jobTask(
+                                                            '<%=taskList[x].titleService%>', 
+                                                            '<%=taskList[x].description%>', 
+                                                            'R$<%=taskList[x].valor%>',
+                                                            '<%=taskList[x].developer%>',
+                                                            '<%=taskList[x].email%>'
+                                                            )">
+                                                             <b><%=taskList[x].titleService%></b><br />
+                                                             R$<%=taskList[x].valor%><br />
+                                                             <%=taskList[x].description.substring(0,25).trim()%>...<br />
+                                                             <%=taskList[x].developer%><br />
+                                                             <%=taskList[x].email%><br />
+                                                             <%intWidth = intWidth+50%>
+                                                    </button>
+                                                <%}%>  
+                                            <%}%> 
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </table>  
+              <script>
+                function jobTask(titulo, description, valor, developer, email) {
+                  document.getElementById("titulo").innerHTML = titulo;                   
+                  document.getElementById("valor").innerHTML = valor;
+                  document.getElementById("description").innerHTML = description;                   
+                  document.getElementById("developer").innerHTML = developer;
+                  document.getElementById("email").innerHTML = email;
+                }
+                </script>
+              <div class="container" style="width: 200px;">
+                <div class="modal fade" id="myModal" role="dialog">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title"><p id="titulo"></p></h4>
+                      </div>
+                      <div class="modal-body">
+                        <p id="description"></p>
+                        <p id="developer"></p>
+                        <p id="email"></p>
+                        <p id="valor"></p>
+                      </div>
+                    </div>                
+                  </div>
+                </div>            
+              </div>   
+        </form>
+    </body>
+</html>

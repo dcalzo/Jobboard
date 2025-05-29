@@ -1,0 +1,56 @@
+<html>
+    <head>
+      <meta charset="utf-8">
+      <link href="public/style.css" rel="stylesheet">
+      <title>board jobs</title>
+    </head>
+    <body>    
+      <form class="backForm">
+      <table style="width: 100%;">
+        <tr>
+          <td style="width: 15%;">
+            <%if(typeuser=="contractor"){%>
+                  <ul>
+                    <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Board</a></li>
+                    <li><a href="?menu=createTask&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Criar Serviço</a></li>
+                    <li><a href="?menu=historico&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Historico de serviços</a></li>
+                    <li><a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Cadastro Financeiro</a></li>
+                    <li><a href="?menu=fichaCad&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">ficha Cadastral</a></li>
+                    <li><a href="?menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">serviços Concluidos</a></li>
+                    <li><a href="?menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Chat com os contratados</a></li>
+                    <li><a href="?menu=ProdutosCaju&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Produtos Caju</a></li>
+                  </ul>    
+            <%}%>
+          </td>
+          <td id="conteudo" name="conteudo" style="width: 85%;" >
+              <input type="hidden" id="senha" name="senha" value="<%=senha%>"  />
+              <input type="hidden" id="email" name="email" value="<%=email%>"  />
+              <input type="hidden" id="menu" name="menu" value="createTask" />
+              <input type="hidden" id="typeuser" name="typeuser" value="contractor" />
+              <input type="hidden" id="LoginContractor" name="LoginContractor" value="<%=Login%>" />
+              <input type="hidden" id="column" name="column" value="post" />
+              <input type="hidden" id="count" name="count" value="<%=count.length+1%>" />
+              <h3><b>Criar serviço</b></h3><br />   
+              <input type="text" id="titleService" name="titleService" placeholder="Title" style="width: 50%;" /><br />
+              <textarea id="description" name="description" placeholder="Description for Service" rows="15" cols="50" style="width: 70%;">              
+              </textarea><br />
+              <select style="width: 20%;" name="tipoPagamento" id="tipoPagamento" >                            
+                <option value="" selected ></option>
+                <option value="Boleto" >Boleto</option>
+                <option value="PIX" >PIX</option>
+                <option value="Bitcoin" >Bitcoin</option>
+                <option value="bancodeposito" >Deposito Bancario</option>                            
+              </select><br />
+              <input type="text" id="valor" name="valor" placeholder="Pagamento do serviço" style="width: 50%;" /><br />
+              <input type="text" id="gitLocal" name="gitLocal" placeholder="repositorio do projeto no Github" style="width: 50%;" /><br />
+              <input type="text" id="urlDoc" name="urlDoc" placeholder="url do documento de explicação do projeto" style="width: 50%;" /><br />
+              <input type="submit" id="taskServ" name="taskServ" style="width: 15%;" value="Salvar Serviço" />                
+          </td>
+        </tr>
+      </table>   
+      <div id="mensagens" name="mensagens" class="divMensagensOk">
+        <%=msg%>             
+      </div>
+      </form>  
+    </body>
+</html>

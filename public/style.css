@@ -1,0 +1,199 @@
+*{
+    width: 98%;   
+    margin-left: 10;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}
+
+.divLista{   
+    width: 100%;   
+    text-align: center;   
+}
+.boardtable{
+    width: 97%;    
+    text-align: center;    
+    font-size: 25px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #c0fce8;
+    
+}
+.boardhead{
+    width: 97%;
+    text-align: center;    
+    font-size: 25px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #7bd1b5;
+}
+.boardbody{
+    width: 97%;
+    height: 500px;
+    text-align: center;    
+    font-size: 25px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #bbeddd;
+    overflow-y: scroll;
+}
+.columntable{
+    width: 210px;
+    text-align: center;    
+    font-family: Arial, Helvetica, sans-serif;
+}
+.boardtableMain{
+    width: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.boardtableMainRow{
+    width: 85%;
+    text-align: center;    
+    font-size: 200%;
+    font-family: Arial, Helvetica, sans-serif;
+    
+}
+.chatBackAreaTalk{
+    width: 80%;   
+    height: 400px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #fcf2bb;
+}
+
+.chatBallonTalk{
+    width: 48%;   
+    height: 100px;
+    font-size: 12px;
+    text-align: left;
+    margin-left: 50%;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #6fc93e;
+}
+
+.chatBallonReturn{
+    width: 48%;   
+    height: 100px;
+    font-size: 12px;
+    text-align: left;
+    margin-right: 0%;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #7cd0f7;
+}
+
+.chatcontacts{
+    width: 20%; 
+    height:100%;  
+    font-size: 16px;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #e9f073;
+}
+
+.contactsScroll{
+    width: 20%; 
+    background-color: #e9f073;
+}
+
+.backForm{
+    width: 100%;
+    background-color: #f2fce1;
+}
+
+.divMensagensOk{
+    width: 98%;
+    background-color: #b3f0fc;
+}
+
+.divMensagensErro{
+    width: 98%;
+    height: 20px;
+    background-color: #f7c6c8;
+}
+
+.ScrollTable{
+    width: 98%;
+    height: 400px;
+    overflow: scroll;
+    margin-top: 0;  
+}
+
+.divMensagensPago{
+    width: 98%;
+    height: 20px;
+    color: #09ed28;
+}
+
+.divMensagens{
+    width: 98%;
+    height: 20px;
+    color: #77befc;
+}
+
+  .atras{
+    background: rgb(54, 144, 248);
+    display: flex;
+    flex: 1;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .post{
+     left: 305;
+     height: 115px;
+     width: 180px;    
+     font-size: 12px;
+     align-items: center;  
+     transition: right .5s ease-in;
+  }
+
+  .postDev{
+    left: 400;
+    height: 125px;
+    width: 180px;     
+    font-size: 12px;
+    align-items: center;  
+    transition: right .5s ease-in;
+ }
+
+ .postRev{
+    left: 820;
+    height: 125px;
+    width: 180px;     
+    font-size: 12px;
+    align-items: center;  
+    transition: right .5s ease-in;
+ }
+
+ .postEnd{
+    left: 1080;
+    height: 125px;
+    width: 180px;     
+    font-size: 12px;
+    align-items: center;  
+    transition: right .5s ease-in;
+ }
+
+  .columnDesk{
+    text-align: center;
+  }
+
+  .columnGet{
+    text-align: right;
+  }
+  
+  .modal-header, h4, .close {
+    background-color: #5cb85c;
+    color:white !important;
+    text-align: center;
+    font-size: 30px;
+  }
+
+  .modal-footer {
+    background-color: #f9f9f9;
+  }
+
+  .button-modal{
+    height: 50px;
+    width: 50px;   
+  }
+
+
+  
+  
