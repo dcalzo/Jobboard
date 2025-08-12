@@ -66,31 +66,31 @@
                   <option value="Boleto" >Boleto</option>
                   <option value="PIX" >PIX</option>
                   <option value="Bitcoin" >Bitcoin</option>
-                  <option value="bancodeposito" >Cartão de crédito</option>
+                  <option value="bancodeposito" >Deposito bancario</option>
                   <%}else if(tipoPagamento == "Boleto"){%>
                     <option value="" ></option>
                     <option value="Boleto" selected >Boleto</option>
                     <option value="PIX" >PIX</option>
                     <option value="Bitcoin" >Bitcoin</option>
-                    <option value="bancodeposito" >Cartão de crédito</option>
+                    <option value="bancodeposito" >Deposito bancario</option>
                   <%}else if(tipoPagamento == "PIX"){%>
                     <option value="" ></option>
                     <option value="Boleto" >Boleto</option>
                     <option value="PIX" selected>PIX</option>
                     <option value="Bitcoin" >Bitcoin</option>
-                    <option value="bancodeposito" >Cartão de crédito</option>
+                    <option value="bancodeposito" >Deposito bancario</option>
                   <%}else if(tipoPagamento == "Bitcoin"){%>
                     <option value="" ></option>
                     <option value="Boleto" >Boleto</option>
                     <option value="PIX" >PIX</option>
                     <option value="Bitcoin" selected>Bitcoin</option>
-                    <option value="bancodeposito" >Cartão de crédito</option>
+                    <option value="bancodeposito" >Deposito bancario</option>
                   <%}else if(tipoPagamento == "bancodeposito"){%>
                     <option value="" ></option>
                     <option value="Boleto" >Boleto</option>
                     <option value="PIX" >PIX</option>
                     <option value="Bitcoin" >Bitcoin</option>
-                    <option value="bancodeposito" selected>Cartão de crédito</option>
+                    <option value="bancodeposito" >Deposito bancario</option>
                   <%}%>
                 </select><br /><br />
                 <%if(tipoPagamento == ""){%>
@@ -109,6 +109,7 @@
                     <input type="text" id="email" name="email" value="<%=profissional[0].email%>" placeholder="E-Mail" style="width: 25%;" />
                     <br />
                     Chave do Pix:
+                    <%=dadosPagamento%>
                     <select name="bandeira" id="bandeira" style="width: 10%;" >
                       <option value="" selected ></option>
                       <option value="documento" >CPF / CNPJ</option>
@@ -117,10 +118,8 @@
                     </select>
                     <%}else if(tipoPagamento == "Boleto"){%>
                       <br /><br />
-                      <input type="submit" id="apresentaBoleto" name="apresentaBoleto" value="Apresentar Boleto" />
                       <div style="overflow-y: scroll; height:250px;">
-                      <object id="boletoPDF" name="boletoPDF" data="" type="application/pdf" width="600" height="700">                        
-                      </object>
+                      <%=dadosPagamento%>
                       </div>
                       <br />
                     <%}else if(tipoPagamento == "Bitcoin"){%>

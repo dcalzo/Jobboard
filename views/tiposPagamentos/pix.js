@@ -1,29 +1,24 @@
 const axios = require('axios');
+const env = require("./dev.env.js");
 
-// Substitua pelos seus dados reais
-const API_KEY = 'sua_chave_api';
-const PIX_KEY = 'chave_pix_destinatario'; // Pode ser um telefone, email, cpf, etc.
-const AMOUNT = 100.00; // Em reais
-const DESCRIPTION = 'Transação de Teste';
-
-async function realizarTransacaoPIX() {
+async function realizarTransacaoPIX(SELLER_KEY, DESTINY_PIX_KEY, AMOUNT, DESCRIPTION) {
     try {
         const response = await axios.post(
             'URL_DA_API', // Insira a URL correta da API aqui
             {
-                "chave": PIX_KEY,
+                "chave": DESTINY_PIX_KEY,
                 "valor": AMOUNT,
                 "descricao": DESCRIPTION
             },
             {
                 headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
+                    'Authorization': `Bearer ${SELLER_KEY}`,
                     'Content-Type': 'application/json'
                 }
             }
         );
-
         console.log('Transação realizada com sucesso:', response.data);
+        return response.data;
     } catch (error) {
         console.error('Erro ao realizar a transação:', error.response ? error.response.data : error.message);
     }

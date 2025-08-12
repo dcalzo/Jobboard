@@ -5,18 +5,19 @@ const contratante = require("./contratante");
 const task = require("./task.js");
 const chatmensagem = require("./views/chat/mensagens.js");
 const profissional = require("./views/professional/cadastro/profissional");
+const env = require("./dev.env.js");
 const app = express();
 const porta = 8080;
 
 mongoose.set('strictQuery', false);
                                                                             
-mongoose.connect('mongodb://0.0.0.0:27017/').then(function(){
+mongoose.connect(env.LOCAL_HOST).then(function(){
     console.log("mongo conectado");
 }).catch(function(err){
     console.log(err.message);
 });
 
-/*mongoose.connect("",{useNewUrlParser: true, useUnifiedTopology:true}).then(function(){
+/*mongoose.connect(env.SERVIDOR,{useNewUrlParser: true, useUnifiedTopology:true}).then(function(){
     console.log("mongo conectado");
 }).catch(function(err){
     console.log(err.message);
