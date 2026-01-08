@@ -1,4 +1,5 @@
 const express = require("express");
+const BitPay = require('bitpay-sdk');
 const mongoose = require("mongoose");
 const path = require("path");
 const contratante = require("./contratante");
@@ -153,10 +154,41 @@ app.get("/", (req,res)=>{
                 }else if(req.query.tipoPagamento == "Boleto"){      
                     console.log("boleto");                 
                 }else if(req.query.tipoPagamento == "Bitcoin"){ 
-                    console.log("bitcoin");     
-                    /*const { Transaction } = require('bitcoinjs-lib');
-                    const tx = new Transaction();
-                    tx.addOutput(destinatarioAddress, valorEmSatoshis);*/             
+                        console.log("bitcoin");     
+                        const BitPay = require('bitpay-sdk');
+                        // Configurar cliente BitPay
+                        const client = new BitPay.Client({
+                        token: 'SEU_TOKEN_DA_BITPAY',
+                        environment: 'test' // Use 'prod' em produção
+                        });
+
+                        // Endpoint para criar uma fatura
+                        app.post('/api/create-invoice', async (req, res) => {
+                        const { jobId, amount, freelancerWallet } = req.body;
+
+                        try {
+                            // Calcular taxa da plataforma (ex.: 5%)
+                            const platformFee = amount * 0.05;
+                            const totalAmount = amount + platformFee;
+
+                            // Criar fatura na BitPay
+                            const invoice = await client.createInvoice({
+                            price: totalAmount,
+                            currency: 'BTC',
+                            buyer: { address1: freelancerWallet },
+                            orderId: jobId,
+                            notificationURL: 'SUA_URL_DE_WEBHOOK'
+                            });
+
+                            // Salvar detalhes no banco de dados
+                            // Exemplo: await db.saveInvoice({ jobId, invoiceId: invoice.id, status: 'pending' });
+
+                            res.json({ invoiceUrl: invoice.url, invoiceId: invoice.id });
+                        } catch (error) {
+                            console.error('Erro ao criar fatura:', error);
+                            res.status(500).json({ error: 'Falha ao criar fatura' });
+                        }
+                    });             
                 }else if(req.query.tipoPagamento == "bancodeposito"){
                     console.log("deposito");                        
                 }                  
@@ -687,7 +719,7 @@ app.get("/", (req,res)=>{
                         console.log("contratante salvo") 
                     }).catch(function(error){
                         console.log(error)    
-                    });                       
+                    });                     
                     }catch(e){
                         console.log(e.error);
                     } 
