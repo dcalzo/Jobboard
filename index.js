@@ -31,7 +31,22 @@ app.set("view engine", "html");
 app.use("/public", express.static(path.join(__dirname,"public")));
 app.set("views", path.join(__dirname,"/views"));
 
+
 app.get("/", (req,res)=>{     
+    let emailLog = "";
+    let senhalog ="";
+    contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, clienteContato){
+        try{
+            emailLog = clienteContato[0].email;
+            senhalog = clienteContato[0].senha;
+        }catch(e){}
+    });
+    profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, clienteProf){
+         try{
+            emailLog = clienteProf[0].email;
+            senhalog = clienteProf[0].senha;
+        }catch(e){}
+    });
     if(((req.query.email == "teste" || req.query.email == "teste2") && req.query.senha == "123") &&
      (req.query.cadastroProf != "Salvar" || req.query.cadastroContractor !="Salvar")){
         if(req.query.typeuser == "contractor"){
@@ -564,14 +579,14 @@ app.get("/", (req,res)=>{
         }             
     }
     else{
-        if(req.query.opcao == "login-pro"){   
+        if(req.query.opcao == "login-pro" && req.query.opcaoPag != "cadastroPro"){   
             res.render("login/index",{logado: "", user:"professional"});
-        }else if(req.query.opcao == "login-cont"){   
+        }else if(req.query.opcao == "login-cont" && req.query.opcao != "cadastroCon"){   
             res.render("login/index",{logado: "", user:"contractor"});
         }else if(req.query.opcao == "About"){   
             res.render("about/index",{logado: ""});
         }else if(req.query.opcao == "cadastroPro" || req.query.opcaoPag == "cadastroPro"){ 
-            if(req.query.cadastroProf == "Salvar" && req.query.senha != "" && req.query.senha == req.query.senha2){
+            if(req.query.cadastroPro == "Salvar" && req.query.senha != "" && req.query.senha == req.query.senha2){
                 msg = "Profissional salvo com sucesso\npode procurar um serviço";
                      try{
                         profissional.insertMany([ 
