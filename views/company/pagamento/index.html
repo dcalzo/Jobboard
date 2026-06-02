@@ -6,6 +6,36 @@
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      <style>
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+
+          #boletoArea,
+          #boletoArea * {
+            visibility: visible;
+          }
+
+          #boletoArea {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+          }
+
+          .no-print {
+            display: none !important;
+          }
+
+          td.no-print,
+          .no-print {
+            width: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+          }
+        }
+      </style>
       <title>board jobs (Pagamentos)</title>
     </head>
     <body>
@@ -13,7 +43,7 @@
       <form>
       <table style="width: 98%;">
         <tr>
-          <td style="width: 15%;">
+          <td class="no-print" style="width: 15%;">
               <%if(typeuser=="contractor"){%>
                 <ul>
                   <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Board</a></li>
@@ -101,7 +131,8 @@
                     <input type="text" id="banco" name="banco" value="<%=profissional[0].banco%>" placeholder="código" style="width: 50%;" /><br /> 
                     <input type="text" id="numeroconta" value="<%=profissional[0].conta%>" name="numeroconta" placeholder="Número da conta" style="width: 50%;" /><br /> 
                     <input type="text" id="agencia" name="agencia" value="<%=profissional[0].agencia%>" placeholder="Agência" style="width: 50%;" /><br />
-                    <input type="text" id="valorpagamento" value="<%=task[0].valor%>" name="valorpagamento" placeholder="valor do deposito" style="width: 50%;" />                     
+                    <input type="text" id="valorpagamento" value="<%=task[0].valor%>" name="valorpagamento" placeholder="valor do deposito" style="width: 50%;" />   
+                    <input type="submit" id="buttonPay" name="buttonPay" value="Pagar" />                  
                   <%}else if(tipoPagamento == "PIX"){%>
                     <input type="text" id="nomepix" name="Nomepix" value="<%=profissional[0].nome%>" placeholder="Nome Completo" style="width: 50%;" /><br />
                     <input type="text" id="cpf_cnpj_pix" name="cpf_cnpj_pix" value="<%=profissional[0].cpf_cnpj%>" placeholder="CPF / CNPJ" style="width: 30%;" /><br />
@@ -116,23 +147,91 @@
                       <option value="telefone" >Telefone</option>
                       <option value="email" >E-Mail</option>
                     </select>
+                    <input type="submit" id="buttonPay" name="buttonPay" value="Pagar" />
                     <%}else if(tipoPagamento == "Boleto"){%>
                       <br /><br />
-                      <div style="overflow-y: scroll; height:250px;">
-                      <%=dadosPagamento%>
+                      <div id="boletoArea">
+                      <table style="width: 95%;">
+                        <tr>
+                          <td> 
+                            <div style="border: 1px solid #000000; width: 100%; height: 70px;">
+                                 <%=dadosPagamento.description%><br />
+                                 Cedente: <%=dadosPagamento.payer.name%><br />
+                                 Contato: <%=dadosPagamento.payer.email%><br />
+                            </div>
+                          </td>
+                          <td>
+                             <div style="border: 1px solid #000000; width: 300px; height: 20px;">
+                                Validade: <%=dadosPagamento.validity%>
+                             </div>
+                             <div style="border: 1px solid #000000; width: 300px; height: 20px;">
+                                Valor do Pagamento: <%=dadosPagamento.amount%>
+                             </div>
+                             <div style="border: 1px solid #000000; width: 300px; height: 30px; background-color: #838080;">
+                             </div>                                 
+                          </td>
+                        </tr>
+                      </table>
+                      <br />
+                      <div style="width: 95%;">     
+                        <img id="barcodeImage" alt="Codigo de barras do boleto" style="max-width: 100%;" />
+                        <svg id="barcodeSvg" style="display:none;"></svg>
+                        <canvas id="barcodeCanvas" style="display:none;"></canvas>
+                        <input type="hidden" id="codigoBarrasValor" value="<%= (dadosPagamento && dadosPagamento.codigo_barras) ? dadosPagamento.codigo_barras : '' %>" />
+                      </div>
+                      <script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
+                      <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                          var codigoBarras = document.getElementById("codigoBarrasValor").value;
+                          var codigoNormalizado = codigoBarras.replace(/\s+/g, "").trim();
+                          var imageElement = document.getElementById("barcodeImage");
+
+                          if (!codigoNormalizado) {
+                            imageElement.alt = "Codigo de barras indisponivel";
+                            imageElement.style.display = "none";
+                            document.getElementById("barcodeText").innerText = "Nao foi possivel gerar o codigo de barras deste boleto.";
+                            return;
+                          }
+
+                          try {
+                            JsBarcode("#barcodeCanvas", codigoNormalizado, {
+                              format: "CODE128",
+                              width: 2,
+                              height: 70,
+                              displayValue: true,
+                              margin: 8,
+                              textMargin: 4,
+                              fontSize: 14
+                            });
+                            imageElement.src = document.getElementById("barcodeCanvas").toDataURL("image/png");
+                          } catch (e) {
+                            JsBarcode("#barcodeSvg", codigoNormalizado, {
+                              format: "CODE128",
+                              width: 2,
+                              height: 70,
+                              displayValue: true,
+                              margin: 8,
+                              textMargin: 4,
+                              fontSize: 14
+                            });
+                            imageElement.src = "data:image/svg+xml;utf8," + encodeURIComponent(document.getElementById("barcodeSvg").outerHTML);
+                          }
+                        });
+                      </script>
                       </div>
                       <br />
+                      <button type="button" onclick="window.print()" class="btn btn-primary no-print">Imprimir Boleto</button>
                     <%}else if(tipoPagamento == "Bitcoin"){%>
                       <input type="text" id="carteiraBit" name="carteiraBit" value="<%=profissional[0].carteiraBitcoin%>" placeholder="id da carteira bitcoin" style="width: 50%;" /><br />
-                      R$<input type="text" id="valorBitcoin" name="valorBitcoin" value="<%=task[0].valor%>" placeholder="Valor à Pagar" style="width: 10%;" />                      
+                      R$<input type="text" id="valorBitcoin" name="valorBitcoin" value="<%=task[0].valor%>" placeholder="Valor à Pagar" style="width: 10%;" />    
+                      <input type="submit" id="buttonPay" name="buttonPay" value="Pagar" />                  
                     <%}%>
                     <br />
                     <input type="hidden" id="typeuser" name="typeuser" value="<%=typeuser%>" />
                     <input type="hidden" id="email" name="email" value="<%=email%>" />
                     <input type="hidden" id="senha" name="senha" value="<%=senha%>" />
                     <input type="hidden" id="menu" name="menu" value="fincadCont" />
-                    <br /><br />
-                    <input type="submit" id="buttonPay" name="buttonPay" value="Pagar" />
+                    <br /><br />                    
                 </td>
               </tr>
             </table>   

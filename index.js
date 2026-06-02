@@ -1,4 +1,5 @@
 const express = require("express");
+const axios = require("axios");
 const BitPay = require('bitpay-sdk');
 const mongoose = require("mongoose");
 const path = require("path");
@@ -25,14 +26,300 @@ mongoose.connect(env.LOCAL_HOST).then(function(){
 });*/
 
 let msg = null;
+let codigoBarrasPagBank = "";
 
 app.engine("html", require("ejs").renderFile);
 app.set("view engine", "html");
 app.use("/public", express.static(path.join(__dirname,"public")));
 app.set("views", path.join(__dirname,"/views"));
 
+function formatDateBr(date) {
+    const dia = String(date.getDate()).padStart(2, "0");
+    const mes = String(date.getMonth() + 1).padStart(2, "0");
+    const ano = date.getFullYear();
+    return dia + "/" + mes + "/" + ano;
+}
 
-app.get("/", (req,res)=>{     
+function addBusinessDays(baseDate, daysToAdd) {
+    const result = new Date(baseDate);
+    let addedDays = 0;
+
+    while (addedDays < daysToAdd) {
+        result.setDate(result.getDate() + 1);
+        const dayOfWeek = result.getDay();
+        const isBusinessDay = dayOfWeek !== 0 && dayOfWeek !== 6;
+
+        if (isBusinessDay) {
+            addedDays += 1;
+        }
+    }
+
+    return result;
+}
+
+function getThirdNextBusinessDay() {
+    const thirdBusinessDay = addBusinessDays(new Date(), 3);
+    return formatDateBr(thirdBusinessDay);
+}
+
+function normalizeTaxId(value) {
+    if (!value) {
+        return "";
+    }
+
+    return String(value).replace(/\D/g, "");
+}
+
+function maskToken(token) {
+    if (!token) {
+        return "";
+    }
+
+    const tokenString = String(token);
+    if (tokenString.length <= 10) {
+        return "***";
+    }
+
+    return tokenString.slice(0, 6) + "..." + tokenString.slice(-4);
+}
+
+function shouldLogPagBankDebug() {
+    return String(env.PAGBANK_DEBUG || "").toLowerCase() === "true";
+}
+
+function sanitizePagBankPayloadForLogs(payload) {
+    if (!payload || typeof payload !== "object") {
+        return payload;
+    }
+
+    const clonedPayload = JSON.parse(JSON.stringify(payload));
+    if (clonedPayload.payment_method && clonedPayload.payment_method.holder && clonedPayload.payment_method.holder.email) {
+        clonedPayload.payment_method.holder.email = "***";
+    }
+
+    return clonedPayload;
+}
+
+function brDateToIsoDate(brDate) {
+    if (!brDate || typeof brDate !== "string") {
+        return null;
+    }
+
+    const parts = brDate.split("/");
+    if (parts.length !== 3) {
+        return null;
+    }
+
+    return parts[2] + "-" + parts[1] + "-" + parts[0];
+}
+
+function getPagBankBarcode(responseData) {
+    if (!responseData || typeof responseData !== "object") {
+        return "";
+    }
+
+    if (responseData.payment_method && responseData.payment_method.barcode) {
+        return String(responseData.payment_method.barcode);
+    }
+
+    if (responseData.payment_method && responseData.payment_method.boleto && responseData.payment_method.boleto.barcode) {
+        return String(responseData.payment_method.boleto.barcode);
+    }
+
+    if (responseData.barcode) {
+        return String(responseData.barcode);
+    }
+
+    if (Array.isArray(responseData.charges) && responseData.charges.length > 0) {
+        const firstCharge = responseData.charges[0];
+        if (firstCharge && firstCharge.payment_method && firstCharge.payment_method.barcode) {
+            return String(firstCharge.payment_method.barcode);
+        }
+    }
+
+    return "";
+}
+
+function validatePagBankChargePayload(payload) {
+    const errors = [];
+
+    if (!payload || typeof payload !== "object") {
+        errors.push("payload ausente");
+        return errors;
+    }
+
+    if (!payload.reference_id || String(payload.reference_id).trim() === "") {
+        errors.push("reference_id obrigatorio");
+    }
+
+    if (!payload.description || String(payload.description).trim() === "") {
+        errors.push("description obrigatoria");
+    }
+
+    const amountValue = payload.amount && payload.amount.value;
+    if (!Number.isInteger(amountValue) || amountValue <= 0) {
+        errors.push("amount.value deve ser inteiro positivo em centavos");
+    }
+
+    if (!payload.amount || payload.amount.currency !== "BRL") {
+        errors.push("amount.currency deve ser BRL");
+    }
+
+    const dueDate = payload.payment_method && payload.payment_method.boleto && payload.payment_method.boleto.due_date;
+    if (!dueDate || !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
+        errors.push("payment_method.boleto.due_date invalido (esperado YYYY-MM-DD)");
+    }
+
+    const holder = payload.payment_method && payload.payment_method.holder;
+    if (!holder || !holder.name || String(holder.name).trim() === "") {
+        errors.push("payment_method.holder.name obrigatorio");
+    }
+
+    if (!holder || !holder.tax_id || !/^\d{11}$|^\d{14}$/.test(String(holder.tax_id))) {
+        errors.push("payment_method.holder.tax_id obrigatorio (11 ou 14 digitos)");
+    }
+
+    return errors;
+}
+
+async function buildBoletoWithPagBankBarcode(boletoData, profissionalDoc) {
+    const token = env.TOKEN_PAGSEGURO;
+    const pagBankBaseUrl = env.PAGBANK_API_URL || "https://sandbox.api.pagseguro.com";
+    const chargeUrl = pagBankBaseUrl + "/charges";
+
+    if (!token) {
+        console.log("PagBank: TOKEN_PAGSEGURO nao configurado");
+        return boletoData;
+    }
+
+    const dueDate = brDateToIsoDate(boletoData.validity);
+    const amountInCents = Math.round(Number(boletoData.amount || 0) * 100);
+
+    if (!dueDate || !Number.isFinite(amountInCents) || amountInCents <= 0) {
+        return boletoData;
+    }
+
+    const taxIdRaw = profissionalDoc && profissionalDoc.cpf_cnpj ? String(profissionalDoc.cpf_cnpj) : "";
+    const taxId = normalizeTaxId(taxIdRaw);
+    const holder = {
+        name: boletoData.payer && boletoData.payer.name ? boletoData.payer.name : "Profissional"
+    };
+
+    if (boletoData.payer && boletoData.payer.email) {
+        holder.email = boletoData.payer.email;
+    }
+
+    if (taxId.length === 11 || taxId.length === 14) {
+        holder.tax_id = taxId;
+    }
+
+    const payload = {
+        reference_id: String(boletoData.reference_id || "123456"),
+        description: String(boletoData.description || "Pagamento de servico").slice(0, 140),
+        amount: {
+            value: amountInCents,
+            currency: "BRL"
+        },
+        payment_method: {
+            type: "BOLETO",
+            boleto: {
+                due_date: dueDate,
+                instruction_lines: {
+                    line_1: "Pagamento referente ao servico contratado",
+                    line_2: "Nao receber apos o vencimento"
+                }
+            },
+            holder: holder
+        }
+    };
+
+    const payloadErrors = validatePagBankChargePayload(payload);
+    if (payloadErrors.length > 0) {
+        console.log("PagBank: payload invalido para gerar boleto:", payloadErrors.join("; "));
+        return boletoData;
+    }
+
+    if (shouldLogPagBankDebug()) {
+        console.log("PagBank DEBUG request:", {
+            url: chargeUrl,
+            authorization: "Bearer " + maskToken(token),
+            payload: sanitizePagBankPayloadForLogs(payload)
+        });
+    }
+
+    try {
+        const response = await axios.post(chargeUrl, payload, {
+            headers: {
+                Authorization: "Bearer " + token,
+                "Content-Type": "application/json",
+                Accept: "application/json"
+            }
+        });
+
+        if (shouldLogPagBankDebug()) {
+            console.log("PagBank DEBUG response status:", response.status);
+        }
+
+        codigoBarrasPagBank = getPagBankBarcode(response.data);
+        if (!codigoBarrasPagBank) {
+            if (shouldLogPagBankDebug()) {
+                console.log("PagBank DEBUG response body sem codigo de barras:", response.data);
+            }
+            return boletoData;
+        }
+
+        return Object.assign({}, boletoData, {
+            codigo_barras: codigoBarrasPagBank
+        });
+    } catch (error) {
+        const status = error && error.response ? error.response.status : null;
+        const details = error && error.response && error.response.data ? error.response.data : error.message;
+
+        if (shouldLogPagBankDebug()) {
+            console.log("PagBank DEBUG erro completo:", {
+                url: chargeUrl,
+                status: status,
+                details: details
+            });
+        }
+
+        console.log("Erro ao gerar boleto no PagBank. Status:", status, "Detalhes:", details);
+        return boletoData;
+    }
+}
+
+function buildBoletoFromDb(taskDoc, profissionalDoc) {
+    const fallbackDescription = "Servico de desenvolvimento de software";
+    const descriptionParts = [];
+
+    if (taskDoc && taskDoc.titleService) {
+        descriptionParts.push(String(taskDoc.titleService));
+    }
+    if (taskDoc && taskDoc.description) {
+        descriptionParts.push(String(taskDoc.description));
+    }
+
+    const amountValue = taskDoc && taskDoc.valor ? Number(String(taskDoc.valor).replace(",", ".")) : 100.50;
+    const amount = Number.isFinite(amountValue) ? amountValue : 100.50;
+    const profissionalNome = profissionalDoc && profissionalDoc.nome ? profissionalDoc.nome : "";
+    const profissionalEmail = profissionalDoc && profissionalDoc.email ? profissionalDoc.email : "";
+    const referenceId = taskDoc && taskDoc.idtask ? String(taskDoc.idtask) : "123456";
+    const barcodeSeed = referenceId.replace(/\D/g, "");
+
+    return {
+        reference_id: referenceId,
+        description: descriptionParts.length ? descriptionParts.join("\n") : fallbackDescription,
+        amount: amount,
+        validity: getThirdNextBusinessDay(),
+        payer: {
+            name: profissionalNome,
+            email: profissionalEmail
+        },
+        codigo_barras: codigoBarrasPagBank.length != 0 ? codigoBarrasPagBank : barcodeSeed + " 1111000 11111110 00000000000000"
+    };
+}
+
+app.get("/", (req,res)=>{    
     let emailLog = "";
     let senhalog ="";
     contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, clienteContato){
@@ -152,7 +439,6 @@ app.get("/", (req,res)=>{
             }
             else if(req.query.menu == "fincadCont" || req.query.tipoPagamento != null){
                 // -------------------------------------------------------------------------------------------------------------------- 
-                var  boleto = {vazio: ""};               
                 if(req.query.tipoPagamento == "PIX"){
                     console.log("PIX");
                     /*const pix = require('faz-um-pix');
@@ -166,8 +452,6 @@ app.get("/", (req,res)=>{
                     });
                     const payload = code;
                     console.log(payload);*/
-                }else if(req.query.tipoPagamento == "Boleto"){      
-                    console.log("boleto");                 
                 }else if(req.query.tipoPagamento == "Bitcoin"){ 
                         console.log("bitcoin");     
                         const BitPay = require('bitpay-sdk');
@@ -206,41 +490,82 @@ app.get("/", (req,res)=>{
                     });             
                 }else if(req.query.tipoPagamento == "bancodeposito"){
                     console.log("deposito");                        
-                }                  
+                }  
                 if(req.query.idtask == null){                                 
                     task.find({email:req.query.email}).sort({"_id":1}).exec(function(err, task){
                         contratante.find({email:req.query.email}).sort({"_id":1}).exec(function(err, contratante){                    
                             profissional.find({}).sort({"_id":1}).exec(function(err, profissional){
-                                if(req.query.tipoPagamento == ""){
-                                    res.render("company/pagamento/index",{
-                                        profissional: profissional,
-                                        contratante: contratante,
-                                        idtask:"",
-                                        task: task,
-                                        estadoPg: "",
-                                        profissionalSel: req.query.profissionalSel,
-                                        taskservice: req.query.taskservice,
-                                        typeuser: req.query.typeuser,  
-                                        nome: req.query.nome,
-                                        email:req.query.email, 
-                                        senha:req.query.senha,
-                                        tipoPagamento: ""}); 
+                                var taskSelecionada = null;
+                                var profissionalSelecionado = null;
+
+                                if (task && task.length > 0) {
+                                    taskSelecionada = task.find(function(item) {
+                                        return item.titleService === req.query.taskservice;
+                                    }) || task[0];
                                 }
-                                else if(req.query.tipoPagamento != ""){                                   
+
+                                if (profissional && profissional.length > 0) {
+                                    profissionalSelecionado = profissional.find(function(item) {
+                                        return item.nome === req.query.profissionalSel;
+                                    }) || profissional[0];
+                                }
+
+                                var boleto = buildBoletoFromDb(taskSelecionada, profissionalSelecionado);
+                                var shouldGeneratePagBankBoleto = req.query.tipoPagamento == "Boleto";
+
+                                var boletoPromise = shouldGeneratePagBankBoleto
+                                    ? buildBoletoWithPagBankBarcode(boleto, profissionalSelecionado)
+                                    : Promise.resolve(boleto);
+
+                                boletoPromise.then(function(boletoComCodigoPagBank) {
+                                    if(req.query.tipoPagamento == ""){
                                         res.render("company/pagamento/index",{
                                             profissional: profissional,
                                             contratante: contratante,
-                                            idtask: "",
+                                            idtask:"",
                                             task: task,
                                             estadoPg: "",
                                             profissionalSel: req.query.profissionalSel,
+                                            dadosPagamento: boletoComCodigoPagBank,
                                             taskservice: req.query.taskservice,
-                                            typeuser: req.query.typeuser, 
+                                            typeuser: req.query.typeuser,
                                             nome: req.query.nome,
                                             email:req.query.email,
                                             senha:req.query.senha,
-                                            tipoPagamento: req.query.tipoPagamento});  
-                                }
+                                            tipoPagamento: ""});
+                                    }
+                                    else if(req.query.tipoPagamento != ""){
+                                            res.render("company/pagamento/index",{
+                                                profissional: profissional,
+                                                contratante: contratante,
+                                                idtask: "",
+                                                task: task,
+                                                estadoPg: "",
+                                                profissionalSel: req.query.profissionalSel,
+                                                dadosPagamento: boletoComCodigoPagBank,
+                                                taskservice: req.query.taskservice,
+                                                typeuser: req.query.typeuser,
+                                                nome: req.query.nome,
+                                                email:req.query.email,
+                                                senha:req.query.senha,
+                                                tipoPagamento: req.query.tipoPagamento});
+                                    }
+                                }).catch(function() {
+                                    res.render("company/pagamento/index",{
+                                        profissional: profissional,
+                                        contratante: contratante,
+                                        idtask: "",
+                                        task: task,
+                                        estadoPg: "",
+                                        profissionalSel: req.query.profissionalSel,
+                                        dadosPagamento: boleto,
+                                        taskservice: req.query.taskservice,
+                                        typeuser: req.query.typeuser,
+                                        nome: req.query.nome,
+                                        email:req.query.email,
+                                        senha:req.query.senha,
+                                        tipoPagamento: req.query.tipoPagamento || ""});
+                                });
                             });
                         });
                     }); 
@@ -248,20 +573,45 @@ app.get("/", (req,res)=>{
                     task.find({developer:req.query.emailDev}).sort({"_id":1}).exec(function(err, task){
                         contratante.find({email:req.query.email}).sort({"_id":1}).exec(function(err, contratante){                    
                             profissional.find({email:req.query.emailDev}).sort({"_id":1}).exec(function(err, profissional){
-                                res.render("company/pagamento/index",{
-                                    profissional: profissional,
-                                    contratante: contratante,
-                                    idtask: req.query.idtask,
-                                    boleto: boleto,
-                                    task: task,
-                                    profissionalSel: req.query.profissionalSel,
-                                    taskservice: req.query.taskservice,
-                                    estadoPg: req.query.estadoPg,
-                                    typeuser: req.query.typeuser, 
-                                    nome: req.query.nome,
-                                    email:req.query.email,
-                                    senha:req.query.senha,
-                                    tipoPagamento: req.query.tipoPagamento});  
+                                var taskSelecionada = task && task.length > 0 ? task[0] : null;
+                                var profissionalSelecionado = profissional && profissional.length > 0 ? profissional[0] : null;
+                                var boleto = buildBoletoFromDb(taskSelecionada, profissionalSelecionado);
+                                var shouldGeneratePagBankBoleto = req.query.tipoPagamento == "Boleto";
+                                var boletoPromise = shouldGeneratePagBankBoleto
+                                    ? buildBoletoWithPagBankBarcode(boleto, profissionalSelecionado)
+                                    : Promise.resolve(boleto);
+
+                                boletoPromise.then(function(boletoComCodigoPagBank) {
+                                    res.render("company/pagamento/index",{
+                                        profissional: profissional,
+                                        contratante: contratante,
+                                        idtask: req.query.idtask,
+                                        dadosPagamento: boletoComCodigoPagBank,
+                                        task: task,
+                                        profissionalSel: req.query.profissionalSel,
+                                        taskservice: req.query.taskservice,
+                                        estadoPg: req.query.estadoPg,
+                                        typeuser: req.query.typeuser,
+                                        nome: req.query.nome,
+                                        email:req.query.email,
+                                        senha:req.query.senha,
+                                        tipoPagamento: req.query.tipoPagamento});
+                                }).catch(function() {
+                                    res.render("company/pagamento/index",{
+                                        profissional: profissional,
+                                        contratante: contratante,
+                                        idtask: req.query.idtask,
+                                        dadosPagamento: boleto,
+                                        task: task,
+                                        profissionalSel: req.query.profissionalSel,
+                                        taskservice: req.query.taskservice,
+                                        estadoPg: req.query.estadoPg,
+                                        typeuser: req.query.typeuser,
+                                        nome: req.query.nome,
+                                        email:req.query.email,
+                                        senha:req.query.senha,
+                                        tipoPagamento: req.query.tipoPagamento});
+                                });
                             });
                         });
                     }); 
