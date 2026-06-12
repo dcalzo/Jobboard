@@ -14,15 +14,15 @@ function loadEnv() {
     try {
         return require("./dev.env.js");
     } catch (error) {
-        if (error && error.code !== "MODULE_NOT_FOUND") {
-            throw error;
+        if (error && error.code === "MODULE_NOT_FOUND" && error.message && error.message.indexOf("dev.env.js") !== -1) {
+            return {};
         }
 
-        return {};
+        throw error;
     }
 }
 
-const env = Object.assign({}, process.env, loadEnv());
+const env = Object.assign({}, loadEnv(), process.env);
 const mongoUri = env.LOCAL_HOST || "mongodb://127.0.0.1:27017/jobboard";
 
 mongoose.set('strictQuery', false);
