@@ -7,13 +7,27 @@ const contratante = require("./contratante");
 const task = require("./task.js");
 const chatmensagem = require("./views/chat/mensagens.js");
 const profissional = require("./views/professional/cadastro/profissional");
-const env = require("./dev.env.js");
 const app = express();
 const porta = 8080;
 
+function loadEnv() {
+    try {
+        return require("./dev.env.js");
+    } catch (error) {
+        if (error && error.code !== "MODULE_NOT_FOUND") {
+            throw error;
+        }
+
+        return {};
+    }
+}
+
+const env = Object.assign({}, process.env, loadEnv());
+const mongoUri = env.LOCAL_HOST || "mongodb://127.0.0.1:27017/jobboard";
+
 mongoose.set('strictQuery', false);
                                                                             
-mongoose.connect(env.LOCAL_HOST).then(function(){
+mongoose.connect(mongoUri).then(function(){
     console.log("mongo conectado");
 }).catch(function(err){
     console.log(err.message);
@@ -512,6 +526,8 @@ app.get("/", (req,res)=>{
 
                                 var boleto = buildBoletoFromDb(taskSelecionada, profissionalSelecionado);
                                 var shouldGeneratePagBankBoleto = req.query.tipoPagamento == "Boleto";
+                                var profissionalAtual = profissionalSelecionado || (profissional && profissional.length > 0 ? profissional[0] : null);
+                                var taskAtual = taskSelecionada || (task && task.length > 0 ? task[0] : null);
 
                                 var boletoPromise = shouldGeneratePagBankBoleto
                                     ? buildBoletoWithPagBankBarcode(boleto, profissionalSelecionado)
@@ -521,9 +537,11 @@ app.get("/", (req,res)=>{
                                     if(req.query.tipoPagamento == ""){
                                         res.render("company/pagamento/index",{
                                             profissional: profissional,
+                                            profissionalAtual: profissionalAtual,
                                             contratante: contratante,
                                             idtask:"",
                                             task: task,
+                                            taskAtual: taskAtual,
                                             estadoPg: "",
                                             profissionalSel: req.query.profissionalSel,
                                             dadosPagamento: boletoComCodigoPagBank,
@@ -537,9 +555,11 @@ app.get("/", (req,res)=>{
                                     else if(req.query.tipoPagamento != ""){
                                             res.render("company/pagamento/index",{
                                                 profissional: profissional,
+                                                profissionalAtual: profissionalAtual,
                                                 contratante: contratante,
                                                 idtask: "",
                                                 task: task,
+                                                taskAtual: taskAtual,
                                                 estadoPg: "",
                                                 profissionalSel: req.query.profissionalSel,
                                                 dadosPagamento: boletoComCodigoPagBank,
@@ -553,9 +573,11 @@ app.get("/", (req,res)=>{
                                 }).catch(function() {
                                     res.render("company/pagamento/index",{
                                         profissional: profissional,
+                                        profissionalAtual: profissionalAtual,
                                         contratante: contratante,
                                         idtask: "",
                                         task: task,
+                                        taskAtual: taskAtual,
                                         estadoPg: "",
                                         profissionalSel: req.query.profissionalSel,
                                         dadosPagamento: boleto,
@@ -577,6 +599,8 @@ app.get("/", (req,res)=>{
                                 var profissionalSelecionado = profissional && profissional.length > 0 ? profissional[0] : null;
                                 var boleto = buildBoletoFromDb(taskSelecionada, profissionalSelecionado);
                                 var shouldGeneratePagBankBoleto = req.query.tipoPagamento == "Boleto";
+                                var profissionalAtual = profissionalSelecionado || (profissional && profissional.length > 0 ? profissional[0] : null);
+                                var taskAtual = taskSelecionada || (task && task.length > 0 ? task[0] : null);
                                 var boletoPromise = shouldGeneratePagBankBoleto
                                     ? buildBoletoWithPagBankBarcode(boleto, profissionalSelecionado)
                                     : Promise.resolve(boleto);
@@ -584,10 +608,12 @@ app.get("/", (req,res)=>{
                                 boletoPromise.then(function(boletoComCodigoPagBank) {
                                     res.render("company/pagamento/index",{
                                         profissional: profissional,
+                                        profissionalAtual: profissionalAtual,
                                         contratante: contratante,
                                         idtask: req.query.idtask,
                                         dadosPagamento: boletoComCodigoPagBank,
                                         task: task,
+                                        taskAtual: taskAtual,
                                         profissionalSel: req.query.profissionalSel,
                                         taskservice: req.query.taskservice,
                                         estadoPg: req.query.estadoPg,
@@ -599,10 +625,12 @@ app.get("/", (req,res)=>{
                                 }).catch(function() {
                                     res.render("company/pagamento/index",{
                                         profissional: profissional,
+                                        profissionalAtual: profissionalAtual,
                                         contratante: contratante,
                                         idtask: req.query.idtask,
                                         dadosPagamento: boleto,
                                         task: task,
+                                        taskAtual: taskAtual,
                                         profissionalSel: req.query.profissionalSel,
                                         taskservice: req.query.taskservice,
                                         estadoPg: req.query.estadoPg,
@@ -1119,6 +1147,3 @@ app.get("/", (req,res)=>{
 app.listen(porta,()=>{
     console.log("funcionando\nhttp://localhost:8080/");    
 });
-
-
-
