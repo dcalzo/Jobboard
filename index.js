@@ -303,7 +303,7 @@ function buildBoletoFromDb(taskDoc, profissionalDoc) {
     const amount = Number.isFinite(amountValue) ? amountValue : 100.50;
     const profissionalNome = profissionalDoc && profissionalDoc.nome ? profissionalDoc.nome : "";
     const profissionalEmail = profissionalDoc && profissionalDoc.email ? profissionalDoc.email : "";
-    const referenceId = taskDoc && taskDoc.idtask ? String(taskDoc.idtask) : "123456";
+    const referenceId = taskDoc && taskDoc.idtask ? String(taskDoc.idtask) : "";
     const barcodeSeed = referenceId.replace(/\D/g, "");
 
     return {
@@ -819,19 +819,33 @@ app.get("/", (req,res)=>{
                 res.render("professional/ganho/index",{typeuser: req.query.typeuser, email:req.query.email, senha:req.query.senha});       
             }else  if(req.query.menu == "fichaPro" || req.query.cadastroProf=="Salvar"){                   
                 if(req.query.typeuser == null){
-                     res.render("professional/cadastro/index",{typeuser: null, email:req.query.email, senha:req.query.senha}); 
+                     res.render("professional/cadastro/index",{
+                        typeuser: null, 
+                        email:req.query.email, 
+                        senha:req.query.senha
+                    }); 
                 }else{
-                    res.render("professional/cadastro/index",{typeuser: req.query.typeuser, email:req.query.email, senha:req.query.senha}); 
+                    res.render("professional/cadastro/index",{
+                        typeuser: req.query.typeuser, 
+                        email:req.query.email, 
+                        senha:req.query.senha
+                    }); 
                 }      
             
             }else if(req.query.menu == "fincadPro"){     
-                res.render("professional/pagamento/index",{typeuser: req.query.typeuser, email:req.query.email, senha:req.query.senha});       
+                res.render("professional/pagamento/index",{
+                    typeuser: req.query.typeuser, 
+                    codigoBarras: req.query.codigoBarras,
+                    email:req.query.email, 
+                    senha:req.query.senha, 
+                    tipoPagamento: req.query.tipoPagamento});       
             }
             else if(req.query.menu == "chatP"){
                 if( req.query.conversa == "Enviar" && req.query.usuario != "" ){           
                     try{
                         chatmensagem.collection.insertMany([
-                        {           
+                        {     
+                            tipoPagamento: req.query.tipoPagamento,      
                             remetente: req.query.email,
                             destinatario: req.query.usuario,
                             mensagem: req.query.mensagem                  
@@ -853,6 +867,7 @@ app.get("/", (req,res)=>{
                                 task: task,
                                 chatmensagem: chatmensagem,
                                 remetente: profissional[0].email,
+                                tipoPagamento: req.query.tipoPagamento,
                                 typeuser: req.query.typeuser,
                                 mensagem: req.query.mensagem,
                                 usuario: req.query.usuario,

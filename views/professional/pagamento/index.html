@@ -7,7 +7,7 @@
     <body>
         <h1><b>Área do <%=typeuser%></b></h1><br />    
         <form>            
-            <table style="width: 100%;">
+            <table style="margin-left: 1px; width: 100%;">
                 <tr>
                   <td style="width: 15%;">
                     <%if(typeuser=="professional"){%>            
@@ -32,11 +32,282 @@
                             </ul>    
                       <%}%>
                   </td>
-                  <td id="conteudo" name="conteudo" style="width: 85%;" >
-                    Cadastro financeiro
-                  </td>
-                </tr>
-              </table>    
+                  <td id="conteudo" name="conteudo" >
+                    <label><b>tipo de pagamento:</b></label>
+                        <select name="tipoPagamento" style="width: 15%;" id="tipoPagamento" onchange="this.form.submit()">
+                            <%if(tipoPagamento == "" || tipoPagamento == null){%>
+                              <option value="" selected ></option>
+                              <option value="Boleto" >Boleto</option>
+                              <option value="PIX" >PIX</option>
+                              <option value="Bitcoin" >Bitcoin</option>
+                              <option value="bancodeposito" >Deposito bancario</option>
+                              <%}else if(tipoPagamento == "Boleto"){%>
+                                <option value="" ></option>
+                                <option value="Boleto" selected >Boleto</option>
+                                <option value="PIX" >PIX</option>
+                                <option value="Bitcoin" >Bitcoin</option>
+                                <option value="bancodeposito" >Deposito bancario</option>
+                              <%}else if(tipoPagamento == "PIX"){%>
+                                <option value="" ></option>
+                                <option value="Boleto" >Boleto</option>
+                                <option value="PIX" selected>PIX</option>
+                                <option value="Bitcoin" >Bitcoin</option>
+                                <option value="bancodeposito" >Deposito bancario</option>
+                              <%}else if(tipoPagamento == "Bitcoin"){%>
+                                <option value="" ></option>
+                                <option value="Boleto" >Boleto</option>
+                                <option value="PIX" >PIX</option>
+                                <option value="Bitcoin" selected>Bitcoin</option>
+                                <option value="bancodeposito" >Deposito bancario</option>
+                              <%}else if(tipoPagamento == "bancodeposito"){%>
+                                <option value="" ></option>
+                                <option value="Boleto" >Boleto</option>
+                                <option value="PIX" >PIX</option>
+                                <option value="Bitcoin" >Bitcoin</option>
+                                <option value="bancodeposito" selected >Deposito bancario</option>
+                              <%}%>
+                          </select><br /><br />     
+                              <%if(tipoPagamento == "" || tipoPagamento == null){%>
+                                <label><b>Escolha um tipo de pagamento para exibir as informações</b></label>                                
+                              <%}else if(tipoPagamento == "Boleto"){%>   
+                                <div style="width:100%; height: 390px; overflow-y: scroll;">                         
+                                <table style="width: 80%;">
+                                  <tr>
+                                    <td><h3>Dados Bancários para Boleto</h3></td>
+                                  </tr>
+                                  <tr>
+                                    <td style="width: 100%; padding: 10px;">
+                                      <label for="nomeTitular"><b>Nome do Titular:</b></label><br />
+                                      <input type="text" id="nomeTitular" name="nomeTitular" style="width: 80%; padding: 5px;" placeholder="Digite seu nome completo" required /><br /><br />
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td style="width: 100%; padding: 10px;">
+                                      <label for="cpfcnpj"><b>CPF/CNPJ:</b></label><br />
+                                      <input type="text" id="cpfcnpj" name="cpfcnpj" style="width: 80%; padding: 5px;" placeholder="Digite seu CPF ou CNPJ" required /><br /><br />
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td style="width: 48%; padding: 10px; display: inline-block;">
+                                      <label for="banco"><b>Banco:</b></label><br />
+                                      <select id="banco" name="banco" style="width: 100%; padding: 5px;" required>
+                                        <option value="">Selecione um banco</option>
+                                        <option value="001">001 - Banco do Brasil</option>
+                                        <option value="033">033 - Banco Santander</option>
+                                        <option value="104">104 - Caixa Econômica Federal</option>
+                                        <option value="237">237 - Banco Bradesco</option>
+                                        <option value="341">341 - Banco Itaú</option>
+                                        <option value="389">389 - Banco Mercantil</option>
+                                        <option value="422">422 - Banco Safra</option>
+                                        <option value="633">633 - Banco Inter</option>
+                                        <option value="655">655 - Banco Votorantim</option>
+                                        <option value="707">707 - Banco Daycoval</option>
+                                      </select><br /><br />
+                                    </td>
+                                    <td style="width: 48%; padding: 10px; display: inline-block; margin-left: 4%;">
+                                      <label for="agencia"><b>Agência:</b></label><br />
+                                      <input type="text" id="agencia" name="agencia" style="width: 100%; padding: 5px;" placeholder="Número da agência" required /><br /><br />
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td style="width: 48%; padding: 10px; display: inline-block;">
+                                      <label for="conta"><b>Conta:</b></label><br />
+                                      <input type="text" id="conta" name="conta" style="width: 100%; padding: 5px;" placeholder="Número da conta" required /><br /><br />
+                                    </td>
+                                    <td style="width: 48%; padding: 10px; display: inline-block; margin-left: 4%;">
+                                      <label for="tipoConta"><b>Tipo de Conta:</b></label><br />
+                                      <select id="tipoConta" name="tipoConta" style="width: 100%; padding: 5px;" required>
+                                        <option value="">Selecione o tipo</option>
+                                        <option value="Corrente">Corrente</option>
+                                        <option value="Poupança">Poupança</option>
+                                      </select><br /><br />
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td style="width: 100%; padding: 10px;">
+                                      <button type="submit" id="pagProfissional" name="pagProfissional" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Confirmar Dados</button>
+                                    </td>
+                                  </tr>
+                                </table>
+                                </div>    
+                              <%}else if(tipoPagamento == "PIX"){%>
+                                <div style="width:100%; height: 390px; overflow-y: scroll;"> 
+                                <table style="width: 80%;">
+                                  <tr>
+                                    <td><h3>Dados para Recebimento via PIX</h3></td>
+                                  </tr>
+                                  <tr>
+                                    <td style="width: 100%; padding: 10px;">
+                                      <label for="nomeTitularPix"><b>Nome do Titular:</b></label><br />
+                                      <input type="text" id="nomeTitularPix" name="nomeTitularPix" style="width: 80%; padding: 5px;" placeholder="Digite seu nome completo" required /><br /><br />
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td style="width: 100%; padding: 10px;">
+                                      <label for="cpfcnpjPix"><b>CPF/CNPJ:</b></label><br />
+                                      <input type="text" id="cpfcnpjPix" name="cpfcnpjPix" style="width: 80%; padding: 5px;" placeholder="Digite seu CPF ou CNPJ" required /><br /><br />
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td style="width: 48%; padding: 10px; display: inline-block;">
+                                      <label for="tipoChavePix"><b>Tipo de Chave PIX:</b></label><br />
+                                      <select id="tipoChavePix" name="tipoChavePix" style="width: 100%; padding: 5px;" required>
+                                        <option value="">Selecione o tipo</option>
+                                        <option value="cpf">CPF</option>
+                                        <option value="cnpj">CNPJ</option>
+                                        <option value="email">E-mail</option>
+                                        <option value="telefone">Telefone</option>
+                                        <option value="aleatoria">Chave Aleatoria</option>
+                                      </select><br /><br />
+                                    </td>
+                                    <td style="width: 48%; padding: 10px; display: inline-block; margin-left: 4%;">
+                                      <label for="chavePix"><b>Chave PIX:</b></label><br />
+                                      <input type="text" id="chavePix" name="chavePix" style="width: 100%; padding: 5px;" placeholder="Digite sua chave PIX" required /><br /><br />
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                     <td style="width: 48%; padding: 10px; display: inline-block; margin-left: 4%;">
+                                      <label for="valorPagamento"><b>Valor do Pagamento:</b></label><br />
+                                      <input type="text" id="valorPagamento" name="valorPagamento" style="width: 100%; padding: 5px;" placeholder="Digite o valor do pagamento" required /><br /><br />
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td style="width: 100%; padding: 10px;">
+                                      <button type="submit" id="pagPix" name="pagPix" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Confirmar Dados PIX</button>
+                                    </td>
+                                  </tr>
+                                </table>
+                                </div>
+                              <%}else if(tipoPagamento == "Bitcoin"){%>
+                                <div style="width:100%; height: 390px; overflow-y: scroll;"> 
+                                  <table style="width: 80%;">
+                                    <tr>
+                                      <td><h3>Dados para Recebimento via Bitcoin</h3></td>
+                                    </tr>
+                                    <tr>
+                                      <td style="width: 100%; padding: 10px;">
+                                        <label for="nomeTitularBitcoin"><b>Nome do Titular:</b></label><br />
+                                        <input type="text" id="nomeTitularBitcoin" name="nomeTitularBitcoin" style="width: 80%; padding: 5px;" placeholder="Digite seu nome completo" required /><br /><br />
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td style="width: 100%; padding: 10px;">
+                                        <label for="cpfcnpjBitcoin"><b>CPF/CNPJ:</b></label><br />
+                                        <input type="text" id="cpfcnpjBitcoin" name="cpfcnpjBitcoin" style="width: 80%; padding: 5px;" placeholder="Digite seu CPF ou CNPJ" required /><br /><br />
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td style="width: 48%; padding: 10px; display: inline-block;">
+                                        <label for="bitcoinNetwork"><b>Rede Bitcoin:</b></label><br />
+                                        <select id="bitcoinNetwork" name="bitcoinNetwork" style="width: 100%; padding: 5px;" required>
+                                          <option value="">Selecione a rede</option>
+                                          <option value="btc">Bitcoin (BTC)</option>
+                                          <option value="testnet">Testnet</option>
+                                        </select><br /><br />
+                                      </td>
+                                      <td style="width: 48%; padding: 10px; display: inline-block; margin-left: 4%;">
+                                        <label for="enderecoBitcoin"><b>Endereço Bitcoin:</b></label><br />
+                                        <input type="text" id="enderecoBitcoin" name="enderecoBitcoin" style="width: 100%; padding: 5px;" placeholder="Digite seu endereço Bitcoin" required /><br /><br />
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                       <td style="width: 48%; padding: 10px; display: inline-block; margin-left: 4%;">
+                                      <label for="valorPagamento"><b>Valor do Pagamento:</b></label><br />
+                                      <input type="text" id="valorPagamento" name="valorPagamento" style="width: 100%; padding: 5px;" placeholder="Digite o valor do pagamento" required /><br /><br />
+                                    </td>
+                                    </tr>
+                                    <tr>
+                                      <td style="width: 100%; padding: 10px;">
+                                        <label for="observacoesBitcoin"><b>Observações:</b></label><br />
+                                        <textarea id="observacoesBitcoin" name="observacoesBitcoin" style="width: 80%; padding: 5px;" rows="4" placeholder="Informações adicionais (opcional)"></textarea><br /><br />
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td style="width: 100%; padding: 10px;">
+                                        <button type="submit" id="pagBitcoin" name="pagBitcoin" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Confirmar Dados Bitcoin</button>
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </div>
+                              <%}else if(tipoPagamento == "bancodeposito"){%>
+                                <div style="width:100%; height: 390px; overflow-y: scroll;"> 
+                                  <table style="width: 80%;">
+                                    <tr>
+                                      <td><h3>Dados para Depósito Bancário (TED)</h3></td>
+                                    </tr>
+                                    <tr>
+                                      <td style="width: 100%; padding: 10px;">
+                                        <label for="nomeTitularTED"><b>Nome do Titular:</b></label><br />
+                                        <input type="text" id="nomeTitularTED" name="nomeTitularTED" style="width: 80%; padding: 5px;" placeholder="Digite seu nome completo" required /><br /><br />
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td style="width: 100%; padding: 10px;">
+                                        <label for="cpfcnpjTED"><b>CPF/CNPJ:</b></label><br />
+                                        <input type="text" id="cpfcnpjTED" name="cpfcnpjTED" style="width: 80%; padding: 5px;" placeholder="Digite seu CPF ou CNPJ" required /><br /><br />
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td style="width: 48%; padding: 10px; display: inline-block;">
+                                        <label for="bancoTED"><b>Banco:</b></label><br />
+                                        <select id="bancoTED" name="bancoTED" style="width: 100%; padding: 5px;" required>
+                                          <option value="">Selecione um banco</option>
+                                          <option value="001">001 - Banco do Brasil</option>
+                                          <option value="033">033 - Banco Santander</option>
+                                          <option value="104">104 - Caixa Econômica Federal</option>
+                                          <option value="237">237 - Banco Bradesco</option>
+                                          <option value="341">341 - Banco Itaú</option>
+                                          <option value="389">389 - Banco Mercantil</option>
+                                          <option value="422">422 - Banco Safra</option>
+                                          <option value="633">633 - Banco Inter</option>
+                                          <option value="655">655 - Banco Votorantim</option>
+                                          <option value="707">707 - Banco Daycoval</option>
+                                        </select><br /><br />
+                                      </td>
+                                      <td style="width: 48%; padding: 10px; display: inline-block; margin-left: 4%;">
+                                        <label for="agenciaTED"><b>Agência:</b></label><br />
+                                        <input type="text" id="agenciaTED" name="agenciaTED" style="width: 100%; padding: 5px;" placeholder="Número da agência" required /><br /><br />
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td style="width: 48%; padding: 10px; display: inline-block;">
+                                        <label for="contaTED"><b>Conta:</b></label><br />
+                                        <input type="text" id="contaTED" name="contaTED" style="width: 100%; padding: 5px;" placeholder="Número da conta" required /><br /><br />
+                                      </td>
+                                      <td style="width: 48%; padding: 10px; display: inline-block; margin-left: 4%;">
+                                        <label for="tipoContaTED"><b>Tipo de Conta:</b></label><br />
+                                        <select id="tipoContaTED" name="tipoContaTED" style="width: 100%; padding: 5px;" required>
+                                          <option value="">Selecione o tipo</option>
+                                          <option value="Corrente">Corrente</option>
+                                          <option value="Poupança">Poupança</option>
+                                        </select><br /><br />
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td style="width: 100%; padding: 10px;">
+                                        <label for="valorTED"><b>Valor do Depósito:</b></label><br />
+                                        <input type="text" id="valorTED" name="valorTED" style="width: 80%; padding: 5px;" placeholder="Digite o valor do depósito" required /><br /><br />
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td style="width: 100%; padding: 10px;">
+                                        <button type="submit" id="pagTED" name="pagTED" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Confirmar Dados TED</button>
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </div>                                
+                              <%}%>  
+                     </td>
+                  </tr>
+              </table>  
+              <input type="hidden" id="typeuser" name="typeuser" value="<%=typeuser%>" />
+              <input type="hidden" id="email" name="email" value="<%=email%>" />
+              <input type="hidden" id="senha" name="senha" value="<%=senha%>" />
+              <input type="hidden" id="menu" name="menu" value="fincadPro" />      
+              <input type="hidden" id="codigoBarras" name="codigoBarras" value="<%=codigoBarras%>" />        
         </form>        
     </body>
 </html>
+
+
+
