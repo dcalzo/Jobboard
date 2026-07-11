@@ -19,7 +19,7 @@
             <%=mensagem%>
           </div> 
         <%}%>
-        <form>
+        <form>          
             <%=typeuser%>
             <table style="width: 100%;">
                 <tr>
@@ -32,6 +32,7 @@
                     </ul> 
                   </td>
                   <td id="conteudo" name="conteudo" style="width: 85%;" >
+                    <div style="width:100%; height: 390px; overflow-y: scroll;">
                     Cadastro do Profissional<br />
                     <form> 
                         <a href="?opcao=home">Home</a><br />
@@ -174,9 +175,10 @@
                         <br /><br />     
                     <input type="submit" id="cadastroPro" name="cadastroPro" value="Salvar" style="width: 50%;" />        
                     </form>
+                    </div>
                   </td>
                 </tr>
-              </table>    
+              </table>   
         </form>        
     </body>
 </html>

@@ -304,7 +304,6 @@ function buildBoletoFromDb(taskDoc, profissionalDoc) {
     const profissionalNome = profissionalDoc && profissionalDoc.nome ? profissionalDoc.nome : "";
     const profissionalEmail = profissionalDoc && profissionalDoc.email ? profissionalDoc.email : "";
     const referenceId = taskDoc && taskDoc.idtask ? String(taskDoc.idtask) : "";
-    const barcodeSeed = referenceId.replace(/\D/g, "");
 
     return {
         reference_id: referenceId,
@@ -315,7 +314,7 @@ function buildBoletoFromDb(taskDoc, profissionalDoc) {
             name: profissionalNome,
             email: profissionalEmail
         },
-        codigo_barras: codigoBarrasPagBank.length != 0 ? codigoBarrasPagBank : barcodeSeed + " 1111000 11111110 00000000000000"
+        codigo_barras: codigoBarrasPagBank.length != 0 ? codigoBarrasPagBank : "Codigo de barras não disponivel"
     };
 }
 
@@ -814,9 +813,34 @@ app.get("/", (req,res)=>{
             }); 
             }//-------------------------------------------------------------------------Fim Board
             else  if(req.query.menu == "ProdutosCaju"){     
-                res.render("professional/caju/index",{typeuser: req.query.typeuser, email:req.query.email, senha:req.query.senha});       
+                res.render("professional/caju/index",{
+                    typeuser: req.query.typeuser,
+                    email:req.query.email,
+                    senha:req.query.senha,
+                    tipoPagamento: req.query.tipoPagamento
+                });       
             }else  if(req.query.menu == "ganho"){     
-                res.render("professional/ganho/index",{typeuser: req.query.typeuser, email:req.query.email, senha:req.query.senha});       
+                if(req.query.taskServ == "alteraPagProfissional"){/////////////////////////////////////////////////////////////////
+                    try{
+                        task.collection.updateOne({
+                            idtask: req.query.count
+                        }, {
+                            $set: {
+                                codigo: codigoBarrasPagBank
+                            }
+                        });
+                        console.log("task finalizada");
+                    }catch(e){
+                        console.log("Erro: "+e.message);
+                    }
+                }
+                res.render("professional/ganho/index",{///////////////////////////////////////////////////////////////////////////
+                    typeuser: req.query.typeuser, 
+                    email:req.query.email, 
+                    senha:req.query.senha,
+                    codigoBarras: codigoBarrasPagBank,
+                    tipoPagamento: req.query.tipoPagamento
+                });       
             }else  if(req.query.menu == "fichaPro" || req.query.cadastroProf=="Salvar"){                   
                 if(req.query.typeuser == null){
                      res.render("professional/cadastro/index",{
@@ -1126,10 +1150,76 @@ app.get("/", (req,res)=>{
                 tipoPagamento: req.query.tipoPagamento}); 
         }
         else if(req.query.opcao == null || req.query.opcao == "home"){ 
-            res.render("principal/index",{logado: ""});
+            res.render("principal/index",{
+                logado: "",
+                demo: req.query.demo,
+                demo2: req.query.demo2
+            });
         }  
     }    
 }); 
+
+// API para gerar boleto via PagSeguro
+app.post('/api/gerar-boleto', async (req, res) => {
+    try {
+        const { email, senha } = req.body;
+
+        if (!email || !senha) {
+            return res.status(400).json({ 
+                success: false, 
+                erro: 'Email e senha são obrigatórios' 
+            });
+        }
+
+        // Buscar dados do profissional
+        const profissionalDocs = await profissional.find({ email: email, senha: senha }).exec();
+        
+        if (!profissionalDocs || profissionalDocs.length === 0) {
+            return res.status(401).json({ 
+                success: false, 
+                erro: 'Profissional não encontrado' 
+            });
+        }
+
+        const profissionalSelecionado = profissionalDocs[0];
+
+        // Criar dados do boleto com valores padrão
+        const boletoData = {
+            reference_id: profissionalSelecionado._id.toString(),
+            description: 'Pagamento de serviço profissional',
+            amount: 100.00, // Valor padrão - pode ser alterado conforme necessário
+            validity: getThirdNextBusinessDay(), // Data de vencimento
+            payer: {
+                name: profissionalSelecionado.nome || 'Profissional',
+                email: profissionalSelecionado.email
+            }
+        };
+
+        // Gerar boleto com código de barras via PagBank
+        const boletoComCodigo = await buildBoletoWithPagBankBarcode(boletoData, profissionalSelecionado);
+
+        if (boletoComCodigo.codigo_barras) {
+            return res.json({
+                success: true,
+                codigoBarras: boletoComCodigo.codigo_barras,
+                linkPagSeguro: env.PAGBANK_API_URL || 'https://www.pagseguro.com.br',
+                mensagem: 'Boleto gerado com sucesso'
+            });
+        } else {
+            return res.json({
+                success: false,
+                erro: 'Não foi possível gerar o boleto. Verifique suas configurações.'
+            });
+        }
+
+    } catch (error) {
+        console.error('Erro ao gerar boleto:', error);
+        res.status(500).json({
+            success: false,
+            erro: 'Erro ao gerar boleto: ' + error.message
+        });
+    }
+});
 
 app.listen(porta,()=>{
     console.log("funcionando\nhttp://localhost:8080/");    

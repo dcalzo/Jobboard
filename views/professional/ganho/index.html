@@ -31,6 +31,100 @@
                         <td style="width: 25%;"><b>etapa do desenvolvimento</b></td>
                         <td style="width: 25%;"><b>estado do pagamento</b></td>
                       </tr>
+                      <tr>
+                        <td style="width: 25%;"></td>
+                        <td style="width: 25%;">
+                          <select name="tipoPagamento" style="width: 53%;" id="tipoPagamento" onchange="this.form.submit()">
+                            <%if(tipoPagamento == "" || tipoPagamento == null){%>
+                              <option value="" selected ></option>
+                              <option value="Boleto" >Boleto</option>
+                              <option value="PIX" >PIX</option>
+                              <option value="Bitcoin" >Bitcoin</option>
+                              <option value="bancodeposito" >Deposito bancario</option>
+                              <%}else if(tipoPagamento == "Boleto"){%>
+                                <option value="" ></option>
+                                <option value="Boleto" selected >Boleto</option>
+                                <option value="PIX" >PIX</option>
+                                <option value="Bitcoin" >Bitcoin</option>
+                                <option value="bancodeposito" >Deposito bancario</option>
+                              <%}else if(tipoPagamento == "PIX"){%>
+                                <option value="" ></option>
+                                <option value="Boleto" >Boleto</option>
+                                <option value="PIX" selected>PIX</option>
+                                <option value="Bitcoin" >Bitcoin</option>
+                                <option value="bancodeposito" >Deposito bancario</option>
+                              <%}else if(tipoPagamento == "Bitcoin"){%>
+                                <option value="" ></option>
+                                <option value="Boleto" >Boleto</option>
+                                <option value="PIX" >PIX</option>
+                                <option value="Bitcoin" selected>Bitcoin</option>
+                                <option value="bancodeposito" >Deposito bancario</option>
+                              <%}else if(tipoPagamento == "bancodeposito"){%>
+                                <option value="" ></option>
+                                <option value="Boleto" >Boleto</option>
+                                <option value="PIX" >PIX</option>
+                                <option value="Bitcoin" >Bitcoin</option>
+                                <option value="bancodeposito" selected >Deposito bancario</option>
+                              <%}%>
+                          </select>
+                          <%if(tipoPagamento == "" || tipoPagamento == null){%>
+                              <%}else if(tipoPagamento == "Boleto"){%>
+                                <button type="button" onclick="gerarBoleto()" style="margin-left: 10px; padding: 5px 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Gerar Boleto</button>
+                                <div id="resultadoBoleto" style="margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; display: none;">
+                                  <h4>Boleto Gerado:</h4>
+                                  <p><strong>Código de Barras:</strong></p>
+                                  <div id="codigoBarras" style="font-family: monospace; font-size: 14px; font-weight: bold; padding: 10px; background-color: #f5f5f5; border: 1px solid #ccc; border-radius: 4px; word-break: break-all; margin: 10px 0;"></div>
+                                  <button type="button" onclick="copiarCodigoBarras()" style="padding: 5px 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Copiar Código</button>
+                                  <a id="linkBoleto" href="#" target="_blank" style="margin-left: 10px; padding: 5px 10px; background-color: #FF9800; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block;">Abrir PagSeguro</a>
+                                </div>
+                                <div id="carregandoBoleto" style="display: none; margin-top: 10px;">
+                                  <p>Gerando boleto...</p>
+                                </div>
+                                <div id="erroBoleto" style="display: none; margin-top: 10px; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;"></div>
+                              <%}else if(tipoPagamento == "PIX"){%>
+                                <div id="avisoPIX">
+                                  <% if (typeof pagamentoRecebido !== 'undefined' && pagamentoRecebido) { %>
+                                    <p style="margin: 5px 0;"><strong>Contratante já pagou:</strong> Sim</p>
+                                    <p style="margin: 5px 0;"><strong>Valor recebido:</strong> R$ <%= typeof valorRecebido !== 'undefined' ? valorRecebido : '0,00' %></p>
+                                  <% } else if (typeof pagamentoRecebido !== 'undefined') { %>
+                                    <p style="margin: 5px 0;"><strong>Contratante já pagou:</strong> Não</p>
+                                    <p style="margin: 5px 0;"><strong>Valor recebido:</strong> R$ <%= typeof valorRecebido !== 'undefined' ? valorRecebido : '0,00' %></p>
+                                  <% } else { %>
+                                    <p style="margin: 5px 0;"><strong>Contratante já pagou:</strong> Aguardando confirmação</p>
+                                    <p style="margin: 5px 0;">Verifique o status do PIX ou atualize a página para confirmar o pagamento.</p>
+                                  <% } %>
+                                </div>
+                              <%}else if(tipoPagamento == "Bitcoin"){%>
+                                <div id="avisoBitcoin">
+                                  <% if (typeof pagamentoRecebidoBitcoin !== 'undefined' && pagamentoRecebidoBitcoin) { %>
+                                    <p style="margin: 5px 0;"><strong>Contratante já pagou:</strong> Sim</p>
+                                    <p style="margin: 5px 0;"><strong>Valor recebido:</strong> BTC <%= typeof valorRecebidoBitcoin !== 'undefined' ? valorRecebidoBitcoin : '0.00000000' %></p>
+                                  <% } else if (typeof pagamentoRecebidoBitcoin !== 'undefined') { %>
+                                    <p style="margin: 5px 0;"><strong>Contratante já pagou:</strong> Não</p>
+                                    <p style="margin: 5px 0;"><strong>Valor recebido:</strong> BTC <%= typeof valorRecebidoBitcoin !== 'undefined' ? valorRecebidoBitcoin : '0.00000000' %></p>
+                                  <% } else { %>
+                                    <p style="margin: 5px 0;"><strong>Contratante já pagou:</strong> Aguardando confirmação</p>
+                                    <p style="margin: 5px 0;">Verifique o status do pagamento em Bitcoin ou atualize a página para confirmar.</p>
+                                  <% } %>
+                                </div>
+                              <%}else if(tipoPagamento == "bancodeposito"){%>
+                                <div id="avisoTED">
+                                   <% if (typeof pagamentoRecebidoTED !== 'undefined' && pagamentoRecebidoTED) { %>
+                                    <p style="margin: 5px 0;"><strong>Contratante já pagou:</strong> Sim</p>
+                                    <p style="margin: 5px 0;"><strong>Valor recebido:</strong> R$ <%= typeof valorRecebidoTED !== 'undefined' ? valorRecebidoTED : '0,00' %></p>
+                                  <% } else if (typeof pagamentoRecebidoTED !== 'undefined') { %>
+                                    <p style="margin: 5px 0;"><strong>Contratante já pagou:</strong> Não</p>
+                                    <p style="margin: 5px 0;"><strong>Valor recebido:</strong> R$ <%= typeof valorRecebidoTED !== 'undefined' ? valorRecebidoTED : '0,00' %></p>
+                                  <% } else { %>
+                                    <p style="margin: 5px 0;"><strong>Contratante já pagou:</strong> Aguardando confirmação</p>
+                                    <p style="margin: 5px 0;">Verifique o status do TED ou atualize a página para confirmar.</p>
+                                  <% } %>
+                                </div>
+                              <%}%>
+                        </td>
+                        <td style="width: 25%;"></td>
+                        <td style="width: 25%;"></td>
+                      </tr>
                        <tr>
                         <td style="width: 25%;"></td>
                         <td style="width: 25%;"></td>
@@ -40,6 +134,70 @@
                   </td>
                 </tr>
               </table>    
+              <input type="hidden" id="typeuser" name="typeuser" value="<%=typeuser%>" />
+              <input type="hidden" id="email" name="email" value="<%=email%>" />
+              <input type="hidden" id="senha" name="senha" value="<%=senha%>" />
+              <input type="hidden" id="menu" name="menu" value="ganho" />      
         </form>        
     </body>
+    <script>
+      function gerarBoleto() {
+        const email = document.getElementById('email').value;
+        const senha = document.getElementById('senha').value;
+        const carregandoDiv = document.getElementById('carregandoBoleto');
+        const resultadoDiv = document.getElementById('resultadoBoleto');
+        const erroDiv = document.getElementById('erroBoleto');
+
+        // Resetar estados anteriores
+        carregandoDiv.style.display = 'block';
+        resultadoDiv.style.display = 'none';
+        erroDiv.style.display = 'none';
+        erroDiv.innerHTML = '';
+
+        // Fazer chamada AJAX para gerar boleto
+        fetch('/api/gerar-boleto', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: email,
+            senha: senha
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          carregandoDiv.style.display = 'none';
+          
+          if (data.success) {
+            // Exibir código de barras
+            document.getElementById('codigoBarras').textContent = data.codigoBarras;
+            if (data.linkPagSeguro) {
+              document.getElementById('linkBoleto').href = data.linkPagSeguro;
+              document.getElementById('linkBoleto').style.display = 'inline-block';
+            }
+            resultadoDiv.style.display = 'block';
+          } else {
+            erroDiv.innerHTML = data.erro || 'Erro ao gerar boleto. Tente novamente.';
+            erroDiv.style.display = 'block';
+          }
+        })
+        .catch(error => {
+          console.error('Erro:', error);
+          carregandoDiv.style.display = 'none';
+          erroDiv.innerHTML = 'Erro na requisição: ' + error.message;
+          erroDiv.style.display = 'block';
+        });
+      }
+
+      function copiarCodigoBarras() {
+        const codigoBarras = document.getElementById('codigoBarras').textContent;
+        navigator.clipboard.writeText(codigoBarras).then(() => {
+          alert('Código de barras copiado para a área de transferência!');
+        }).catch(err => {
+          console.error('Erro ao copiar:', err);
+          alert('Erro ao copiar o código de barras.');
+        });
+      }
+    </script>
 </html>

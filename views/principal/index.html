@@ -23,7 +23,116 @@
               </td>
               <td id="conteudo" name="conteudo" class="boardtableMainRow" >
                 Prataforma para contratar profissionais e encontrar serviços a<br />
-                serem executados
+                serem executados<br />
+                demonstração do board job<br />
+                <div style="width:100%; height: 325px; overflow-y: scroll;">   
+                  <%if(demo == undefined){%>    
+                  <ul style="width:80%;">
+                  <li><a href="?demo=demo-prof">Profissional</a>
+                  <li><a href="?demo=demo-cont">Contratante</a>
+                </ul>      
+                <%}else if(demo == "demo-prof"){%>
+                  <p>Demonstração para Profissionais</p>
+                  <table>
+                    <tr>
+                      <td style="width: 20%; margin-left: 0px;">
+                         <ul>
+                        <li><a href="?demo2=demo-boardprof&demo=demo-prof">Board</a></li>
+                        <li><a href="?demo2=demo-ganho&demo=demo-prof">Ganhos Financeiros</a></li>
+                        <li><a href="?demo2=demo-fincad&demo=demo-prof">Cadastro Financeiro</a></li>
+                        <li><a href="?demo2=demo-chatprof&demo=demo-prof">Chat</a></li>
+                      </ul> 
+                      </td>
+                      <td style="width: 15%;">
+                        <%if(demo2 == undefined || demo2 == "demo-boardprof"){%>    
+                          <p>Board</p>
+                          <table style="width: 100%; margin-left: 0px;">
+                              <tr>
+                              <td style="width: 5%; margin-left: 0px;">Services</td>
+                              <td style="width: 5%; margin-left: 0px;">development</td>
+                              <td style="width: 5%; margin-left: 0px;">Revision</td>
+                              <td style="width: 5%; margin-left: 0px;">Concluded</td>
+                            </tr>
+                            <tr>
+                              <td style="width: 5%; margin-left: 0px;">
+                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                              </td>
+                              <td style="width: 5%; margin-left: 0px;">
+                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                              </td>
+                              <td style="width: 5%; margin-left: 0px;">
+                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                              </td>
+                              <td style="width: 5%; margin-left: 0px;">
+                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                              </td>
+                            </tr>
+                          </table>
+                        <%} else if(demo2 == "demo-ganho"){%>
+                          <p>Ganhos Financeiros</p>
+                        <%} else if(demo2 == "demo-fincad"){%>
+                          <p>Cadastro Financeiro</p>
+                        <%} else if(demo2 == "demo-chatprof"){%>
+                          <p>Chat com o Cliente</p>
+                        <%}%>
+                      </td>
+                    </tr>
+                  </table>
+                <%}else if(demo == "demo-cont"){%>
+                  <p>Demonstração para Contratantes</p>
+                  <table>
+                    <tr>
+                      <td style="width: 20%; margin-left: 0px;">
+                        <ul>
+                                <li><a href="?demo2=demo-boardcont&demo=demo-cont">Board</a></li>
+                                <li><a href="?demo2=demo-task&demo=demo-cont">Criar Serviço</a></li>
+                                <li><a href="?demo2=demo-historico&demo=demo-cont">Historico de Serviços</a></li>
+                                <li><a href="?demo2=demo-fincadcont&demo=demo-cont">Cadastro Financeiro</a></li>
+                                <li><a href="?demo2=demo-concluidos&demo=demo-cont">serviços Concluidos</a></li>
+                                <li><a href="?demo2=demo-chatcont&demo=demo-cont">Chat</a></li>
+                              </ul>    
+                      </td>
+                      <td style="width: 15%;">
+                         <%if(demo2 == undefined || demo2 == "demo-boardcont"){%>  
+                          <p>Board</p>
+                          <table style="width: 100%; margin-left: 0px;">
+                              <tr>
+                              <td style="width: 5%; margin-left: 0px;">Services</td>
+                              <td style="width: 5%; margin-left: 0px;">development</td>
+                              <td style="width: 5%; margin-left: 0px;">Revision</td>
+                              <td style="width: 5%; margin-left: 0px;">Concluded</td>
+                            </tr>
+                            <tr>
+                              <td style="width: 5%; margin-left: 0px;">
+                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                              </td style="width: 5%; margin-left: 0px;">
+                              <td style="width: 5%; margin-left: 0px;">
+                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                              </td>
+                              <td style="width: 5%; margin-left: 0px;">
+                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                              </td>
+                              <td style="width: 5%; margin-left: 0px;">
+                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                              </td>
+                            </tr>
+                          </table>
+                         <%} else if(demo2 == "demo-task"){%>
+                          <p>Criar Serviço</p>
+                         <%} else if(demo2 == "demo-historico"){%>
+                          <p>Historico de Serviços</p>
+                         <%} else if(demo2 == "demo-fincadcont"){%>
+                          <p>Cadastro Financeiro</p>
+                         <%} else if(demo2 == "demo-concluidos"){%>
+                          <p>serviços Concluidos</p>
+                         <%} else if(demo2 == "demo-chatcont"){%>
+                          <p>Chat com os contratados</p>
+                         <%}%>
+                      </td>
+                    </tr>
+                  </table>
+                <%}%>
+                </div>
               </td>
             </tr>
           </table>     
