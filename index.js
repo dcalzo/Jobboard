@@ -1,5 +1,6 @@
 const express = require("express");
 const axios = require("axios");
+const mercadopago = require("mercadopago");
 const BitPay = require('bitpay-sdk');
 const mongoose = require("mongoose");
 const path = require("path");
@@ -7,6 +8,7 @@ const contratante = require("./contratante");
 const task = require("./task.js");
 const chatmensagem = require("./views/chat/mensagens.js");
 const profissional = require("./views/professional/cadastro/profissional");
+const contasPagamentos = require("./contasPagamento.js");
 const env = require("./dev.env.js");
 const app = express();
 const porta = 8080;
@@ -32,6 +34,8 @@ app.engine("html", require("ejs").renderFile);
 app.set("view engine", "html");
 app.use("/public", express.static(path.join(__dirname,"public")));
 app.set("views", path.join(__dirname,"/views"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 function formatDateBr(date) {
     const dia = String(date.getDate()).padStart(2, "0");
@@ -68,6 +72,18 @@ function normalizeTaxId(value) {
     }
 
     return String(value).replace(/\D/g, "");
+}
+
+function calculatePaymentAmounts(amountValue) {
+    const amount = Number.isFinite(Number(amountValue)) ? Number(amountValue) : 0;
+    const professionalAmount = Number(amount.toFixed(2));
+    const platformFee = Number((professionalAmount * 0.05).toFixed(2));
+
+    return {
+        professionalAmount: professionalAmount,
+        platformFee: platformFee,
+        totalAmount: Number((professionalAmount + platformFee).toFixed(2))
+    };
 }
 
 function maskToken(token) {
@@ -113,28 +129,95 @@ function brDateToIsoDate(brDate) {
     return parts[2] + "-" + parts[1] + "-" + parts[0];
 }
 
+function stringifyPagBankValue(value) {
+    if (value === null || value === undefined) {
+        return "";
+    }
+    if (typeof value === "string") {
+        return value;
+    }
+    if (typeof value === "number" || typeof value === "boolean") {
+        return String(value);
+    }
+    if (typeof value === "object") {
+        if (value.content) {
+            return stringifyPagBankValue(value.content);
+        }
+        if (value.line_code) {
+            return stringifyPagBankValue(value.line_code);
+        }
+        if (value.barcode) {
+            return stringifyPagBankValue(value.barcode);
+        }
+        if (value.url) {
+            return stringifyPagBankValue(value.url);
+        }
+        return JSON.stringify(value);
+    }
+    return String(value);
+}
+
 function getPagBankBarcode(responseData) {
     if (!responseData || typeof responseData !== "object") {
         return "";
     }
 
     if (responseData.payment_method && responseData.payment_method.barcode) {
-        return String(responseData.payment_method.barcode);
+        return stringifyPagBankValue(responseData.payment_method.barcode);
     }
 
     if (responseData.payment_method && responseData.payment_method.boleto && responseData.payment_method.boleto.barcode) {
-        return String(responseData.payment_method.boleto.barcode);
+        return stringifyPagBankValue(responseData.payment_method.boleto.barcode);
     }
 
     if (responseData.barcode) {
-        return String(responseData.barcode);
+        return stringifyPagBankValue(responseData.barcode);
+    }
+
+    if (responseData.point_of_interaction && responseData.point_of_interaction.transaction_data) {
+        const transactionData = responseData.point_of_interaction.transaction_data;
+        if (transactionData.line_code) {
+            return stringifyPagBankValue(transactionData.line_code);
+        }
+        if (transactionData.barcode) {
+            return stringifyPagBankValue(transactionData.barcode);
+        }
     }
 
     if (Array.isArray(responseData.charges) && responseData.charges.length > 0) {
         const firstCharge = responseData.charges[0];
         if (firstCharge && firstCharge.payment_method && firstCharge.payment_method.barcode) {
-            return String(firstCharge.payment_method.barcode);
+            return stringifyPagBankValue(firstCharge.payment_method.barcode);
         }
+    }
+
+    return "";
+}
+
+function getMercadoPagoBoletoLink(responseData) {
+    if (!responseData || typeof responseData !== "object") {
+        return "";
+    }
+
+    if (responseData.point_of_interaction && responseData.point_of_interaction.transaction_data) {
+        const transactionData = responseData.point_of_interaction.transaction_data;
+        if (transactionData.ticket_url) {
+            return String(transactionData.ticket_url);
+        }
+        if (transactionData.transaction_url) {
+            return String(transactionData.transaction_url);
+        }
+        if (transactionData.url) {
+            return String(transactionData.url);
+        }
+    }
+
+    if (responseData.transaction_details && responseData.transaction_details.external_resource_url) {
+        return String(responseData.transaction_details.external_resource_url);
+    }
+
+    if (responseData.ticket_url) {
+        return String(responseData.ticket_url);
     }
 
     return "";
@@ -183,108 +266,167 @@ function validatePagBankChargePayload(payload) {
 }
 
 async function buildBoletoWithPagBankBarcode(boletoData, profissionalDoc) {
-    const token = env.TOKEN_PAGSEGURO;
-    const pagBankBaseUrl = env.PAGBANK_API_URL || "https://sandbox.api.pagseguro.com";
-    const chargeUrl = pagBankBaseUrl + "/charges";
+    const token = env.TOKEN_MERCADO_PAGO;
+    const apiUrl = String(env.MERCADO_PAGO_API_URL || "").replace(/\/+$/, "");
 
-    if (!token) {
-        console.log("PagBank: TOKEN_PAGSEGURO nao configurado");
-        return boletoData;
+    if (!token || !apiUrl) {
+        console.log("Mercado Pago: TOKEN_MERCADO_PAGO ou MERCADO_PAGO_API_URL nao configurado");
+        return {
+            ...boletoData,
+            error: "TOKEN_MERCADO_PAGO ou MERCADO_PAGO_API_URL nao configurado"
+        };
     }
 
-    const dueDate = brDateToIsoDate(boletoData.validity);
-    const amountInCents = Math.round(Number(boletoData.amount || 0) * 100);
+    const client = new mercadopago.MercadoPagoConfig({ accessToken: token });
+    const paymentClient = new mercadopago.Payment(client);
 
-    if (!dueDate || !Number.isFinite(amountInCents) || amountInCents <= 0) {
-        return boletoData;
+    const dueDate = brDateToIsoDate(boletoData.validity);
+    const rawAmount = Number(
+        boletoData.amount
+        ?? boletoData.valor
+        ?? boletoData.transaction_amount
+        ?? boletoData.value
+        ?? boletoData.total
+        ?? boletoData.preco
+        ?? 0
+    );
+    const amountFromPayload = Number(
+        (boletoData && boletoData.payload && boletoData.payload.amount && boletoData.payload.amount.value) || 0
+    );
+    const fallbackAmount = Number.isFinite(rawAmount) && rawAmount > 0 ? rawAmount : (Number.isFinite(amountFromPayload) && amountFromPayload > 0 ? amountFromPayload / 100 : 100);
+    const amountInReais = Number.isFinite(fallbackAmount) && fallbackAmount > 0 ? fallbackAmount : 100;
+
+    if (!dueDate || !Number.isFinite(amountInReais) || amountInReais <= 0) {
+        return {
+            ...boletoData,
+            error: "Valor ou data de vencimento inválidos"
+        };
     }
 
     const taxIdRaw = profissionalDoc && profissionalDoc.cpf_cnpj ? String(profissionalDoc.cpf_cnpj) : "";
     const taxId = normalizeTaxId(taxIdRaw);
-    const holder = {
-        name: boletoData.payer && boletoData.payer.name ? boletoData.payer.name : "Profissional"
-    };
-
-    if (boletoData.payer && boletoData.payer.email) {
-        holder.email = boletoData.payer.email;
-    }
-
-    if (taxId.length === 11 || taxId.length === 14) {
-        holder.tax_id = taxId;
-    }
+    const fallbackEmail = env.EMAIL_PAGBANK || "";
+    const payerEmail = (boletoData.payer && boletoData.payer.email) || fallbackEmail || "test@test.com";
+    const payerNameRaw = String(boletoData.payer && boletoData.payer.name ? boletoData.payer.name : "Profissional").trim() || "Profissional";
+    const payerNameParts = payerNameRaw.split(/\s+/).filter(Boolean);
+    const payerFirstName = payerNameParts[0] || "Profissional";
+    const payerLastName = payerNameParts.slice(1).join(" ") || "Cliente";
 
     const payload = {
-        reference_id: String(boletoData.reference_id || "123456"),
+        transaction_amount: Number(amountInReais.toFixed(2)),
         description: String(boletoData.description || "Pagamento de servico").slice(0, 140),
-        amount: {
-            value: amountInCents,
-            currency: "BRL"
-        },
-        payment_method: {
-            type: "BOLETO",
-            boleto: {
-                due_date: dueDate,
-                instruction_lines: {
-                    line_1: "Pagamento referente ao servico contratado",
-                    line_2: "Nao receber apos o vencimento"
-                }
-            },
-            holder: holder
+        payment_method_id: "bolbradesco",
+        payer: {
+            email: payerEmail,
+            first_name: payerFirstName,
+            last_name: payerLastName
         }
     };
 
-    const payloadErrors = validatePagBankChargePayload(payload);
-    if (payloadErrors.length > 0) {
-        console.log("PagBank: payload invalido para gerar boleto:", payloadErrors.join("; "));
-        return boletoData;
+    if (taxId) {
+        payload.payer.identification = {
+            type: taxId.length === 14 ? "CNPJ" : "CPF",
+            number: taxId
+        };
+    } else {
+        payload.payer.identification = {
+            type: "CPF",
+            number: "12345678909"
+        };
     }
 
-    if (shouldLogPagBankDebug()) {
-        console.log("PagBank DEBUG request:", {
-            url: chargeUrl,
-            authorization: "Bearer " + maskToken(token),
-            payload: sanitizePagBankPayloadForLogs(payload)
-        });
-    }
+    payload.payer.address = {
+        zip_code: "01310930",
+        street_name: "Av. Paulista",
+        street_number: "1000",
+        neighborhood: "Bela Vista",
+        city: "São Paulo",
+        federal_unit: "SP"
+    };
+
+    console.log("Mercado Pago request url:", apiUrl);
+    console.log("Mercado Pago request payload:", sanitizePagBankPayloadForLogs(payload));
 
     try {
-        const response = await axios.post(chargeUrl, payload, {
-            headers: {
-                Authorization: "Bearer " + token,
-                "Content-Type": "application/json",
-                Accept: "application/json"
-            }
-        });
+        const response = await paymentClient.create({ body: payload });
+        const responseData = response && response.body ? response.body : response;
 
-        if (shouldLogPagBankDebug()) {
-            console.log("PagBank DEBUG response status:", response.status);
-        }
+        const codigoBarras = getPagBankBarcode(responseData);
+        const linkBoleto = getMercadoPagoBoletoLink(responseData);
+        codigoBarrasPagBank = codigoBarras;
 
-        codigoBarrasPagBank = getPagBankBarcode(response.data);
-        if (!codigoBarrasPagBank) {
+        if (!codigoBarras && !linkBoleto) {
             if (shouldLogPagBankDebug()) {
-                console.log("PagBank DEBUG response body sem codigo de barras:", response.data);
+                console.log("Mercado Pago DEBUG response body sem codigo de barras nem link:", responseData);
             }
-            return boletoData;
+            return {
+                ...boletoData,
+                error: "Não foi possível obter código de barras ou link do boleto"
+            };
         }
 
         return Object.assign({}, boletoData, {
-            codigo_barras: codigoBarrasPagBank
+            codigo_barras: codigoBarras,
+            link_boleto: linkBoleto
         });
     } catch (error) {
-        const status = error && error.response ? error.response.status : null;
-        const details = error && error.response && error.response.data ? error.response.data : error.message;
+        let status = error && error.response ? error.response.status : null;
+        let details = error && error.response && error.response.data ? error.response.data : error.message;
 
         if (shouldLogPagBankDebug()) {
-            console.log("PagBank DEBUG erro completo:", {
-                url: chargeUrl,
+            console.log("Mercado Pago DEBUG erro completo:", {
+                url: apiUrl,
                 status: status,
                 details: details
             });
         }
 
-        console.log("Erro ao gerar boleto no PagBank. Status:", status, "Detalhes:", details);
-        return boletoData;
+        // Algumas vezes a SDK retorna erro genérico 'internal_error' com status nulo.
+        // Tentamos uma chamada direta com axios uma vez para obter mais detalhes ou recuperar o boleto.
+        const shouldRetryDirect = status === null || (Number.isInteger(status) && status >= 500) || (typeof details === "string" && details.toLowerCase().includes("internal_error"));
+
+        if (shouldRetryDirect) {
+            try {
+                if (shouldLogPagBankDebug()) console.log("Mercado Pago: tentando retry direto via axios para obter mais detalhes...");
+                const axiosResp = await axios.post(apiUrl, payload, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    timeout: 10000
+                });
+
+                const axiosData = axiosResp && axiosResp.data ? axiosResp.data : axiosResp;
+                const codigoBarrasRetry = getPagBankBarcode(axiosData);
+                const linkBoletoRetry = getMercadoPagoBoletoLink(axiosData);
+
+                if (shouldLogPagBankDebug()) console.log("Mercado Pago retry response:", axiosData);
+
+                if (codigoBarrasRetry || linkBoletoRetry) {
+                    return Object.assign({}, boletoData, {
+                        codigo_barras: codigoBarrasRetry,
+                        link_boleto: linkBoletoRetry
+                    });
+                }
+
+                // se não obteve, atualize detalhes para retornar
+                status = axiosResp.status || status;
+                details = axiosData;
+            } catch (retryErr) {
+                if (shouldLogPagBankDebug()) console.log("Mercado Pago retry erro:", retryErr && retryErr.response ? retryErr.response.data : retryErr.message || retryErr);
+                // manter status/details originais ou usar o do retry
+                const retryStatus = retryErr && retryErr.response ? retryErr.response.status : null;
+                const retryDetails = retryErr && retryErr.response && retryErr.response.data ? retryErr.response.data : retryErr.message;
+                status = status || retryStatus;
+                details = details || retryDetails;
+            }
+        }
+
+        console.log("Erro ao gerar boleto no Mercado Pago. Status:", status, "Detalhes:", details);
+        return {
+            ...boletoData,
+            error: typeof details === "string" ? details : JSON.stringify(details)
+        };
     }
 }
 
@@ -293,26 +435,42 @@ function buildBoletoFromDb(taskDoc, profissionalDoc) {
     const descriptionParts = [];
 
     if (taskDoc && taskDoc.titleService) {
-        descriptionParts.push(String(taskDoc.titleService));
+        descriptionParts.push(`Serviço: ${String(taskDoc.titleService)}`);
+    }
+    if (taskDoc && taskDoc.tipoPagamento) {
+        descriptionParts.push(`Tipo de pagamento: ${String(taskDoc.tipoPagamento)}`);
+    }
+    if (taskDoc && taskDoc.developer) {
+        descriptionParts.push(`Desenvolvedor: ${String(taskDoc.developer)}`);
     }
     if (taskDoc && taskDoc.description) {
         descriptionParts.push(String(taskDoc.description));
     }
 
-    const amountValue = taskDoc && taskDoc.valor ? Number(String(taskDoc.valor).replace(",", ".")) : 100.50;
+    const amountValue = taskDoc && taskDoc.valor ? Number(String(taskDoc.valor).replace(/[^0-9,.-]/g, "").replace(",", ".")) : 100.50;
     const amount = Number.isFinite(amountValue) ? amountValue : 100.50;
+    const paymentAmounts = calculatePaymentAmounts(amount);
     const profissionalNome = profissionalDoc && profissionalDoc.nome ? profissionalDoc.nome : "";
     const profissionalEmail = profissionalDoc && profissionalDoc.email ? profissionalDoc.email : "";
     const referenceId = taskDoc && taskDoc.idtask ? String(taskDoc.idtask) : "";
 
     return {
         reference_id: referenceId,
-        description: descriptionParts.length ? descriptionParts.join("\n") : fallbackDescription,
-        amount: amount,
+        description: descriptionParts.length ? descriptionParts.join(" | ") : fallbackDescription,
+        amount: paymentAmounts.totalAmount,
+        professionalAmount: paymentAmounts.professionalAmount,
+        platformFee: paymentAmounts.platformFee,
         validity: getThirdNextBusinessDay(),
         payer: {
             name: profissionalNome,
             email: profissionalEmail
+        },
+        task: {
+            idtask: referenceId,
+            titleService: taskDoc && taskDoc.titleService ? String(taskDoc.titleService) : "",
+            tipoPagamento: taskDoc && taskDoc.tipoPagamento ? String(taskDoc.tipoPagamento) : "",
+            developer: taskDoc && taskDoc.developer ? String(taskDoc.developer) : "",
+            valor: taskDoc && taskDoc.valor ? String(taskDoc.valor) : String(amount)
         },
         codigo_barras: codigoBarrasPagBank.length != 0 ? codigoBarrasPagBank : "Codigo de barras não disponivel"
     };
@@ -333,7 +491,7 @@ app.get("/", (req,res)=>{
             senhalog = clienteProf[0].senha;
         }catch(e){}
     });
-    if(((req.query.email == "teste" || req.query.email == "teste2") && req.query.senha == "123") &&
+    if(((req.query.email == "teste" || req.query.email == "teste2@gmail.com") && req.query.senha == "123") &&
      (req.query.cadastroProf != "Salvar" || req.query.cadastroContractor !="Salvar")){
         if(req.query.typeuser == "contractor"){
             if(req.query.opcao == "Entrar" && task.idtask == undefined){
@@ -510,6 +668,11 @@ app.get("/", (req,res)=>{
                                 }
 
                                 var boleto = buildBoletoFromDb(taskSelecionada, profissionalSelecionado);
+                                var paymentValues = {
+                                    professionalAmount: boleto.professionalAmount,
+                                    platformFee: boleto.platformFee,
+                                    totalAmount: boleto.amount
+                                };
                                 var shouldGeneratePagBankBoleto = req.query.tipoPagamento == "Boleto";
 
                                 var boletoPromise = shouldGeneratePagBankBoleto
@@ -526,6 +689,7 @@ app.get("/", (req,res)=>{
                                             estadoPg: "",
                                             profissionalSel: req.query.profissionalSel,
                                             dadosPagamento: boletoComCodigoPagBank,
+                                            paymentValues: paymentValues,
                                             taskservice: req.query.taskservice,
                                             typeuser: req.query.typeuser,
                                             nome: req.query.nome,
@@ -542,6 +706,7 @@ app.get("/", (req,res)=>{
                                                 estadoPg: "",
                                                 profissionalSel: req.query.profissionalSel,
                                                 dadosPagamento: boletoComCodigoPagBank,
+                                                paymentValues: paymentValues,
                                                 taskservice: req.query.taskservice,
                                                 typeuser: req.query.typeuser,
                                                 nome: req.query.nome,
@@ -558,6 +723,7 @@ app.get("/", (req,res)=>{
                                         estadoPg: "",
                                         profissionalSel: req.query.profissionalSel,
                                         dadosPagamento: boleto,
+                                        paymentValues: paymentValues,
                                         taskservice: req.query.taskservice,
                                         typeuser: req.query.typeuser,
                                         nome: req.query.nome,
@@ -575,6 +741,11 @@ app.get("/", (req,res)=>{
                                 var taskSelecionada = task && task.length > 0 ? task[0] : null;
                                 var profissionalSelecionado = profissional && profissional.length > 0 ? profissional[0] : null;
                                 var boleto = buildBoletoFromDb(taskSelecionada, profissionalSelecionado);
+                                var paymentValues = {
+                                    professionalAmount: boleto.professionalAmount,
+                                    platformFee: boleto.platformFee,
+                                    totalAmount: boleto.amount
+                                };
                                 var shouldGeneratePagBankBoleto = req.query.tipoPagamento == "Boleto";
                                 var boletoPromise = shouldGeneratePagBankBoleto
                                     ? buildBoletoWithPagBankBarcode(boleto, profissionalSelecionado)
@@ -586,6 +757,7 @@ app.get("/", (req,res)=>{
                                         contratante: contratante,
                                         idtask: req.query.idtask,
                                         dadosPagamento: boletoComCodigoPagBank,
+                                        paymentValues: paymentValues,
                                         task: task,
                                         profissionalSel: req.query.profissionalSel,
                                         taskservice: req.query.taskservice,
@@ -601,6 +773,7 @@ app.get("/", (req,res)=>{
                                         contratante: contratante,
                                         idtask: req.query.idtask,
                                         dadosPagamento: boleto,
+                                        paymentValues: paymentValues,
                                         task: task,
                                         profissionalSel: req.query.profissionalSel,
                                         taskservice: req.query.taskservice,
@@ -817,30 +990,108 @@ app.get("/", (req,res)=>{
                     typeuser: req.query.typeuser,
                     email:req.query.email,
                     senha:req.query.senha,
-                    tipoPagamento: req.query.tipoPagamento
+                    tipoPagamento: req.query.hiddenCodigoBarras
                 });       
-            }else  if(req.query.menu == "ganho"){     
-                if(req.query.taskServ == "alteraPagProfissional"){/////////////////////////////////////////////////////////////////
-                    try{
+            }else  if(req.query.menu == "ganho"){ ////////////////////////////////////////////////////////////////////////// 
+                const id = req.query.idTask || req.query.idtask || req.query.id || req.query.count;
+                const keyExact = 'hiddenCodigoBarras';
+                const keyWithDash = `hiddenCodigoBarras-${id}`;
+                const keyWithoutDash = `hiddenCodigoBarras${id}`;
+                const foundKey = Object.keys(req.query).find(k =>
+                        k === keyExact || k === keyWithDash || k === keyWithoutDash || k.startsWith('hiddenCodigoBarras')
+                );
+                const idtask = Object.keys(req.query).find(k => k.startsWith('idTask') );
+                if(req.query.alteraPagProfissional == "Salvar código"){                    
+                    try{                         
                         task.collection.updateOne({
-                            idtask: req.query.count
+                            idtask: req.query[idtask]
                         }, {
                             $set: {
-                                codigo: codigoBarrasPagBank
+                                codigo: foundKey ? req.query[foundKey] : undefined
                             }
                         });
-                        console.log("task finalizada");
+                        console.log("task alterada");
                     }catch(e){
                         console.log("Erro: "+e.message);
                     }
                 }
-                res.render("professional/ganho/index",{///////////////////////////////////////////////////////////////////////////
-                    typeuser: req.query.typeuser, 
-                    email:req.query.email, 
-                    senha:req.query.senha,
-                    codigoBarras: codigoBarrasPagBank,
-                    tipoPagamento: req.query.tipoPagamento
-                });       
+                if(req.query.chavePix == "Enviar chave PIX"){
+                    contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, dadosPag){
+                        dadosPag.forEach(function(dado) { 
+                            if (dado.tipo === "PIX"){
+                                try{
+                                    task.collection.updateOne({
+                                        idtask: "4",
+                                        tipoPagamento: "PIX"
+                                    }, {
+                                    $set: {
+                                        codigo: dado.chave
+                                    }
+                                });
+                                 console.log("Chave PIX alterada");
+                                }catch(e){
+                                     console.log("Erro: "+e.message);
+                                }
+                            }
+                        })
+                    }); 
+                }
+                 if(req.query.carteiraBitcoin == "Enviar carteira Bitcoin"){
+                    contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, dadosPag){
+                        dadosPag.forEach(function(dado) { 
+                            if (dado.tipo === "Bitcoin"){
+                                try{
+                                    task.collection.updateOne({
+                                        idtask: "2",
+                                        tipoPagamento: "Bitcoin"
+                                    }, {
+                                    $set: {
+                                        codigo: dado.enderecoBTC
+                                    }
+                                });
+                                 console.log("Carteira Bitcoin alterada");
+                                }catch(e){
+                                     console.log("Erro: "+e.message);
+                                }
+                            }
+                        })
+                    }); 
+                }
+                if(req.query.contaTED == "Enviar dados do TED"){
+                    contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, dadosPag){
+                        dadosPag.forEach(function(dado) { 
+                            if (dado.tipo === "bancodeposito"){
+                                try{
+                                    task.collection.updateOne({
+                                        idtask: "8",
+                                        tipoPagamento: "bancodeposito"
+                                    }, {
+                                    $set: {
+                                        codigo: "{Banco:'" + dado.banco + "',agencia:'" + dado.agencia + "',conta:'" + dado.numeroConta + "',tipo:'" + dado.tipoConta + "'}"
+                                    }
+                                });
+                                 console.log("Carteira TED alterada");
+                                }catch(e){
+                                     console.log("Erro: "+e.message);
+                                }
+                            }
+                        })
+                    }); 
+                }
+                contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, dadosPag){
+                    task.find({developer: req.query.email}).sort({"_id":1}).exec(function(err, task){
+                    profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, profissional){
+                       res.render("professional/ganho/index",{
+                            typeuser: req.query.typeuser,
+                            email: req.query.email,
+                            senha: req.query.senha,
+                            task: task,
+                            codigoBarras: req.query.hiddenCodigoBarras,
+                            tipoPagamento: req.query.tipoPagamento
+                            });
+                        });
+                  });
+              });                                     
             }else  if(req.query.menu == "fichaPro" || req.query.cadastroProf=="Salvar"){                   
                 if(req.query.typeuser == null){
                      res.render("professional/cadastro/index",{
@@ -856,13 +1107,81 @@ app.get("/", (req,res)=>{
                     }); 
                 }      
             
-            }else if(req.query.menu == "fincadPro"){     
-                res.render("professional/pagamento/index",{
+            }else if(req.query.menu == "fincadPro"){ ////////////////////////////////////////////////////////////////////////////////////////////////////////  
+                if( req.query.cadastraPagamento == "Cadastrar Pagamento"){
+                    try{
+                        contasPagamentos.collection.insertMany([
+                        {           
+                            nome: req.query.nome,
+                            email: req.query.email,
+                            tipo: req.query.tipoPagamento,
+                            documento: req.query.documento,
+                            redeBTC: req.query.redeBTC,
+                            enderecoBTC: req.query.enderecoBTC,
+                            banco: req.query.banco,
+                            agencia: req.query.agencia,
+                            numeroConta: req.query.conta,
+                            tipoConta: req.query.tipoConta,
+                            tipochave: req.query.tipochave,
+                            chave: req.query.chave,
+                            senha: req.query.senha,
+                            valor: req.query.valor,
+                            observacao: req.query.observacao,
+                            produto: "JobBaord"                
+                        }
+                    ]).then(function(){
+                        msg = "pagamento salvo"
+                        console.log(msg) 
+                    }).catch(function(error){
+                        console.log(error)    
+                    });
+                    }catch(e){
+                        console.log(e.error);
+                    }              
+                } else if( req.query.cadastraPagamento == "Alterar Pagamento"){
+                    try{
+                        contasPagamentos.collection.updateOne({
+                            email: req.query.email,
+                            tipo: req.query.tipoPagamento
+                        }, {
+                            $set: {
+                                nome: req.query.nome,
+                                email: req.query.email,
+                                tipo: req.query.tipoPagamento,
+                                documento: req.query.documento,
+                                redeBTC: req.query.redeBTC,
+                                enderecoBTC: req.query.enderecoBTC,
+                                banco: req.query.banco,
+                                agencia: req.query.agencia,
+                                numeroConta: req.query.conta,
+                                tipoConta: req.query.tipoConta,
+                                tipochave: req.query.tipochave,
+                                chave: req.query.chave,
+                                senha: req.query.senha,
+                                valor: req.query.valor,
+                                observacao: req.query.observacao,
+                                produto: "JobBaord"            
+                            }
+                        }).then(function(){
+                        msg = "pagamento alterado"
+                        console.log(msg) 
+                    }).catch(function(error){
+                        console.log(error)    
+                    });
+                    }catch(e){
+                        console.log(e.error);
+                    }              
+                }  
+                contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contasSalvas){
+                    res.render("professional/pagamento/index",{
                     typeuser: req.query.typeuser, 
                     codigoBarras: req.query.codigoBarras,
                     email:req.query.email, 
                     senha:req.query.senha, 
-                    tipoPagamento: req.query.tipoPagamento});       
+                    tipoPagamento: req.query.tipoPagamento,
+                    contasSalvas: contasSalvas
+                }); 
+                 });                      
             }
             else if(req.query.menu == "chatP"){
                 if( req.query.conversa == "Enviar" && req.query.usuario != "" ){           
@@ -1162,7 +1481,8 @@ app.get("/", (req,res)=>{
 // API para gerar boleto via PagSeguro
 app.post('/api/gerar-boleto', async (req, res) => {
     try {
-        const { email, senha } = req.body;
+        const payload = req.body && Object.keys(req.body).length > 0 ? req.body : (req.query || {});
+        const { email, senha, taskTitleService } = payload;
 
         if (!email || !senha) {
             return res.status(400).json({ 
@@ -1183,12 +1503,11 @@ app.post('/api/gerar-boleto', async (req, res) => {
 
         const profissionalSelecionado = profissionalDocs[0];
 
-        // Criar dados do boleto com valores padrão
         const boletoData = {
             reference_id: profissionalSelecionado._id.toString(),
-            description: 'Pagamento de serviço profissional',
-            amount: 100.00, // Valor padrão - pode ser alterado conforme necessário
-            validity: getThirdNextBusinessDay(), // Data de vencimento
+            description: `Pagamento de serviço: ${taskTitleService || 'Sem título'}`,
+            amount: 100.00,
+            validity: getThirdNextBusinessDay(),
             payer: {
                 name: profissionalSelecionado.nome || 'Profissional',
                 email: profissionalSelecionado.email
@@ -1198,17 +1517,24 @@ app.post('/api/gerar-boleto', async (req, res) => {
         // Gerar boleto com código de barras via PagBank
         const boletoComCodigo = await buildBoletoWithPagBankBarcode(boletoData, profissionalSelecionado);
 
-        if (boletoComCodigo.codigo_barras) {
+        if (boletoComCodigo.codigo_barras || boletoComCodigo.link_boleto) {
             return res.json({
                 success: true,
-                codigoBarras: boletoComCodigo.codigo_barras,
-                linkPagSeguro: env.PAGBANK_API_URL || 'https://www.pagseguro.com.br',
-                mensagem: 'Boleto gerado com sucesso'
+                codigoBarras: boletoComCodigo.codigo_barras || '',
+                linkBoleto: boletoComCodigo.link_boleto || '',
+                linkPagSeguro: boletoComCodigo.link_boleto || '',
+                mensagem: 'Boleto gerado com sucesso',
+                boleto: {
+                    description: boletoData.description,
+                    amount: boletoData.amount,
+                    validity: boletoData.validity,
+                    payer: boletoData.payer
+                }
             });
         } else {
             return res.json({
                 success: false,
-                erro: 'Não foi possível gerar o boleto. Verifique suas configurações.'
+                erro: boletoComCodigo.error || 'Não foi possível gerar o boleto. Verifique suas configurações.'
             });
         }
 
@@ -1221,9 +1547,56 @@ app.post('/api/gerar-boleto', async (req, res) => {
     }
 });
 
-app.listen(porta,()=>{
-    console.log("funcionando\nhttp://localhost:8080/");    
+app.post('/api/salvar-conta-bancaria', async (req, res) => {
+    try {
+        const { email, senha, banco, agencia, conta, tipoConta } = req.body;
+        if (!email || !senha) {
+            return res.status(400).json({ success: false, error: 'Email e senha são obrigatórios.' });
+        }
+        if (!banco || !agencia || !conta || !tipoConta) {
+            return res.status(400).json({ success: false, error: 'Todos os campos da conta bancária são obrigatórios.' });
+        }
+
+        const updateResult = await profissional.updateOne(
+            { email: email, senha: senha },
+            {
+                $set: {
+                    banco: banco,
+                    agencia: agencia,
+                    conta: conta,
+                    tipoconta: tipoConta
+                }
+            }
+        ).exec();
+
+        if (updateResult.matchedCount === 0) {
+            return res.status(404).json({ success: false, error: 'Profissional não encontrado.' });
+        }
+
+        return res.json({ success: true, message: 'Dados bancários salvos com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao salvar conta bancária:', error);
+        return res.status(500).json({ success: false, error: 'Erro interno ao salvar conta bancária.' });
+    }
 });
+
+function startServer(port) {
+    const server = app.listen(port, () => {
+        console.log(`funcionando\nhttp://localhost:${port}/`);
+    });
+
+    server.on("error", (error) => {
+        if (error.code === "EADDRINUSE") {
+            console.warn(`Porta ${port} ocupada. Tentando ${port + 1}...`);
+            server.close(() => startServer(port + 1));
+        } else {
+            console.error("Erro ao iniciar servidor:", error);
+            process.exit(1);
+        }
+    });
+}
+
+startServer(process.env.PORT || porta);
 
 
 

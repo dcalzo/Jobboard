@@ -12,7 +12,8 @@ var task = new Schema({
     valor: String,
     gitLocal: String,
     urlDoc: String,
-    column: String
+    column: String,
+    codigo: String
 },{collection:"task"})
 
 var task = mongoose.model("Task",task);

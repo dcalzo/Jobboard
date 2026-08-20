@@ -53,7 +53,7 @@
                                     <div style="width: 220px; height: 400px; overflow-y: scroll;">
                                     <%for(let x = 0; x < taskList.length; x++ ){%>
                                         <%if(taskList[x].column=="post"){%>
-                                            <button type="button" style="background: rgb(54, 144, 248); top: <%=intWidth%>;" 
+                                            <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 10px; width: 100%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal"
                                                 onclick="jobTask(
                                                     '<%=taskList[x].titleService%>', 

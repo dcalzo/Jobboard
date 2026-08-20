@@ -46,32 +46,106 @@
                       <td style="width: 15%;">
                         <%if(demo2 == undefined || demo2 == "demo-boardprof"){%>    
                           <p>Board</p>
-                          <table style="width: 100%; margin-left: 0px;">
+                          <table class="boardtable">
+                            <thead class="boardhead">
                               <tr>
                               <td style="width: 5%; margin-left: 0px;">Services</td>
                               <td style="width: 5%; margin-left: 0px;">development</td>
                               <td style="width: 5%; margin-left: 0px;">Revision</td>
                               <td style="width: 5%; margin-left: 0px;">Concluded</td>
                             </tr>
+                            </thead>
+                            <tbody>
                             <tr>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>ler planilhas em Python</b><br />
+                                                         R$50,00<br /> 
+                                  </button>
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>contador de visitantes no site</b><br />
+                                                         R$25,00<br /> 
+                                  </button>
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>bot para atendimento ao cliente</b><br />
+                                                         R$100,00<br /> 
+                                  </button>
+                                </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>gerenciador de restaurante</b><br />
+                                                         R$1000,00<br /> 
+                                  </button>
+                                </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>gerenciador de audiência para Streaming</b><br />
+                                                         R$500,00<br /> 
+                                  </button>
+                                </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>api para bet</b><br />
+                                                         R$600,00<br /> 
+                                  </button>
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>bot para distribuir propaganda</b><br />
+                                                         R$800,00<br /> 
+                                  </button>
+                                </div>
                               </td>
                             </tr>
+                            </tbody>
                           </table>
                         <%} else if(demo2 == "demo-ganho"){%>
                           <p>Ganhos Financeiros</p>
+                          <table style="width: 100%;">
+                            <tr>
+                              <td style="width: 25%;"><b>trabalho</b></td>
+                              <td style="width: 25%;"><b>pagamento</b></td>
+                              <td style="width: 25%;"><b>etapa do desenvolvimento</b></td>
+                              <td style="width: 25%;"><b>estado do pagamento</b></td>
+                            </tr>
+                            <tr>
+                              <td style="width: 25%;">api para audiência de streaming</td>
+                              <td style="width: 25%;">
+                                <select style="width: 53%;">
+                                  <option value="" selected ></option>
+                                  <option value="Boleto" >Boleto</option>
+                                  <option value="PIX" >PIX</option>
+                                  <option value="Bitcoin" >Bitcoin</option>
+                                  <option value="bancodeposito" >Deposito bancario</option>
+                                </select>
+                              </td>
+                              <td style="width: 25%;">Revision</td>
+                              <td style="width: 25%;">Waiting payment</td>
+                            </tr>
+                          </table>
                         <%} else if(demo2 == "demo-fincad"){%>
-                          <p>Cadastro Financeiro</p>
+                          <p>Cadastro Financeiro</p><br />
+                          <label><b>tipo de pagamento:</b></label>
+                           <select style="width: 50%;">
+                              <option value="" selected ></option>
+                              <option value="Boleto" >Boleto</option>
+                              <option value="PIX" >PIX</option>
+                              <option value="Bitcoin" >Bitcoin</option>
+                              <option value="bancodeposito" >Deposito bancario</option>
+                           </select><br /><br />
+                           Aqui o profissional vai escolher o tipo de pagamento que deseja receber
                         <%} else if(demo2 == "demo-chatprof"){%>
                           <p>Chat com o Cliente</p>
                         <%}%>
@@ -95,27 +169,70 @@
                       <td style="width: 15%;">
                          <%if(demo2 == undefined || demo2 == "demo-boardcont"){%>  
                           <p>Board</p>
-                          <table style="width: 100%; margin-left: 0px;">
+                          <table class="boardtable">
+                            <thead class="boardhead">
                               <tr>
                               <td style="width: 5%; margin-left: 0px;">Services</td>
                               <td style="width: 5%; margin-left: 0px;">development</td>
                               <td style="width: 5%; margin-left: 0px;">Revision</td>
                               <td style="width: 5%; margin-left: 0px;">Concluded</td>
                             </tr>
+                            </thead>
+                            <tbody>
                             <tr>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
-                              </td style="width: 5%; margin-left: 0px;">
-                              <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>ler planilhas em Python</b><br />
+                                                         R$50,00<br /> 
+                                  </button>
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>contador de visitantes no site</b><br />
+                                                         R$25,00<br /> 
+                                  </button>
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>bot para atendimento ao cliente</b><br />
+                                                         R$100,00<br /> 
+                                  </button>
+                                </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>gerenciador de restaurante</b><br />
+                                                         R$1000,00<br /> 
+                                  </button>
+                                </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;"> </div>
+                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>gerenciador de audiência para Streaming</b><br />
+                                                         R$500,00<br /> 
+                                  </button>
+                                </div>
+                              </td>
+                              <td style="width: 5%; margin-left: 0px;">
+                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>api para bet</b><br />
+                                                         R$600,00<br /> 
+                                  </button>
+                                  <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
+                                                class="post" data-toggle="modal" data-target="#myModal">
+                                                        <b>bot para distribuir propaganda</b><br />
+                                                         R$800,00<br /> 
+                                  </button>
+                                </div>
                               </td>
                             </tr>
+                            </tbody>
                           </table>
                          <%} else if(demo2 == "demo-task"){%>
                           <p>Criar Serviço</p>
@@ -135,7 +252,7 @@
                 </div>
               </td>
             </tr>
-          </table>     
+          </table>              
         </form>
     </body>
 </html>

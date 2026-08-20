@@ -20,7 +20,6 @@ async function realizarTransacao() {
 
         // Se tudo correr bem, commitamos a transação
         await client.query('COMMIT');
-        console.log('Transação realizada com sucesso!');
     } catch (e) {
         // Se algo der errado, fazemos rollback da transação
         await client.query('ROLLBACK');
