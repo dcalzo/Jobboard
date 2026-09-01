@@ -993,32 +993,24 @@ app.get("/", (req,res)=>{
                     tipoPagamento: req.query.hiddenCodigoBarras
                 });       
             }else  if(req.query.menu == "ganho"){ ////////////////////////////////////////////////////////////////////////// 
-                const id = req.query.idTask || req.query.idtask || req.query.id || req.query.count;
-                const keyExact = 'hiddenCodigoBarras';
-                const keyWithDash = `hiddenCodigoBarras-${id}`;
-                const keyWithoutDash = `hiddenCodigoBarras${id}`;
-                const foundKey = Object.keys(req.query).find(k =>
-                        k === keyExact || k === keyWithDash || k === keyWithoutDash || k.startsWith('hiddenCodigoBarras')
-                );
-                const idtask = Object.keys(req.query).find(k => k.startsWith('idTask') );
-                if(req.query.alteraPagProfissional == "Salvar código"){                    
-                    try{                         
-                        task.collection.updateOne({
-                            idtask: req.query[idtask]
-                        }, {
-                            $set: {
-                                codigo: foundKey ? req.query[foundKey] : undefined
-                            }
-                        });
-                        console.log("task alterada");
-                    }catch(e){
-                        console.log("Erro: "+e.message);
-                    }
-                }
                 if(req.query.chavePix == "Enviar chave PIX"){
                     contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, dadosPag){
                         dadosPag.forEach(function(dado) { 
-                            if (dado.tipo === "PIX"){
+                            if (dado.tipo === "PIX"){                             
+                                task.find({developer: req.query.email}).exec(function(err, task){   
+                                    for(let i = 1; i < task.length; i++){                       
+                                        //const idtask = Object.keys(req.query).find(id => id.startsWith(`idTask-${i}`) );
+                                        //const barras = Object.keys(req.query).find(barra =>  barra.startsWith(`hiddenCodigoBarras-${i}`) );                            
+                                        const parametros = Object.keys(req.query).find(barra => 
+                                            barra.startsWith(`hiddenCodigoBarras-${i}`) != undefined ? console.log(req.query[`${barra}`]) : null);
+                                        //console.log(req.query)
+                                        //console.log(idtask)
+                                        //console.log(req.query[`${barra}`])
+                                        //console.log(req.query[`${idtask}`])
+                                        //console.log(barras)
+                                        /*console.log(req.query[`${barras}`]) */
+                                    }
+                                });        
                                 try{
                                     task.collection.updateOne({
                                         idtask: "4",

@@ -43,38 +43,20 @@
                           <input type="hidden" id="valor-<%=task.idtask%>" name="valor-<%=task.idtask%>" value="<%=task.valor%>" /> 
                         </td>
                         <td style="width: 25%; border: 1px solid #020202;">
-                          <%if(task.tipoPagamento == "Boleto"){%>
-                                <p>Boleto</p>
-                                <button type="button" onclick="gerarBoleto(this)" data-task-id="<%=task.idtask%>" data-task-title="<%=task.titleService%>" style="width: 50%; margin-left: 0px; padding: 5px 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Gerar Boleto</button>
-
-                                <input type="hidden" id="hiddenCodigoBarras-<%=task.idtask%>" name="hiddenCodigoBarras-<%=task.idtask%>" value="" />
-                                <input type="hidden" id="idTask-<%=task.idtask%>" name="idTask-<%=task.idtask%>" value="<%=task.idtask%>" />
-
-                                <div id="resultadoBoleto-<%=task.idtask%>" style="width:100%; margin-left: 0px; border-radius: 4px; display: none;">
-                                  <p>Valor do Boleto: R$ <span id="valorBoleto-<%=task.idtask%>"></span></p>
-                                  <p>Código de Barras:</p>
-                                  <div id="codigoBarras-<%=task.idtask%>" style="width:90%;"></div>
-                                  <a id="linkBoleto-<%=task.idtask%>" href="#" target="_blank" style="display:none; margin-top:6px;">Abrir Boleto</a>
-                                  <input value="Salvar código" id="alteraPagProfissional" name="alteraPagProfissional" type="submit" style="width: 50%; padding: 5px 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;" />
-                                </div>
-                                <div id="carregandoBoleto-<%=task.idtask%>" style="display: none; margin-top: 10px;">
-                                  <p>Gerando boleto...</p>
-                                </div>
-                                <div id="erroBoleto-<%=task.idtask%>" style="display: none; margin-top: 10px; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;"></div>
-                              <%}else if(task.tipoPagamento == "PIX"){%>
-                                <p>PIX</p>
-                                <div style="margin-top:6px;">
-                                   <input type="submit" id="chavePix" name="chavePix" style="width:85%; padding:5px 10px; margin-left:6px; background-color:#2196F3; color:#fff; border:none; border-radius:4px; cursor:pointer;"  value="Enviar chave PIX" />
-                                </div>
-                              <%}else if(task.tipoPagamento == "Bitcoin"){%>
-                                <p>Bitcoin</p>
-                                <div style="margin-top:6px;">
-                                  <input type="submit" id="carteiraBitcoin" name="carteiraBitcoin" style="width:85%; padding:5px 10px; margin-left:6px; background-color:#f7931a; color:#fff; border:none; border-radius:4px; cursor:pointer;"  value="Enviar carteira Bitcoin" />
-                                </div>
-                              <%}else if(task.tipoPagamento == "bancodeposito"){%>
-                                <p>Depósito Bancário</p>
-                                <input type="submit" id="contaTED" name="contaTED" style="width:85%; padding:8px 12px; background-color:#4CAF50; color:#fff; border-radius:4px; cursor:pointer;"  value="Enviar dados do TED" />                                
-                              <%}%>
+                          <%if(task.tipoPagamento == "PIX"){%>
+                            <p>PIX</p>
+                            <div style="margin-top:6px;">
+                              <input type="submit" id="chavePix" name="chavePix" style="width:85%; padding:5px 10px; margin-left:6px; background-color:#2196F3; color:#fff; border:none; border-radius:4px; cursor:pointer;"  value="Enviar chave PIX" />
+                            </div>
+                          <%}else if(task.tipoPagamento == "Bitcoin"){%>
+                              <p>Bitcoin</p>
+                              <div style="margin-top:6px;">
+                                <input type="submit" id="carteiraBitcoin" name="carteiraBitcoin" style="width:85%; padding:5px 10px; margin-left:6px; background-color:#f7931a; color:#fff; border:none; border-radius:4px; cursor:pointer;"  value="Enviar carteira Bitcoin" />
+                              </div>
+                          <%}else if(task.tipoPagamento == "bancodeposito"){%>
+                            <p>Depósito Bancário</p>
+                            <input type="submit" id="contaTED" name="contaTED" style="width:85%; padding:8px 12px; background-color:#4CAF50; color:#fff; border-radius:4px; cursor:pointer;"  value="Enviar dados do TED" />                                
+                          <%}%>
                         </td>
                         <td style="width: 25%; border: 1px solid #020202;">
                           <%=task.column%>
@@ -82,9 +64,7 @@
                         <td style="width: 25%; border: 1px solid #020202; margin-left: 0px;">
                           <%
                             const pagamentoConfirmado = task.column === "postEnd" && (
-                              task.tipoPagamento === "Boleto"
-                                ? typeof task.codigo !== 'undefined' && task.codigo && task.codigo.trim() !== ''
-                                : task.tipoPagamento === "PIX"
+                              task.tipoPagamento === "PIX"
                                   ? typeof pagamentoRecebido !== 'undefined' && pagamentoRecebido
                                   : task.tipoPagamento === "bancodeposito"
                                     ? typeof pagamentoRecebidoTED !== 'undefined' && pagamentoRecebidoTED
@@ -110,116 +90,4 @@
               <input type="hidden" id="menu" name="menu" value="ganho" />      
         </form>        
     </body>
-    <script>
-      function gerarBoleto(button) {
-        const email = document.getElementById('email').value;
-        const senha = document.getElementById('senha').value;
-        const taskId = button.dataset.taskId;
-        const idtask = document.getElementById('idtask-' + taskId) ? document.getElementById('idtask-' + taskId).value : taskId;
-        // leitura e normalização do valor (suporta '10', '10,00', 'R$ 10')
-        let rawValor = document.getElementById('valor-' + taskId).value || '';
-        rawValor = rawValor.toString().replace(/[^0-9,\.]/g, '');
-        // converte vírgula para ponto e transforma em número
-        const parsed = parseFloat(rawValor.replace(',', '.')) || 0;
-        const valor = parsed; // em reais (ex: 10.00)
-        const amountCents = Math.round(valor * 100); // em centavos (ex: 1000)
-        const taskTitle = button.dataset.taskTitle;
-        const carregandoDiv = document.getElementById('carregandoBoleto-' + taskId);
-        const resultadoDiv = document.getElementById('resultadoBoleto-' + taskId);
-        const erroDiv = document.getElementById('erroBoleto-' + taskId);
-
-        // Resetar estados anteriores
-        if (carregandoDiv) carregandoDiv.style.display = 'block';
-        if (resultadoDiv) resultadoDiv.style.display = 'none';
-        if (erroDiv) { erroDiv.style.display = 'none'; erroDiv.innerHTML = ''; }
-
-        // Fazer chamada AJAX para gerar boleto
-        fetch('/api/gerar-boleto', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-            body: JSON.stringify({
-            email: email,
-            senha: senha,
-            taskId: taskId,
-            taskTitleService: taskTitle,
-            amount: valor,
-            amountCents: amountCents
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (carregandoDiv) carregandoDiv.style.display = 'none';
-          
-          if (data.success) {
-            const codigoBarrasText = data.codigoBarras || 'Não disponível';
-            const codigoElem = document.getElementById('codigoBarras-' + taskId);
-            if (codigoElem) codigoElem.textContent = codigoBarrasText;
-            const hiddenInput = document.getElementById('hiddenCodigoBarras-' + taskId);
-            if (hiddenInput) hiddenInput.value = codigoBarrasText;
-            const valorElem = document.getElementById('valorBoleto-' + taskId);
-            if (valorElem) valorElem.textContent = Number(valor).toFixed(2);
-            const boletoLink = data.linkBoleto || data.linkPagSeguro || '';
-            const linkElement = document.getElementById('linkBoleto-' + taskId);
-            if (linkElement) {
-              if (boletoLink) {
-                linkElement.href = boletoLink;
-                linkElement.style.display = 'inline-block';
-              } else {
-                linkElement.style.display = 'none';
-              }
-            }
-            if (resultadoDiv) resultadoDiv.style.display = 'block';
-          } else {
-            if (erroDiv) { erroDiv.innerHTML = data.erro || 'Erro ao gerar boleto. Tente novamente.'; erroDiv.style.display = 'block'; }
-          }
-        })
-        .catch(error => {
-          console.error('Erro:', error);
-          if (carregandoDiv) carregandoDiv.style.display = 'none';
-          if (erroDiv) { erroDiv.innerHTML = 'Erro na requisição: ' + error.message; erroDiv.style.display = 'block'; }
-        });
-      }
-
-      let codigoBarras = "";
-
-      function copiarCodigoBarras(taskId) {
-        codigoBarras = document.getElementById('codigoBarras-' + taskId).textContent || '';
-        try {
-          const hidden = document.getElementById('hiddenCodigoBarras-' + taskId);
-          if (hidden) hidden.value = codigoBarras;
-        } catch (e) {
-          console.warn('Não foi possível setar hidden:', e);
-        }
-        return navigator.clipboard.writeText(codigoBarras).then(() => {
-          alert('Código de barras copiado para a área de transferência!');
-          return codigoBarras;
-        }).catch(err => {
-          console.error('Erro ao copiar:', err);
-          alert('Erro ao copiar o código de barras.');
-          return '';
-        });
-      }
-
-      function salvarCodigo(taskId) {
-        salvarCodigoOnload(taskId);
-      }
-
-      function salvarCodigoOnload(taskId) {
-        const hidden = document.getElementById('hiddenCodigoBarras-' + taskId);
-        const codigo = hidden ? hidden.value : (document.getElementById('codigoBarras-' + taskId) ? document.getElementById('codigoBarras-' + taskId).textContent : '');
-        if (!codigo) {
-          alert('Nenhum código de barras disponível para salvar.');
-          return;
-        }
-        
-        const email = document.getElementById('email') ? encodeURIComponent(document.getElementById('email').value) : '';
-        const senha = document.getElementById('senha') ? encodeURIComponent(document.getElementById('senha').value) : '';
-        const url = '/' + '?menu=ganho&alteraPagProfissional=' + encodeURIComponent(codigo) + '&email=' + email + '&senha=' + senha;
-
-        // Navega para a URL para que os parâmetros fiquem visíveis na barra de endereço e o servidor receba a requisição GET
-        window.location.href = url;
-      }     
-    </script>
 </html>
