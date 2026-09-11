@@ -39,23 +39,18 @@
                           <%=task.idtask%> - <%=task.titleService%>                      
                         </td>
                         <td style="width: 25%; border: 1px solid #020202;">
-                          R$ <%=task.valor%>
-                          <input type="hidden" id="valor-<%=task.idtask%>" name="valor-<%=task.idtask%>" value="<%=task.valor%>" /> 
+                          R$ <%=task.valor%>                          
                         </td>
                         <td style="width: 25%; border: 1px solid #020202;">
                           <%if(task.tipoPagamento == "PIX"){%>
                             <p>PIX</p>
-                            <div style="margin-top:6px;">
-                              <input type="submit" id="chavePix" name="chavePix" style="width:85%; padding:5px 10px; margin-left:6px; background-color:#2196F3; color:#fff; border:none; border-radius:4px; cursor:pointer;"  value="Enviar chave PIX" />
-                            </div>
+                            <a href="?menu=ganho&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&valor=<%=task.valor%>&titleService=<%=task.titleService%>&idtask=<%=task.idtask%>&chavePix=PIX">Enviar chave PIX</a> 
                           <%}else if(task.tipoPagamento == "Bitcoin"){%>
                               <p>Bitcoin</p>
-                              <div style="margin-top:6px;">
-                                <input type="submit" id="carteiraBitcoin" name="carteiraBitcoin" style="width:85%; padding:5px 10px; margin-left:6px; background-color:#f7931a; color:#fff; border:none; border-radius:4px; cursor:pointer;"  value="Enviar carteira Bitcoin" />
-                              </div>
+                              <a href="?menu=ganho&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&valor=<%=task.valor%>&titleService=<%=task.titleService%>&idtask=<%=task.idtask%>&carteiraBitcoin=bitcoin">Enviar carteira Bitcoin</a>
                           <%}else if(task.tipoPagamento == "bancodeposito"){%>
                             <p>Depósito Bancário</p>
-                            <input type="submit" id="contaTED" name="contaTED" style="width:85%; padding:8px 12px; background-color:#4CAF50; color:#fff; border-radius:4px; cursor:pointer;"  value="Enviar dados do TED" />                                
+                            <a href="?menu=ganho&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&valor=<%=task.valor%>&titleService=<%=task.titleService%>&idtask=<%=task.idtask%>&contaTED=TED">Enviar dados do TED</a>                            
                           <%}%>
                         </td>
                         <td style="width: 25%; border: 1px solid #020202;">

@@ -592,204 +592,39 @@ app.get("/", (req,res)=>{
                         senha:req.query.senha,
                         msg: msg});
                 });
-                });                
+                });
             }
             else if(req.query.menu == "fincadCont" || req.query.tipoPagamento != null){
                 // -------------------------------------------------------------------------------------------------------------------- 
                 if(req.query.tipoPagamento == "PIX"){
                     console.log("PIX");
-                    /*const pix = require('faz-um-pix');
-                    const code = pix({
-                        chave: "sua_chave_pix@exemplo.com",
-                        valor: 100.00,
-                        nome: "Nome do beneficiado",
-                        cidade: "SÃO PAULO",
-                        descricao: "Pedido #123456",
-                        codigo_transacao: "SUA_ID_TRANSACAO"
-                    });
-                    const payload = code;
-                    console.log(payload);*/
                 }else if(req.query.tipoPagamento == "Bitcoin"){ 
-                        console.log("bitcoin");     
-                        const BitPay = require('bitpay-sdk');
-                        // Configurar cliente BitPay
-                        const client = new BitPay.Client({
-                        token: 'SEU_TOKEN_DA_BITPAY',
-                        environment: 'test' // Use 'prod' em produção
-                        });
-
-                        // Endpoint para criar uma fatura
-                        app.post('/api/create-invoice', async (req, res) => {
-                        const { jobId, amount, freelancerWallet } = req.body;
-
-                        try {
-                            // Calcular taxa da plataforma (ex.: 5%)
-                            const platformFee = amount * 0.05;
-                            const totalAmount = amount + platformFee;
-
-                            // Criar fatura na BitPay
-                            const invoice = await client.createInvoice({
-                            price: totalAmount,
-                            currency: 'BTC',
-                            buyer: { address1: freelancerWallet },
-                            orderId: jobId,
-                            notificationURL: 'SUA_URL_DE_WEBHOOK'
-                            });
-
-                            // Salvar detalhes no banco de dados
-                            // Exemplo: await db.saveInvoice({ jobId, invoiceId: invoice.id, status: 'pending' });
-
-                            res.json({ invoiceUrl: invoice.url, invoiceId: invoice.id });
-                        } catch (error) {
-                            console.error('Erro ao criar fatura:', error);
-                            res.status(500).json({ error: 'Falha ao criar fatura' });
-                        }
-                    });             
+                        console.log("bitcoin");               
                 }else if(req.query.tipoPagamento == "bancodeposito"){
                     console.log("deposito");                        
                 }  
-                if(req.query.idtask == null){                                 
-                    task.find({email:req.query.email}).sort({"_id":1}).exec(function(err, task){
-                        contratante.find({email:req.query.email}).sort({"_id":1}).exec(function(err, contratante){                    
-                            profissional.find({}).sort({"_id":1}).exec(function(err, profissional){
-                                var taskSelecionada = null;
-                                var profissionalSelecionado = null;
-
-                                if (task && task.length > 0) {
-                                    taskSelecionada = task.find(function(item) {
-                                        return item.titleService === req.query.taskservice;
-                                    }) || task[0];
-                                }
-
-                                if (profissional && profissional.length > 0) {
-                                    profissionalSelecionado = profissional.find(function(item) {
-                                        return item.nome === req.query.profissionalSel;
-                                    }) || profissional[0];
-                                }
-
-                                var boleto = buildBoletoFromDb(taskSelecionada, profissionalSelecionado);
-                                var paymentValues = {
-                                    professionalAmount: boleto.professionalAmount,
-                                    platformFee: boleto.platformFee,
-                                    totalAmount: boleto.amount
-                                };
-                                var shouldGeneratePagBankBoleto = req.query.tipoPagamento == "Boleto";
-
-                                var boletoPromise = shouldGeneratePagBankBoleto
-                                    ? buildBoletoWithPagBankBarcode(boleto, profissionalSelecionado)
-                                    : Promise.resolve(boleto);
-
-                                boletoPromise.then(function(boletoComCodigoPagBank) {
-                                    if(req.query.tipoPagamento == ""){
-                                        res.render("company/pagamento/index",{
-                                            profissional: profissional,
-                                            contratante: contratante,
-                                            idtask:"",
-                                            task: task,
-                                            estadoPg: "",
-                                            profissionalSel: req.query.profissionalSel,
-                                            dadosPagamento: boletoComCodigoPagBank,
-                                            paymentValues: paymentValues,
-                                            taskservice: req.query.taskservice,
-                                            typeuser: req.query.typeuser,
-                                            nome: req.query.nome,
-                                            email:req.query.email,
-                                            senha:req.query.senha,
-                                            tipoPagamento: ""});
-                                    }
-                                    else if(req.query.tipoPagamento != ""){
-                                            res.render("company/pagamento/index",{
-                                                profissional: profissional,
-                                                contratante: contratante,
-                                                idtask: "",
-                                                task: task,
-                                                estadoPg: "",
-                                                profissionalSel: req.query.profissionalSel,
-                                                dadosPagamento: boletoComCodigoPagBank,
-                                                paymentValues: paymentValues,
-                                                taskservice: req.query.taskservice,
-                                                typeuser: req.query.typeuser,
-                                                nome: req.query.nome,
-                                                email:req.query.email,
-                                                senha:req.query.senha,
-                                                tipoPagamento: req.query.tipoPagamento});
-                                    }
-                                }).catch(function() {
-                                    res.render("company/pagamento/index",{
-                                        profissional: profissional,
-                                        contratante: contratante,
-                                        idtask: "",
-                                        task: task,
-                                        estadoPg: "",
-                                        profissionalSel: req.query.profissionalSel,
-                                        dadosPagamento: boleto,
-                                        paymentValues: paymentValues,
-                                        taskservice: req.query.taskservice,
-                                        typeuser: req.query.typeuser,
-                                        nome: req.query.nome,
-                                        email:req.query.email,
-                                        senha:req.query.senha,
-                                        tipoPagamento: req.query.tipoPagamento || ""});
-                                });
-                            });
-                        });
-                    }); 
-                }else{
-                    task.find({developer:req.query.emailDev}).sort({"_id":1}).exec(function(err, task){
-                        contratante.find({email:req.query.email}).sort({"_id":1}).exec(function(err, contratante){                    
-                            profissional.find({email:req.query.emailDev}).sort({"_id":1}).exec(function(err, profissional){
-                                var taskSelecionada = task && task.length > 0 ? task[0] : null;
-                                var profissionalSelecionado = profissional && profissional.length > 0 ? profissional[0] : null;
-                                var boleto = buildBoletoFromDb(taskSelecionada, profissionalSelecionado);
-                                var paymentValues = {
-                                    professionalAmount: boleto.professionalAmount,
-                                    platformFee: boleto.platformFee,
-                                    totalAmount: boleto.amount
-                                };
-                                var shouldGeneratePagBankBoleto = req.query.tipoPagamento == "Boleto";
-                                var boletoPromise = shouldGeneratePagBankBoleto
-                                    ? buildBoletoWithPagBankBarcode(boleto, profissionalSelecionado)
-                                    : Promise.resolve(boleto);
-
-                                boletoPromise.then(function(boletoComCodigoPagBank) {
-                                    res.render("company/pagamento/index",{
-                                        profissional: profissional,
-                                        contratante: contratante,
-                                        idtask: req.query.idtask,
-                                        dadosPagamento: boletoComCodigoPagBank,
-                                        paymentValues: paymentValues,
-                                        task: task,
-                                        profissionalSel: req.query.profissionalSel,
-                                        taskservice: req.query.taskservice,
-                                        estadoPg: req.query.estadoPg,
-                                        typeuser: req.query.typeuser,
-                                        nome: req.query.nome,
-                                        email:req.query.email,
-                                        senha:req.query.senha,
-                                        tipoPagamento: req.query.tipoPagamento});
-                                }).catch(function() {
-                                    res.render("company/pagamento/index",{
-                                        profissional: profissional,
-                                        contratante: contratante,
-                                        idtask: req.query.idtask,
-                                        dadosPagamento: boleto,
-                                        paymentValues: paymentValues,
-                                        task: task,
-                                        profissionalSel: req.query.profissionalSel,
-                                        taskservice: req.query.taskservice,
-                                        estadoPg: req.query.estadoPg,
-                                        typeuser: req.query.typeuser,
-                                        nome: req.query.nome,
-                                        email:req.query.email,
-                                        senha:req.query.senha,
-                                        tipoPagamento: req.query.tipoPagamento});
-                                });
-                            });
-                        });
-                    }); 
-                }            
-            } 
-            else if(req.query.menu == "historico"){
+                task.find({company: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
+                    const profissionalemail = req.query.profissionalSel == undefined ? undefined : req.query.profissionalSel;
+                    profissional.find({}).sort({"_id":1}).exec(function(err, profissional){
+                        res.render("company/pagamento/index",{
+                            profissional: profissional,
+                            idtask: req.query.idtask,
+                            dadosPagamento: "",
+                            task: task,
+                            profissionalSel: req.query.profissionalSel,
+                            taskservice: req.query.taskservice,
+                            estadoPg: req.query.estadoPg,
+                            typeuser: req.query.typeuser,
+                            nome: req.query.nome,
+                            email:req.query.email,
+                            senha:req.query.senha,
+                            tipoPagamento: req.query.tipoPagamento
+                        }); 
+                });
+                
+            });
+        } 
+        else if(req.query.menu == "historico"){
                 if(req.query.taskServ == "altera"){
                     try{
                         task.collection.updateOne({
@@ -993,81 +828,52 @@ app.get("/", (req,res)=>{
                     tipoPagamento: req.query.hiddenCodigoBarras
                 });       
             }else  if(req.query.menu == "ganho"){ ////////////////////////////////////////////////////////////////////////// 
-                if(req.query.chavePix == "Enviar chave PIX"){
-                    contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, dadosPag){
-                        dadosPag.forEach(function(dado) { 
-                            if (dado.tipo === "PIX"){                             
-                                task.find({developer: req.query.email}).exec(function(err, task){   
-                                    for(let i = 1; i < task.length; i++){                       
-                                        //const idtask = Object.keys(req.query).find(id => id.startsWith(`idTask-${i}`) );
-                                        //const barras = Object.keys(req.query).find(barra =>  barra.startsWith(`hiddenCodigoBarras-${i}`) );                            
-                                        const parametros = Object.keys(req.query).find(barra => 
-                                            barra.startsWith(`hiddenCodigoBarras-${i}`) != undefined ? console.log(req.query[`${barra}`]) : null);
-                                        //console.log(req.query)
-                                        //console.log(idtask)
-                                        //console.log(req.query[`${barra}`])
-                                        //console.log(req.query[`${idtask}`])
-                                        //console.log(barras)
-                                        /*console.log(req.query[`${barras}`]) */
-                                    }
-                                });        
-                                try{
-                                    task.collection.updateOne({
-                                        idtask: "4",
-                                        tipoPagamento: "PIX"
-                                    }, {
-                                    $set: {
-                                        codigo: dado.chave
-                                    }
-                                });
-                                 console.log("Chave PIX alterada");
-                                }catch(e){
-                                     console.log("Erro: "+e.message);
+                if(req.query.chavePix == "PIX"){
+                    contasPagamentos.find({tipo: "PIX"}).sort({"_id":1}).exec(function(err, dadosPag){
+                        try{
+                            task.collection.updateOne({
+                                idtask: req.query.idtask,
+                            }, {
+                                $set: {
+                                    codigo: dadosPag[0].chave
                                 }
-                            }
-                        })
+                            });
+                            console.log("Chave PIX alterada");
+                        }catch(e){
+                            console.log("Erro: "+e.message);
+                        }
                     }); 
                 }
-                 if(req.query.carteiraBitcoin == "Enviar carteira Bitcoin"){
-                    contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, dadosPag){
-                        dadosPag.forEach(function(dado) { 
-                            if (dado.tipo === "Bitcoin"){
-                                try{
-                                    task.collection.updateOne({
-                                        idtask: "2",
-                                        tipoPagamento: "Bitcoin"
-                                    }, {
-                                    $set: {
-                                        codigo: dado.enderecoBTC
-                                    }
-                                });
-                                 console.log("Carteira Bitcoin alterada");
-                                }catch(e){
-                                     console.log("Erro: "+e.message);
+                if(req.query.carteiraBitcoin == "bitcoin"){
+                    contasPagamentos.find({tipo: "Bitcoin"}).sort({"_id":1}).exec(function(err, dadosPag){
+                        try{
+                            task.collection.updateOne({
+                                idtask: req.query.idtask,
+                            }, {
+                                $set: {
+                                    codigo: dadosPag[0].enderecoBTC
                                 }
-                            }
-                        })
+                            });
+                            console.log("Carteira Bitcoin alterada");
+                        }catch(e){
+                            console.log("Erro: "+e.message);
+                        }
                     }); 
                 }
-                if(req.query.contaTED == "Enviar dados do TED"){
-                    contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, dadosPag){
-                        dadosPag.forEach(function(dado) { 
-                            if (dado.tipo === "bancodeposito"){
-                                try{
-                                    task.collection.updateOne({
-                                        idtask: "8",
-                                        tipoPagamento: "bancodeposito"
-                                    }, {
-                                    $set: {
-                                        codigo: "{Banco:'" + dado.banco + "',agencia:'" + dado.agencia + "',conta:'" + dado.numeroConta + "',tipo:'" + dado.tipoConta + "'}"
-                                    }
-                                });
-                                 console.log("Carteira TED alterada");
-                                }catch(e){
-                                     console.log("Erro: "+e.message);
+                if(req.query.contaTED == "TED"){
+                    contasPagamentos.find({tipo: "bancodeposito"}).sort({"_id":1}).exec(function(err, dadosPag){
+                        try{
+                            task.collection.updateOne({
+                                idtask: req.query.idtask,
+                            }, {
+                                $set: {
+                                    codigo: "{Banco:'" + dadosPag[0].banco + "',agencia:'" + dadosPag[0].agencia + "',conta:'" + dadosPag[0].numeroConta + "',tipo:'" + dadosPag[0].tipoConta + "'}"
                                 }
-                            }
-                        })
+                            });
+                            console.log("Carteira TED alterada");
+                        }catch(e){
+                            console.log("Erro: "+e.message);
+                        }
                     }); 
                 }
                 contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, dadosPag){
