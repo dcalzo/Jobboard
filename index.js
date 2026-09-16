@@ -37,445 +37,6 @@ app.set("views", path.join(__dirname,"/views"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-function formatDateBr(date) {
-    const dia = String(date.getDate()).padStart(2, "0");
-    const mes = String(date.getMonth() + 1).padStart(2, "0");
-    const ano = date.getFullYear();
-    return dia + "/" + mes + "/" + ano;
-}
-
-function addBusinessDays(baseDate, daysToAdd) {
-    const result = new Date(baseDate);
-    let addedDays = 0;
-
-    while (addedDays < daysToAdd) {
-        result.setDate(result.getDate() + 1);
-        const dayOfWeek = result.getDay();
-        const isBusinessDay = dayOfWeek !== 0 && dayOfWeek !== 6;
-
-        if (isBusinessDay) {
-            addedDays += 1;
-        }
-    }
-
-    return result;
-}
-
-function getThirdNextBusinessDay() {
-    const thirdBusinessDay = addBusinessDays(new Date(), 3);
-    return formatDateBr(thirdBusinessDay);
-}
-
-function normalizeTaxId(value) {
-    if (!value) {
-        return "";
-    }
-
-    return String(value).replace(/\D/g, "");
-}
-
-function calculatePaymentAmounts(amountValue) {
-    const amount = Number.isFinite(Number(amountValue)) ? Number(amountValue) : 0;
-    const professionalAmount = Number(amount.toFixed(2));
-    const platformFee = Number((professionalAmount * 0.05).toFixed(2));
-
-    return {
-        professionalAmount: professionalAmount,
-        platformFee: platformFee,
-        totalAmount: Number((professionalAmount + platformFee).toFixed(2))
-    };
-}
-
-function maskToken(token) {
-    if (!token) {
-        return "";
-    }
-
-    const tokenString = String(token);
-    if (tokenString.length <= 10) {
-        return "***";
-    }
-
-    return tokenString.slice(0, 6) + "..." + tokenString.slice(-4);
-}
-
-function shouldLogPagBankDebug() {
-    return String(env.PAGBANK_DEBUG || "").toLowerCase() === "true";
-}
-
-function sanitizePagBankPayloadForLogs(payload) {
-    if (!payload || typeof payload !== "object") {
-        return payload;
-    }
-
-    const clonedPayload = JSON.parse(JSON.stringify(payload));
-    if (clonedPayload.payment_method && clonedPayload.payment_method.holder && clonedPayload.payment_method.holder.email) {
-        clonedPayload.payment_method.holder.email = "***";
-    }
-
-    return clonedPayload;
-}
-
-function brDateToIsoDate(brDate) {
-    if (!brDate || typeof brDate !== "string") {
-        return null;
-    }
-
-    const parts = brDate.split("/");
-    if (parts.length !== 3) {
-        return null;
-    }
-
-    return parts[2] + "-" + parts[1] + "-" + parts[0];
-}
-
-function stringifyPagBankValue(value) {
-    if (value === null || value === undefined) {
-        return "";
-    }
-    if (typeof value === "string") {
-        return value;
-    }
-    if (typeof value === "number" || typeof value === "boolean") {
-        return String(value);
-    }
-    if (typeof value === "object") {
-        if (value.content) {
-            return stringifyPagBankValue(value.content);
-        }
-        if (value.line_code) {
-            return stringifyPagBankValue(value.line_code);
-        }
-        if (value.barcode) {
-            return stringifyPagBankValue(value.barcode);
-        }
-        if (value.url) {
-            return stringifyPagBankValue(value.url);
-        }
-        return JSON.stringify(value);
-    }
-    return String(value);
-}
-
-function getPagBankBarcode(responseData) {
-    if (!responseData || typeof responseData !== "object") {
-        return "";
-    }
-
-    if (responseData.payment_method && responseData.payment_method.barcode) {
-        return stringifyPagBankValue(responseData.payment_method.barcode);
-    }
-
-    if (responseData.payment_method && responseData.payment_method.boleto && responseData.payment_method.boleto.barcode) {
-        return stringifyPagBankValue(responseData.payment_method.boleto.barcode);
-    }
-
-    if (responseData.barcode) {
-        return stringifyPagBankValue(responseData.barcode);
-    }
-
-    if (responseData.point_of_interaction && responseData.point_of_interaction.transaction_data) {
-        const transactionData = responseData.point_of_interaction.transaction_data;
-        if (transactionData.line_code) {
-            return stringifyPagBankValue(transactionData.line_code);
-        }
-        if (transactionData.barcode) {
-            return stringifyPagBankValue(transactionData.barcode);
-        }
-    }
-
-    if (Array.isArray(responseData.charges) && responseData.charges.length > 0) {
-        const firstCharge = responseData.charges[0];
-        if (firstCharge && firstCharge.payment_method && firstCharge.payment_method.barcode) {
-            return stringifyPagBankValue(firstCharge.payment_method.barcode);
-        }
-    }
-
-    return "";
-}
-
-function getMercadoPagoBoletoLink(responseData) {
-    if (!responseData || typeof responseData !== "object") {
-        return "";
-    }
-
-    if (responseData.point_of_interaction && responseData.point_of_interaction.transaction_data) {
-        const transactionData = responseData.point_of_interaction.transaction_data;
-        if (transactionData.ticket_url) {
-            return String(transactionData.ticket_url);
-        }
-        if (transactionData.transaction_url) {
-            return String(transactionData.transaction_url);
-        }
-        if (transactionData.url) {
-            return String(transactionData.url);
-        }
-    }
-
-    if (responseData.transaction_details && responseData.transaction_details.external_resource_url) {
-        return String(responseData.transaction_details.external_resource_url);
-    }
-
-    if (responseData.ticket_url) {
-        return String(responseData.ticket_url);
-    }
-
-    return "";
-}
-
-function validatePagBankChargePayload(payload) {
-    const errors = [];
-
-    if (!payload || typeof payload !== "object") {
-        errors.push("payload ausente");
-        return errors;
-    }
-
-    if (!payload.reference_id || String(payload.reference_id).trim() === "") {
-        errors.push("reference_id obrigatorio");
-    }
-
-    if (!payload.description || String(payload.description).trim() === "") {
-        errors.push("description obrigatoria");
-    }
-
-    const amountValue = payload.amount && payload.amount.value;
-    if (!Number.isInteger(amountValue) || amountValue <= 0) {
-        errors.push("amount.value deve ser inteiro positivo em centavos");
-    }
-
-    if (!payload.amount || payload.amount.currency !== "BRL") {
-        errors.push("amount.currency deve ser BRL");
-    }
-
-    const dueDate = payload.payment_method && payload.payment_method.boleto && payload.payment_method.boleto.due_date;
-    if (!dueDate || !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
-        errors.push("payment_method.boleto.due_date invalido (esperado YYYY-MM-DD)");
-    }
-
-    const holder = payload.payment_method && payload.payment_method.holder;
-    if (!holder || !holder.name || String(holder.name).trim() === "") {
-        errors.push("payment_method.holder.name obrigatorio");
-    }
-
-    if (!holder || !holder.tax_id || !/^\d{11}$|^\d{14}$/.test(String(holder.tax_id))) {
-        errors.push("payment_method.holder.tax_id obrigatorio (11 ou 14 digitos)");
-    }
-
-    return errors;
-}
-
-async function buildBoletoWithPagBankBarcode(boletoData, profissionalDoc) {
-    const token = env.TOKEN_MERCADO_PAGO;
-    const apiUrl = String(env.MERCADO_PAGO_API_URL || "").replace(/\/+$/, "");
-
-    if (!token || !apiUrl) {
-        console.log("Mercado Pago: TOKEN_MERCADO_PAGO ou MERCADO_PAGO_API_URL nao configurado");
-        return {
-            ...boletoData,
-            error: "TOKEN_MERCADO_PAGO ou MERCADO_PAGO_API_URL nao configurado"
-        };
-    }
-
-    const client = new mercadopago.MercadoPagoConfig({ accessToken: token });
-    const paymentClient = new mercadopago.Payment(client);
-
-    const dueDate = brDateToIsoDate(boletoData.validity);
-    const rawAmount = Number(
-        boletoData.amount
-        ?? boletoData.valor
-        ?? boletoData.transaction_amount
-        ?? boletoData.value
-        ?? boletoData.total
-        ?? boletoData.preco
-        ?? 0
-    );
-    const amountFromPayload = Number(
-        (boletoData && boletoData.payload && boletoData.payload.amount && boletoData.payload.amount.value) || 0
-    );
-    const fallbackAmount = Number.isFinite(rawAmount) && rawAmount > 0 ? rawAmount : (Number.isFinite(amountFromPayload) && amountFromPayload > 0 ? amountFromPayload / 100 : 100);
-    const amountInReais = Number.isFinite(fallbackAmount) && fallbackAmount > 0 ? fallbackAmount : 100;
-
-    if (!dueDate || !Number.isFinite(amountInReais) || amountInReais <= 0) {
-        return {
-            ...boletoData,
-            error: "Valor ou data de vencimento inválidos"
-        };
-    }
-
-    const taxIdRaw = profissionalDoc && profissionalDoc.cpf_cnpj ? String(profissionalDoc.cpf_cnpj) : "";
-    const taxId = normalizeTaxId(taxIdRaw);
-    const fallbackEmail = env.EMAIL_PAGBANK || "";
-    const payerEmail = (boletoData.payer && boletoData.payer.email) || fallbackEmail || "test@test.com";
-    const payerNameRaw = String(boletoData.payer && boletoData.payer.name ? boletoData.payer.name : "Profissional").trim() || "Profissional";
-    const payerNameParts = payerNameRaw.split(/\s+/).filter(Boolean);
-    const payerFirstName = payerNameParts[0] || "Profissional";
-    const payerLastName = payerNameParts.slice(1).join(" ") || "Cliente";
-
-    const payload = {
-        transaction_amount: Number(amountInReais.toFixed(2)),
-        description: String(boletoData.description || "Pagamento de servico").slice(0, 140),
-        payment_method_id: "bolbradesco",
-        payer: {
-            email: payerEmail,
-            first_name: payerFirstName,
-            last_name: payerLastName
-        }
-    };
-
-    if (taxId) {
-        payload.payer.identification = {
-            type: taxId.length === 14 ? "CNPJ" : "CPF",
-            number: taxId
-        };
-    } else {
-        payload.payer.identification = {
-            type: "CPF",
-            number: "12345678909"
-        };
-    }
-
-    payload.payer.address = {
-        zip_code: "01310930",
-        street_name: "Av. Paulista",
-        street_number: "1000",
-        neighborhood: "Bela Vista",
-        city: "São Paulo",
-        federal_unit: "SP"
-    };
-
-    console.log("Mercado Pago request url:", apiUrl);
-    console.log("Mercado Pago request payload:", sanitizePagBankPayloadForLogs(payload));
-
-    try {
-        const response = await paymentClient.create({ body: payload });
-        const responseData = response && response.body ? response.body : response;
-
-        const codigoBarras = getPagBankBarcode(responseData);
-        const linkBoleto = getMercadoPagoBoletoLink(responseData);
-        codigoBarrasPagBank = codigoBarras;
-
-        if (!codigoBarras && !linkBoleto) {
-            if (shouldLogPagBankDebug()) {
-                console.log("Mercado Pago DEBUG response body sem codigo de barras nem link:", responseData);
-            }
-            return {
-                ...boletoData,
-                error: "Não foi possível obter código de barras ou link do boleto"
-            };
-        }
-
-        return Object.assign({}, boletoData, {
-            codigo_barras: codigoBarras,
-            link_boleto: linkBoleto
-        });
-    } catch (error) {
-        let status = error && error.response ? error.response.status : null;
-        let details = error && error.response && error.response.data ? error.response.data : error.message;
-
-        if (shouldLogPagBankDebug()) {
-            console.log("Mercado Pago DEBUG erro completo:", {
-                url: apiUrl,
-                status: status,
-                details: details
-            });
-        }
-
-        // Algumas vezes a SDK retorna erro genérico 'internal_error' com status nulo.
-        // Tentamos uma chamada direta com axios uma vez para obter mais detalhes ou recuperar o boleto.
-        const shouldRetryDirect = status === null || (Number.isInteger(status) && status >= 500) || (typeof details === "string" && details.toLowerCase().includes("internal_error"));
-
-        if (shouldRetryDirect) {
-            try {
-                if (shouldLogPagBankDebug()) console.log("Mercado Pago: tentando retry direto via axios para obter mais detalhes...");
-                const axiosResp = await axios.post(apiUrl, payload, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    timeout: 10000
-                });
-
-                const axiosData = axiosResp && axiosResp.data ? axiosResp.data : axiosResp;
-                const codigoBarrasRetry = getPagBankBarcode(axiosData);
-                const linkBoletoRetry = getMercadoPagoBoletoLink(axiosData);
-
-                if (shouldLogPagBankDebug()) console.log("Mercado Pago retry response:", axiosData);
-
-                if (codigoBarrasRetry || linkBoletoRetry) {
-                    return Object.assign({}, boletoData, {
-                        codigo_barras: codigoBarrasRetry,
-                        link_boleto: linkBoletoRetry
-                    });
-                }
-
-                // se não obteve, atualize detalhes para retornar
-                status = axiosResp.status || status;
-                details = axiosData;
-            } catch (retryErr) {
-                if (shouldLogPagBankDebug()) console.log("Mercado Pago retry erro:", retryErr && retryErr.response ? retryErr.response.data : retryErr.message || retryErr);
-                // manter status/details originais ou usar o do retry
-                const retryStatus = retryErr && retryErr.response ? retryErr.response.status : null;
-                const retryDetails = retryErr && retryErr.response && retryErr.response.data ? retryErr.response.data : retryErr.message;
-                status = status || retryStatus;
-                details = details || retryDetails;
-            }
-        }
-
-        console.log("Erro ao gerar boleto no Mercado Pago. Status:", status, "Detalhes:", details);
-        return {
-            ...boletoData,
-            error: typeof details === "string" ? details : JSON.stringify(details)
-        };
-    }
-}
-
-function buildBoletoFromDb(taskDoc, profissionalDoc) {
-    const fallbackDescription = "Servico de desenvolvimento de software";
-    const descriptionParts = [];
-
-    if (taskDoc && taskDoc.titleService) {
-        descriptionParts.push(`Serviço: ${String(taskDoc.titleService)}`);
-    }
-    if (taskDoc && taskDoc.tipoPagamento) {
-        descriptionParts.push(`Tipo de pagamento: ${String(taskDoc.tipoPagamento)}`);
-    }
-    if (taskDoc && taskDoc.developer) {
-        descriptionParts.push(`Desenvolvedor: ${String(taskDoc.developer)}`);
-    }
-    if (taskDoc && taskDoc.description) {
-        descriptionParts.push(String(taskDoc.description));
-    }
-
-    const amountValue = taskDoc && taskDoc.valor ? Number(String(taskDoc.valor).replace(/[^0-9,.-]/g, "").replace(",", ".")) : 100.50;
-    const amount = Number.isFinite(amountValue) ? amountValue : 100.50;
-    const paymentAmounts = calculatePaymentAmounts(amount);
-    const profissionalNome = profissionalDoc && profissionalDoc.nome ? profissionalDoc.nome : "";
-    const profissionalEmail = profissionalDoc && profissionalDoc.email ? profissionalDoc.email : "";
-    const referenceId = taskDoc && taskDoc.idtask ? String(taskDoc.idtask) : "";
-
-    return {
-        reference_id: referenceId,
-        description: descriptionParts.length ? descriptionParts.join(" | ") : fallbackDescription,
-        amount: paymentAmounts.totalAmount,
-        professionalAmount: paymentAmounts.professionalAmount,
-        platformFee: paymentAmounts.platformFee,
-        validity: getThirdNextBusinessDay(),
-        payer: {
-            name: profissionalNome,
-            email: profissionalEmail
-        },
-        task: {
-            idtask: referenceId,
-            titleService: taskDoc && taskDoc.titleService ? String(taskDoc.titleService) : "",
-            tipoPagamento: taskDoc && taskDoc.tipoPagamento ? String(taskDoc.tipoPagamento) : "",
-            developer: taskDoc && taskDoc.developer ? String(taskDoc.developer) : "",
-            valor: taskDoc && taskDoc.valor ? String(taskDoc.valor) : String(amount)
-        },
-        codigo_barras: codigoBarrasPagBank.length != 0 ? codigoBarrasPagBank : "Codigo de barras não disponivel"
-    };
-}
-
 app.get("/", (req,res)=>{    
     let emailLog = "";
     let senhalog ="";
@@ -491,7 +52,7 @@ app.get("/", (req,res)=>{
             senhalog = clienteProf[0].senha;
         }catch(e){}
     });
-    if(((req.query.email == "teste" || req.query.email == "teste2@gmail.com") && req.query.senha == "123") &&
+    if(((req.query.email == "teste" || req.query.email == "teste2@gmail.com" || req.query.email == "teste3") && req.query.senha == "123") &&
      (req.query.cadastroProf != "Salvar" || req.query.cadastroContractor !="Salvar")){
         if(req.query.typeuser == "contractor"){
             if(req.query.opcao == "Entrar" && task.idtask == undefined){
@@ -596,35 +157,38 @@ app.get("/", (req,res)=>{
             }
             else if(req.query.menu == "fincadCont" || req.query.tipoPagamento != null){
                 // -------------------------------------------------------------------------------------------------------------------- 
-                if(req.query.tipoPagamento == "PIX"){
-                    console.log("PIX");
-                }else if(req.query.tipoPagamento == "Bitcoin"){ 
-                        console.log("bitcoin");               
-                }else if(req.query.tipoPagamento == "bancodeposito"){
-                    console.log("deposito");                        
-                }  
+                if(req.query.buttonPay == "Pagar"){
+                    if(req.query.tipoPagamento == "PIX"){
+                        console.log("PIX");
+                    }else if(req.query.tipoPagamento == "Bitcoin"){ 
+                            console.log("bitcoin");               
+                    }else if(req.query.tipoPagamento == "bancodeposito"){
+                        console.log("deposito");                        
+                    }  
+                }
                 task.find({company: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
-                    const profissionalemail = req.query.profissionalSel == undefined ? undefined : req.query.profissionalSel;
-                    profissional.find({}).sort({"_id":1}).exec(function(err, profissional){
-                        res.render("company/pagamento/index",{
-                            profissional: profissional,
-                            idtask: req.query.idtask,
-                            dadosPagamento: "",
-                            task: task,
-                            profissionalSel: req.query.profissionalSel,
-                            taskservice: req.query.taskservice,
-                            estadoPg: req.query.estadoPg,
-                            typeuser: req.query.typeuser,
-                            nome: req.query.nome,
-                            email:req.query.email,
-                            senha:req.query.senha,
-                            tipoPagamento: req.query.tipoPagamento
-                        }); 
+                    profissional.find({email: task.map((t) => t.developer)}).sort({"_id":1}).exec(function(err, profissional){
+                        contasPagamentos.find({email: req.query.profissionalSel}).sort({"_id":1}).exec(function(err, pagamento){
+                            res.render("company/pagamento/index",{
+                                profissional: profissional,
+                                idtask: req.query.idtask,
+                                dadosPagamento: pagamento,
+                                task: task,
+                                profissionalSel: req.query.profissionalSel,
+                                taskservice: req.query.taskservice,
+                                estadoPg: req.query.estadoPg,
+                                typeuser: req.query.typeuser,
+                                nome: req.query.nome,
+                                email:req.query.email,
+                                senha:req.query.senha,
+                                tipoPagamento: req.query.tipoPagamento
+                            }); 
+                        });                        
+                    });
+                    
                 });
-                
-            });
-        } 
-        else if(req.query.menu == "historico"){
+            } 
+            else if(req.query.menu == "historico"){
                 if(req.query.taskServ == "altera"){
                     try{
                         task.collection.updateOne({
@@ -1276,125 +840,10 @@ app.get("/", (req,res)=>{
     }    
 }); 
 
-// API para gerar boleto via PagSeguro
-app.post('/api/gerar-boleto', async (req, res) => {
-    try {
-        const payload = req.body && Object.keys(req.body).length > 0 ? req.body : (req.query || {});
-        const { email, senha, taskTitleService } = payload;
-
-        if (!email || !senha) {
-            return res.status(400).json({ 
-                success: false, 
-                erro: 'Email e senha são obrigatórios' 
-            });
-        }
-
-        // Buscar dados do profissional
-        const profissionalDocs = await profissional.find({ email: email, senha: senha }).exec();
-        
-        if (!profissionalDocs || profissionalDocs.length === 0) {
-            return res.status(401).json({ 
-                success: false, 
-                erro: 'Profissional não encontrado' 
-            });
-        }
-
-        const profissionalSelecionado = profissionalDocs[0];
-
-        const boletoData = {
-            reference_id: profissionalSelecionado._id.toString(),
-            description: `Pagamento de serviço: ${taskTitleService || 'Sem título'}`,
-            amount: 100.00,
-            validity: getThirdNextBusinessDay(),
-            payer: {
-                name: profissionalSelecionado.nome || 'Profissional',
-                email: profissionalSelecionado.email
-            }
-        };
-
-        // Gerar boleto com código de barras via PagBank
-        const boletoComCodigo = await buildBoletoWithPagBankBarcode(boletoData, profissionalSelecionado);
-
-        if (boletoComCodigo.codigo_barras || boletoComCodigo.link_boleto) {
-            return res.json({
-                success: true,
-                codigoBarras: boletoComCodigo.codigo_barras || '',
-                linkBoleto: boletoComCodigo.link_boleto || '',
-                linkPagSeguro: boletoComCodigo.link_boleto || '',
-                mensagem: 'Boleto gerado com sucesso',
-                boleto: {
-                    description: boletoData.description,
-                    amount: boletoData.amount,
-                    validity: boletoData.validity,
-                    payer: boletoData.payer
-                }
-            });
-        } else {
-            return res.json({
-                success: false,
-                erro: boletoComCodigo.error || 'Não foi possível gerar o boleto. Verifique suas configurações.'
-            });
-        }
-
-    } catch (error) {
-        console.error('Erro ao gerar boleto:', error);
-        res.status(500).json({
-            success: false,
-            erro: 'Erro ao gerar boleto: ' + error.message
-        });
-    }
+app.listen(porta,()=>{
+   console.log(`funcionando\nhttp://localhost:${porta}/`);    
 });
 
-app.post('/api/salvar-conta-bancaria', async (req, res) => {
-    try {
-        const { email, senha, banco, agencia, conta, tipoConta } = req.body;
-        if (!email || !senha) {
-            return res.status(400).json({ success: false, error: 'Email e senha são obrigatórios.' });
-        }
-        if (!banco || !agencia || !conta || !tipoConta) {
-            return res.status(400).json({ success: false, error: 'Todos os campos da conta bancária são obrigatórios.' });
-        }
-
-        const updateResult = await profissional.updateOne(
-            { email: email, senha: senha },
-            {
-                $set: {
-                    banco: banco,
-                    agencia: agencia,
-                    conta: conta,
-                    tipoconta: tipoConta
-                }
-            }
-        ).exec();
-
-        if (updateResult.matchedCount === 0) {
-            return res.status(404).json({ success: false, error: 'Profissional não encontrado.' });
-        }
-
-        return res.json({ success: true, message: 'Dados bancários salvos com sucesso.' });
-    } catch (error) {
-        console.error('Erro ao salvar conta bancária:', error);
-        return res.status(500).json({ success: false, error: 'Erro interno ao salvar conta bancária.' });
-    }
-});
-
-function startServer(port) {
-    const server = app.listen(port, () => {
-        console.log(`funcionando\nhttp://localhost:${port}/`);
-    });
-
-    server.on("error", (error) => {
-        if (error.code === "EADDRINUSE") {
-            console.warn(`Porta ${port} ocupada. Tentando ${port + 1}...`);
-            server.close(() => startServer(port + 1));
-        } else {
-            console.error("Erro ao iniciar servidor:", error);
-            process.exit(1);
-        }
-    });
-}
-
-startServer(process.env.PORT || porta);
 
 
 
