@@ -157,14 +157,15 @@ app.get("/", (req,res)=>{
             }
             else if(req.query.menu == "fincadCont" || req.query.tipoPagamento != null){
                 // -------------------------------------------------------------------------------------------------------------------- 
-                if(req.query.buttonPay == "Pagar"){
+                let comprovante = ""; 
+                if(req.query.buttonPay == "Pagar"){                    
                     if(req.query.tipoPagamento == "PIX"){
                         console.log("PIX");
                     }else if(req.query.tipoPagamento == "Bitcoin"){ 
-                            console.log("bitcoin");               
+                        console.log("bitcoin");               
                     }else if(req.query.tipoPagamento == "bancodeposito"){
                         console.log("deposito");                        
-                    }  
+                    }                     
                 }
                 task.find({company: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
                     profissional.find({email: task.map((t) => t.developer)}).sort({"_id":1}).exec(function(err, profissional){
@@ -181,7 +182,8 @@ app.get("/", (req,res)=>{
                                 nome: req.query.nome,
                                 email:req.query.email,
                                 senha:req.query.senha,
-                                tipoPagamento: req.query.tipoPagamento
+                                tipoPagamento: req.query.tipoPagamento,
+                                comprovante: comprovante
                             }); 
                         });                        
                     });
