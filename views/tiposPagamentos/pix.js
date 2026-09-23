@@ -1,49 +1,73 @@
-const mercadopago = require('mercadopago');
-const axios = require('axios');
-const env = require("./dev.env.js");
+const mercadopago = require("mercadopago");
+const env = require("../../dev.env.js");
+const tokenMercadoPago = env.TOKEN_MERCADO_PAGO || process.env.TOKEN_MERCADO_PAGO;
+const tokenMercadoPagoPlataforma = env.TOKEN_MERCADO_PAGO_PLATAFORMA || process.env.TOKEN_MERCADO_PAGO_PLATAFORMA;
 
-async function realizarTransacaoPIX(jobId, amount, freelancerEmail, freelancerCpfCnpj) {
-    const mercadopago = require('mercadopago');
-
-// Configurar Mercado Pago
-mercadopago.configure({
-  access_token: 'SEU_ACCESS_TOKEN'
+const mercadoPagoClient = new mercadopago.MercadoPagoConfig({
+	accessToken: tokenMercadoPago
 });
+const mercadoPagoPayment = new mercadopago.Payment(mercadoPagoClient);
+const mercadoPagoPlataformaClient = new mercadopago.MercadoPagoConfig({
+	accessToken: tokenMercadoPagoPlataforma
+});
+const mercadoPagoPlataformaPayment = new mercadopago.Payment(mercadoPagoPlataformaClient);
 
-// Endpoint para criar cobrança PIX
-app.post('/api/create-pix-payment', async (req, res) => {
-        try {
-            // Calcular taxa da plataforma (ex.: 5%)
-            const platformFee = amount * 0.05;
-            const totalAmount = amount + platformFee;
+async function criarPagamentoPix(taskPagamento, emailPagador) {
+	const valorTexto = String(taskPagamento.valor).trim();
+	const valor = Number(valorTexto.includes(",")
+		? valorTexto.replace(/\./g, "").replace(",", ".")
+		: valorTexto);
+	if (!Number.isFinite(valor) || valor <= 0) {
+		throw new Error("O valor do serviço é inválido para pagamento PIX.");
+	}
+	if (!tokenMercadoPagoPlataforma) {
+		throw new Error("Configure TOKEN_MERCADO_PAGO_PLATAFORMA para receber a taxa da plataforma.");
+	}
 
-            // Criar cobrança PIX
-            const paymentData = {
-            transaction_amount: totalAmount,
-            description: `Pagamento pelo serviço ${jobId}`,
-            payment_method_id: 'pix',
-            payer: {
-                email: 'email_do_contratante@example.com', // Substituir pelo email do contratante
-                identification: { type: 'CPF', number: '12345678900' } // Substituir pelo CPF do contratante
-            },
-            notification_url: 'SUA_URL_DE_WEBHOOK'
-            };
+	const valorTaxaPlataforma = Math.round(valor * 0.15 * 100) / 100;
+	if (valorTaxaPlataforma <= 0) {
+		throw new Error("O valor da taxa da plataforma deve ser maior que zero.");
+	}
+	const valorTotal = Math.round((valor + valorTaxaPlataforma) * 100) / 100;
 
-            const payment = await mercadopago.payment.create(paymentData);
+	const respostaServico = await mercadoPagoPayment.create({
+		body: {
+			transaction_amount: valor,
+			description: `Pagamento pelo serviço ${taskPagamento.titleService}`,
+			payment_method_id: "pix",
+			payer: { email: emailPagador }
+		}
+	});
+	const respostaTaxa = await mercadoPagoPlataformaPayment.create({
+		body: {
+			transaction_amount: valorTaxaPlataforma,
+			description: `Taxa da plataforma - ${taskPagamento.titleService}`,
+			payment_method_id: "pix",
+			payer: { email: emailPagador }
+		}
+	});
+	const dadosServico = respostaServico.body || respostaServico;
+	const dadosTaxa = respostaTaxa.body || respostaTaxa;
+	const transacaoServico = dadosServico.point_of_interaction && dadosServico.point_of_interaction.transaction_data;
+	const transacaoTaxa = dadosTaxa.point_of_interaction && dadosTaxa.point_of_interaction.transaction_data;
 
-            // Salvar detalhes no banco de dados
-            // Exemplo: await db.savePayment({ jobId, paymentId: payment.body.id, status: 'pending', qrCode: payment.body.point_of_interaction.transaction_data.qr_code });
+	if (!transacaoServico || !transacaoServico.qr_code || !transacaoTaxa || !transacaoTaxa.qr_code) {
+		throw new Error("O Mercado Pago não retornou os dados do PIX.");
+	}
 
-            res.json({
-            qrCode: payment.body.point_of_interaction.transaction_data.qr_code,
-            qrCodeBase64: payment.body.point_of_interaction.transaction_data.qr_code_base64,
-            paymentId: payment.body.id
-            });
-        } catch (error) {
-            console.error('Erro ao criar cobrança PIX:', error);
-            res.status(500).json({ error: 'Falha ao criar cobrança PIX' });
-        }
-    });
+	return {
+		id: dadosServico.id,
+		idTaxaPlataforma: dadosTaxa.id,
+		valorServico: valor.toFixed(2),
+		taxaPlataforma: valorTaxaPlataforma.toFixed(2),
+		valorTotal: valorTotal.toFixed(2),
+		qrCode: transacaoServico.qr_code,
+		qrCodeBase64: transacaoServico.qr_code_base64,
+		qrCodeTaxaPlataforma: transacaoTaxa.qr_code,
+		qrCodeTaxaPlataformaBase64: transacaoTaxa.qr_code_base64
+	};
 }
 
-realizarTransacaoPIX();
+module.exports = {
+	criarPagamentoPix
+};

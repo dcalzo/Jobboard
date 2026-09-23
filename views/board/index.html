@@ -50,11 +50,16 @@
                             <tr> 
                                 <%let intWidth=130;%>        
                                 <td class="columntable">
-                                    <div style="width: 220px; height: 400px; overflow-y: scroll;">
+                                    <div class="board-column" data-column="post" style="width: 220px; height: 400px; overflow-y: scroll;" ondragover="allowDrop(event)" ondrop="dropTask(event)">
                                     <%for(let x = 0; x < taskList.length; x++ ){%>
                                         <%if(taskList[x].column=="post"){%>
                                             <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 10px; width: 100%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal"
+                                                draggable="<%=typeuser=='professional' && taskList[x].column=='post' ? 'true' : 'false'%>"
+                                                data-task-id="<%=taskList[x]._id%>"
+                                                data-task-count="<%=taskList[x].idtask%>"
+                                                data-next-column="postDev"
+                                                ondragstart="dragTask(event)"
                                                 onclick="jobTask(
                                                     '<%=taskList[x].titleService%>', 
                                                     '<%=taskList[x].description%>', 
@@ -67,7 +72,7 @@
                                                          <%=taskList[x].description.substring(0,25).trim()%>...<br />
                                                          <%=taskList[x].email%><br />
                                                          <%if(typeuser=="professional"){%>
-                                                         <a href="?taskServ=altera&id=<%=taskList[x]._id%>&menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postDev&count=<%=taskList[x].idtask%>">
+                                                          <a onclick="event.stopPropagation()" href="?taskServ=altera&id=<%=taskList[x]._id%>&menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postDev&count=<%=taskList[x].idtask%>">
                                                               próxima coluna
                                                          </a>  
                                                          <%}%> 
@@ -79,11 +84,16 @@
                                 </td>
                                 <%intWidth=0;%>   
                                 <td class="columntable">  
-                                    <div style="width: 220px; height: 400px; overflow-y: scroll;">
+                                    <div class="board-column" data-column="postDev" style="width: 220px; height: 400px; overflow-y: scroll;" ondragover="allowDrop(event)" ondrop="dropTask(event)">
                                             <%for(let x = 0; x < taskList.length; x++ ){%>
                                                 <%if(taskList[x].column=="postDev"){%>
                                                         <button type="button" style="background: rgb(54, 144, 248); top: <%=intWidth%>;"
                                                             class="postDev" data-toggle="modal" data-target="#myModal" 
+                                                            draggable="<%=typeuser=='professional' && taskList[x].column=='postDev' ? 'true' : 'false'%>"
+                                                            data-task-id="<%=taskList[x]._id%>"
+                                                            data-task-count="<%=taskList[x].idtask%>"
+                                                            data-next-column="postRev"
+                                                            ondragstart="dragTask(event)"
                                                             onclick="jobTask(
                                                                 '<%=taskList[x].titleService%>', 
                                                                 '<%=taskList[x].description%>', 
@@ -97,7 +107,7 @@
                                                                 <%=taskList[x].developer%><br />
                                                                 <%=taskList[x].email%><br />
                                                                  <%if(typeuser=="professional"){%>
-                                                                    <a href="?taskServ=altera&id=<%=taskList[x]._id%>&menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postRev&count=<%=taskList[x].idtask%>">
+                                                                    <a onclick="event.stopPropagation()" href="?taskServ=altera&id=<%=taskList[x]._id%>&menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postRev&count=<%=taskList[x].idtask%>">
                                                                         próxima coluna
                                                                     </a>
                                                                 <%}%>
@@ -109,11 +119,16 @@
                                 </td>
                                 <%intWidth=130;%>   
                                 <td class="columntable">
-                                    <div style="width: 220px; height: 400px; overflow-y: scroll;">
+                                    <div class="board-column" data-column="postRev" style="width: 220px; height: 400px; overflow-y: scroll;" ondragover="allowDrop(event)" ondrop="dropTask(event)">
                                         <%for(let x = 0; x < taskList.length; x++ ){%>
                                             <%if(taskList[x].column=="postRev"){%>
                                                     <button type="button" style="background: rgb(54, 144, 248); top: <%=intWidth%>;" 
                                                         class="postRev" data-toggle="modal" data-target="#myModal" 
+                                                        draggable="<%=typeuser=='contractor' && taskList[x].column=='postRev' ? 'true' : 'false'%>"
+                                                        data-task-id="<%=taskList[x]._id%>"
+                                                        data-task-count="<%=taskList[x].idtask%>"
+                                                        data-next-column="postEnd"
+                                                        ondragstart="dragTask(event)"
                                                         onclick="jobTask(
                                                             '<%=taskList[x].titleService%>', 
                                                             '<%=taskList[x].description%>', 
@@ -127,7 +142,7 @@
                                                             <%=taskList[x].developer%><br />
                                                             <%=taskList[x].email%><br />
                                                             <%if(typeuser=="contractor"){%>
-                                                                <a href="?taskServ=altera&id=<%=taskList[x]._id%>&menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=taskList[x].idtask%>">
+                                                                <a onclick="event.stopPropagation()" href="?taskServ=altera&id=<%=taskList[x]._id%>&menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=taskList[x].idtask%>">
                                                                      próxima coluna
                                                                 </a>
                                                             <%}%>
@@ -139,11 +154,12 @@
                                 </td>
                                 <%intWidth=130;%>   
                                 <td class="columntable">
-                                    <div style="width: 220px; height: 400px; overflow-y: scroll;">
+                                    <div class="board-column" data-column="postEnd" style="width: 220px; height: 400px; overflow-y: scroll;" ondragover="allowDrop(event)" ondrop="dropTask(event)">
                                             <%for(let x = 0; x < taskList.length; x++ ){%>
                                                 <%if(taskList[x].column=="postEnd"){%>                                                    
-                                                    <button type="button" style="background: rgb(54, 144, 248); top: <%=intWidth%>;"
+                                                      <button type="button" style="background: rgb(54, 144, 248); top: <%=intWidth%>;"
                                                          class="postEnd" data-toggle="modal" data-target="#myModal" 
+                                                          draggable="false"
                                                          onclick="jobTask(
                                                             '<%=taskList[x].titleService%>', 
                                                             '<%=taskList[x].description%>', 
@@ -169,6 +185,40 @@
                 </tr>
               </table>  
               <script>
+                                let draggedTask = null;
+
+                                function dragTask(event) {
+                                    draggedTask = event.currentTarget;
+                                    event.dataTransfer.effectAllowed = "move";
+                                    event.dataTransfer.setData("text/plain", draggedTask.dataset.taskId);
+                                }
+
+                                function allowDrop(event) {
+                                    if (draggedTask && event.currentTarget.dataset.column === draggedTask.dataset.nextColumn) {
+                                        event.preventDefault();
+                                        event.dataTransfer.dropEffect = "move";
+                                    }
+                                }
+
+                                function dropTask(event) {
+                                    event.preventDefault();
+                                    const destination = event.currentTarget.dataset.column;
+                                    if (!draggedTask || destination !== draggedTask.dataset.nextColumn) return;
+
+                                    const params = new URLSearchParams({
+                                        taskServ: "altera",
+                                        id: draggedTask.dataset.taskId,
+                                        menu: "board",
+                                        senha: "<%=senha%>",
+                                        email: "<%=email%>",
+                                        typeuser: "<%=typeuser%>",
+                                        column: destination,
+                                        count: draggedTask.dataset.taskCount
+                                    });
+                                    window.location.href = "?" + params.toString();
+                                    draggedTask = null;
+                                }
+
                 function jobTask(titulo, description, valor, developer, email) {
                   document.getElementById("titulo").innerHTML = titulo;                   
                   document.getElementById("valor").innerHTML = valor;

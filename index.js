@@ -1,7 +1,5 @@
 const express = require("express");
 const axios = require("axios");
-const mercadopago = require("mercadopago");
-const BitPay = require('bitpay-sdk');
 const mongoose = require("mongoose");
 const path = require("path");
 const contratante = require("./contratante");
@@ -9,6 +7,9 @@ const task = require("./task.js");
 const chatmensagem = require("./views/chat/mensagens.js");
 const profissional = require("./views/professional/cadastro/profissional");
 const contasPagamentos = require("./contasPagamento.js");
+const { criarTransferenciaPagBank } = require("./views/tiposPagamentos/ted.js");
+const { criarPagamentoBitcoinLightning } = require("./views/tiposPagamentos/bitCoin.js");
+const { criarPagamentoPix } = require("./views/tiposPagamentos/pix.js");
 const env = require("./dev.env.js");
 const app = express();
 const porta = 8080;
@@ -37,7 +38,7 @@ app.set("views", path.join(__dirname,"/views"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req,res)=>{    
+app.get("/", async (req,res)=>{    
     let emailLog = "";
     let senhalog ="";
     contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, clienteContato){
@@ -160,11 +161,60 @@ app.get("/", (req,res)=>{
                 let comprovante = ""; 
                 if(req.query.buttonPay == "Pagar"){                    
                     if(req.query.tipoPagamento == "PIX"){
-                        console.log("PIX");
-                    }else if(req.query.tipoPagamento == "Bitcoin"){ 
-                        console.log("bitcoin");               
+                        try {
+                            const tarefaPagamento = await task.findOne({
+                                company: req.query.email,
+                                titleService: req.query.taskservice,
+                                developer: req.query.profissionalSel
+                            }).exec();
+
+                            if (!tarefaPagamento) {
+                                throw new Error("Serviço não encontrado para pagamento.");
+                            }
+
+                            comprovante = JSON.stringify(await criarPagamentoPix(tarefaPagamento, req.query.email));
+                        } catch (error) {
+                            comprovante = "Chave do PIX invalida insira uma chave valida para gerar o pagamento";
+                            console.error("Erro ao criar pagamento PIX:", error.message);
+                        }
+                    }else if(req.query.tipoPagamento == "Bitcoin"){
+                        try {
+                            const tarefaPagamento = await task.findOne({
+                                company: req.query.email,
+                                titleService: req.query.taskservice,
+                                developer: req.query.profissionalSel
+                            }).exec();
+
+                            if (!tarefaPagamento) {
+                                throw new Error("Serviço não encontrado para pagamento.");
+                            }
+
+                            comprovante = JSON.stringify(await criarPagamentoBitcoinLightning(tarefaPagamento));
+                        } catch (error) {
+                            comprovante = JSON.stringify({ erro: error.message });
+                            console.error("Erro ao criar pagamento Bitcoin Lightning:", error.message);
+                        }
                     }else if(req.query.tipoPagamento == "bancodeposito"){
-                        console.log("deposito");                        
+                        try {
+                            const tarefaPagamento = await task.findOne({
+                                company: req.query.email,
+                                titleService: req.query.taskservice,
+                                developer: req.query.profissionalSel
+                            }).exec();
+                            const contaPagamento = await contasPagamentos.findOne({
+                                email: req.query.profissionalSel,
+                                tipo: "bancodeposito"
+                            }).exec();
+
+                            if (!tarefaPagamento) {
+                                throw new Error("Serviço não encontrado para pagamento.");
+                            }
+
+                            comprovante = JSON.stringify(await criarTransferenciaPagBank(tarefaPagamento, contaPagamento));
+                        } catch (error) {
+                            comprovante = JSON.stringify({ erro: error.message });
+                            console.error("Erro ao criar transferência PagBank:", error.message);
+                        }
                     }                     
                 }
                 task.find({company: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
@@ -186,8 +236,7 @@ app.get("/", (req,res)=>{
                                 comprovante: comprovante
                             }); 
                         });                        
-                    });
-                    
+                    });                    
                 });
             } 
             else if(req.query.menu == "historico"){

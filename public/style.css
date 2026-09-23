@@ -170,6 +170,18 @@
     transition: right .5s ease-in;
  }
 
+ .board-column {
+     min-height: 400px;
+ }
+
+ [draggable="true"] {
+     cursor: grab;
+ }
+
+ [draggable="true"]:active {
+     cursor: grabbing;
+ }
+
   .columnDesk{
     text-align: center;
   }
