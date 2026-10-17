@@ -3,19 +3,22 @@ Project JobBoard (Freelancer)
 ### Install Librarys
 
 npm install
-npm i nodemon
 
 librarys used
 
 express
 mongoose
 nodemon
+livereload
+connect-livereload
 path
 ejs
 
 ### run localhost
 
-nodemon
+npm run dev
+
+Abra http://localhost:8080/. O LiveReload atualiza o navegador ao salvar arquivos HTML, incluindo os templates em `views`. Para ativar a recarga automática, inicie a aplicação com `npm run dev`; o servidor de recarga é iniciado junto com a aplicação.
 
 ### database used
 
@@ -47,3 +50,5 @@ PAGBANK_TRANSFER_API_URL=https://secure.api.pagseguro.com/transfers
 ```
 
 O access token de transferência exige aplicação, certificado digital e liberação da API pelo PagBank. A API do PagBank identifica transferências externas por dados bancários como uma transferência PIX; ela não executa uma TED tradicional. O ambiente sandbox deve usar a URL de transferência correspondente ao ambiente disponibilizado para sua conta.
+
+Em ambiente diferente de `production`, se a transferência falhar e o valor do serviço for válido, a tela exibe uma prévia dos dados e valores para desenvolvimento. Essa prévia é identificada como não enviada e não realiza pagamento algum.

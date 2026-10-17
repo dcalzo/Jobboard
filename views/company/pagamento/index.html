@@ -12,51 +12,6 @@
       <% let retornoPagamento = null; %>
       <% try { retornoPagamento = comprovante ? JSON.parse(comprovante) : null; } catch (e) {} %>
       <h1><b>Fazer o Pagamento</b></h1><br />
-      <% if (retornoPagamento && retornoPagamento.qrCodeBase64) { %>
-        <section>
-          <h2>PIX gerado</h2>
-          <p>Serviço: R$ <%= retornoPagamento.valorServico.replace('.', ',') %></p>
-          <p>Taxa da plataforma (15%): R$ <%= retornoPagamento.taxaPlataforma.replace('.', ',') %></p>
-          <p><b>Total: R$ <%= retornoPagamento.valorTotal.replace('.', ',') %></b></p>
-          <img src="data:image/png;base64,<%= retornoPagamento.qrCodeBase64 %>" alt="QR Code PIX" />
-          <p><b>Copia e cola:</b></p>
-          <textarea rows="4" cols="70" readonly><%= retornoPagamento.qrCode %></textarea>
-          <p>Id da transação: <%= retornoPagamento.id %></p>
-          <h2>Taxa da plataforma</h2>
-          <p>Escaneie o segundo QR Code para pagar a taxa diretamente à plataforma.</p>
-          <img src="data:image/png;base64,<%= retornoPagamento.qrCodeTaxaPlataformaBase64 %>" alt="QR Code da taxa da plataforma" />
-          <p><b>Copia e cola da taxa:</b></p>
-          <textarea rows="4" cols="70" readonly><%= retornoPagamento.qrCodeTaxaPlataforma %></textarea>
-          <p>Id da transação da taxa: <%= retornoPagamento.idTaxaPlataforma %></p>
-        </section>
-      <% } else if (retornoPagamento && retornoPagamento.paymentUrl) { %>
-        <section>
-          <h2>Pagamento Bitcoin via Lightning Network</h2>
-          <p>Serviço: R$ <%= retornoPagamento.valorServico.replace('.', ',') %></p>
-          <p>Taxa da plataforma (15%): R$ <%= retornoPagamento.taxaPlataforma.replace('.', ',') %></p>
-          <p><b>Total a pagar: R$ <%= retornoPagamento.valorTotal.replace('.', ',') %></b></p>
-          <p><a href="<%= retornoPagamento.paymentUrl %>" target="_blank" rel="noopener">Abrir pagamento Lightning</a></p>
-          <% if (retornoPagamento.lightningInvoice) { %>
-            <p><b>Invoice Lightning:</b></p>
-            <textarea rows="4" cols="70" readonly><%= retornoPagamento.lightningInvoice %></textarea>
-          <% } %>
-          <p>Id da invoice: <%= retornoPagamento.invoiceId %></p>
-        </section>
-      <% } else if (retornoPagamento && retornoPagamento.id && retornoPagamento.status) { %>
-        <section>
-          <h2>Transferência bancária PagBank criada</h2>
-          <p>Serviço: R$ <%= retornoPagamento.valorServico.replace('.', ',') %></p>
-          <p>Taxa da plataforma (15%): R$ <%= retornoPagamento.taxaPlataforma.replace('.', ',') %></p>
-          <p><b>Total transferido: R$ <%= retornoPagamento.valorTotal.replace('.', ',') %></b></p>
-          <p>Status: <%= retornoPagamento.status %></p>
-          <p>Id da transferência: <%= retornoPagamento.id %></p>
-          <% if (retornoPagamento.endToEndId) { %>
-            <p>End-to-end ID: <%= retornoPagamento.endToEndId %></p>
-          <% } %>
-        </section>
-      <% } else if (retornoPagamento && retornoPagamento.erro) { %>
-        <p><b><%= retornoPagamento.erro %></b></p>
-      <% } %>
       <br />
       <form>
       <table style="width: 98%;">
@@ -94,20 +49,151 @@
               <%}%>
             </select> 
             <br /><br /> 
+            <% if (retornoPagamento && retornoPagamento.preview && retornoPagamento.tipo === "Prévia de transferência PagBank") { %>
+              <div style="width: 100%; height: 220px; overflow-y: scroll;">  
+              <section>
+                <h2>Prévia de transferência PagBank (não enviada)</h2>
+                <p><b>Esta é somente uma simulação para visualizar a tela. Nenhum pagamento foi realizado.</b></p>
+                <p>Serviço: R$ <%= retornoPagamento.valorServico.replace('.', ',') %></p>
+                <p>Taxa da plataforma (15%): R$ <%= retornoPagamento.taxaPlataforma.replace('.', ',') %></p>
+                <p><b>Total a pagar: R$ <%= retornoPagamento.valorTotal.replace('.', ',') %></b></p>
+                <p>Status: <%= retornoPagamento.status %></p>
+                <p>Banco: <%= retornoPagamento.banco || "não informado" %></p>
+                <p>Agência: <%= retornoPagamento.agencia || "não informada" %></p>
+                <p>Conta: <%= retornoPagamento.conta || "não informada" %></p>
+                <p>Tipo de conta: <%= retornoPagamento.tipoConta || "não informado" %></p>
+                <p>Titular: <%= retornoPagamento.titular || "não informado" %></p>
+                <p>Motivo da simulação: <%= retornoPagamento.erro %></p>
+              </section>
+              </div>
+            <% } else if (retornoPagamento && retornoPagamento.id && retornoPagamento.status) { %>
+              <section>
+                <h2>Transferência bancária PagBank criada</h2>
+                <p>Serviço: R$ <%= retornoPagamento.valorServico.replace('.', ',') %></p>
+                <p>Taxa da plataforma (15%): R$ <%= retornoPagamento.taxaPlataforma.replace('.', ',') %></p>
+                <p><b>Total transferido: R$ <%= retornoPagamento.valorTotal.replace('.', ',') %></b></p>
+                <p>Status: <%= retornoPagamento.status %></p>
+                <p>Id da transferência: <%= retornoPagamento.id %></p>
+                <% if (retornoPagamento.endToEndId) { %>
+                  <p>End-to-end ID: <%= retornoPagamento.endToEndId %></p>
+                <% } %>
+              </section>
+            <% } else if (retornoPagamento && retornoPagamento.erro) { %>
+              <p><b><%= retornoPagamento.erro %></b></p>
+              <% if (retornoPagamento.codigo || retornoPagamento.status) { %>
+                <p>Erro da API: <%= retornoPagamento.codigo || "não informado" %> (<%= retornoPagamento.status || "sem status" %>)</p>
+              <% } %>
+              <% if (Array.isArray(retornoPagamento.detalhes) && retornoPagamento.detalhes.length) { %>
+                <p>Detalhes:</p>
+                <ul>
+                  <% retornoPagamento.detalhes.forEach(function(detalhe) { %>
+                    <% const codigoDetalhe = detalhe && typeof detalhe === "object" ? detalhe.code || detalhe.error || "Erro" : "Erro"; %>
+                    <% const mensagemDetalhe = detalhe && typeof detalhe === "object" ? detalhe.description || detalhe.message || "" : detalhe; %>
+                    <li><%= codigoDetalhe %>: <%= mensagemDetalhe %></li>
+                  <% }); %>
+                </ul>
+              <% } %>
+            <% } %>
+            <br /><br />
             <%if(taskservice != "" && tipoPagamento != ""){%>  
+              <%if(tipoPagamento == "PIX"){%>                 
+                  <section>
+                    <% if (retornoPagamento && retornoPagamento.qrCodeBase64) { %>                     
+                      <div style="width: 100%; height: 260px; overflow-y: scroll;">                        
+                        <table>
+                        <tr>
+                          <td style="width: 40%;">    
+                              <label>Pagamento do Profissional</label>   
+                              <img class="qr-code" src="data:<%= retornoPagamento.qrCodeMimeType || 'image/png' %>;base64,<%= retornoPagamento.qrCodeBase64 %>" alt="QR Code PIX" />
+                              <p><b>Copia e cola:</b></p>
+                              <textarea rows="4" cols="70" readonly><%= retornoPagamento.qrCode %></textarea>
+                              <p>Id da transação: <%= retornoPagamento.id %></p>   
+                          </td>
+                          <td style="width: 20%;">
+                            <label>PIX gerado</label><br />    
+                            <p>Serviço: R$ <%= retornoPagamento.valorServico.replace('.', ',') %></p>
+                            <p>Taxa da plataforma (15%): R$ <%= retornoPagamento.taxaPlataforma.replace('.', ',') %></p>
+                            <p><b>Total: R$ <%= retornoPagamento.valorTotal.replace('.', ',') %></b></p> 
+                            <p>Escaneie o segundo QR Code para pagar a taxa diretamente à plataforma.</p>
+                          </td>
+                          <td style="width: 40%;">
+                            <label>Taxa da plataforma</label>
+                            <img class="qr-code" src="data:<%= retornoPagamento.qrCodeMimeType || 'image/png' %>;base64,<%= retornoPagamento.qrCodeTaxaPlataformaBase64 %>" alt="QR Code da taxa da plataforma" />
+                            <p><b>Copia e cola da taxa:</b></p>
+                            <textarea rows="4" cols="70" readonly><%= retornoPagamento.qrCodeTaxaPlataforma %></textarea>
+                            <p>Id da transação da taxa: <%= retornoPagamento.idTaxaPlataforma %></p>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  <%}%>     
+                </section>                              
+              <%}else if(tipoPagamento == "Bitcoin"){%>
+                <%if (retornoPagamento && retornoPagamento.paymentUrl) { %>
+                  <section>
+                    <h2>Pagamento Bitcoin via Lightning Network</h2>
+                    <p>Serviço: R$ <%= retornoPagamento.valorServico.replace('.', ',') %></p>
+                    <p>Taxa da plataforma (15%): R$ <%= retornoPagamento.taxaPlataforma.replace('.', ',') %></p>
+                    <p><b>Total a pagar: R$ <%= retornoPagamento.valorTotal.replace('.', ',') %></b></p>
+                    <% if (retornoPagamento.preview) { %>
+                      <p>Link de pagamento Lightning (indisponível na pré-visualização)</p>
+                    <% } else { %>
+                      <p><a href="<%= retornoPagamento.paymentUrl %>" target="_blank" rel="noopener">Abrir pagamento Lightning</a></p>
+                    <% } %>
+                    <% if (retornoPagamento.lightningInvoice) { %>
+                      <p><b>Invoice Lightning:</b></p>
+                      <textarea rows="4" cols="70" readonly><%= retornoPagamento.lightningInvoice %></textarea>
+                    <% } %>
+                    <p>Id da invoice: <%= retornoPagamento.invoiceId %></p>
+                  </section>
+                <%}%>
+              <%}%>
               <%task.map(function(dado){%>
                 <%if(dado.titleService == taskservice){%> 
                   <label>
                     Pagamento via <%if(dado.tipoPagamento=="bancodeposito"){%>
-                      Deposito Bancário
+                      Deposito Bancário<br /> 
+                      <%
+                        let dadosBancarios = null;
+                        try {
+                          const codigoBancario = JSON.parse(dado.codigo);
+                          if (codigoBancario && typeof codigoBancario === "object" && !Array.isArray(codigoBancario)) {
+                            dadosBancarios = codigoBancario;
+                          }
+                        } catch (error) {
+                          const codigoLegado = typeof dado.codigo === "string"
+                            ? dado.codigo.match(/^\{Banco:'([\s\S]*)',agencia:'([\s\S]*)',conta:'([\s\S]*)',tipo:'([\s\S]*)'\}$/)
+                            : null;
+                          if (codigoLegado) {
+                            dadosBancarios = {
+                              Banco: codigoLegado[1],
+                              agencia: codigoLegado[2],
+                              conta: codigoLegado[3],
+                              tipo: codigoLegado[4]
+                            };
+                          }
+                        }
+                      %>
+                      <% if (dadosBancarios) {%>
+                        <span>Banco: <%= dadosBancarios.Banco || dadosBancarios.banco || "" %></span><br />
+                        <span>Agência: <%= dadosBancarios.agencia || "" %></span><br />
+                        <span>Conta: <%= dadosBancarios.conta || "" %></span><br />
+                        <span>Tipo de conta: <%= dadosBancarios.tipo || "" %></span><br /><br />
+                      <% } else { %>
+                        <span>Não foi possível interpretar os dados bancários cadastrados.</span><br />
+                        <code><%= dado.codigo %></code><br /><br />
+                      <% } %>
+                      <label>Valor do serviço: R$ <%=dado.valor%></label><br />
+                      <label>Taxa da plataforma (15%): R$ <%= (Number(String(dado.valor).replace(',', '.')) * 0.15).toFixed(2).replace('.', ',') %></label><br />
+                      <label><b>Total a pagar: R$ <%= (Number(String(dado.valor).replace(',', '.')) * 1.15).toFixed(2).replace('.', ',') %></b></label><br /><br />
                     <%}else{%>
-                      <%=dado.tipoPagamento%>
+                      <%=dado.tipoPagamento%><br /> 
+                      <label><%=dado.codigo%></label><br /><br /> 
+                      <label>Valor do serviço: R$ <%=dado.valor%></label><br />
+                      <label>Taxa da plataforma (15%): R$ <%= (Number(String(dado.valor).replace(',', '.')) * 0.15).toFixed(2).replace('.', ',') %></label><br />
+                      <label><b>Total a pagar: R$ <%= (Number(String(dado.valor).replace(',', '.')) * 1.15).toFixed(2).replace('.', ',') %></b></label><br /><br />
                     <%}%>
-                  </label><br />
-                  <label><%=dado.codigo%></label><br /><br /> 
-                  <label>Valor do serviço: R$ <%=dado.valor%></label><br />
-                  <label>Taxa da plataforma (15%): R$ <%= (Number(String(dado.valor).replace(',', '.')) * 0.15).toFixed(2).replace('.', ',') %></label><br />
-                  <label><b>Total a pagar: R$ <%= (Number(String(dado.valor).replace(',', '.')) * 1.15).toFixed(2).replace('.', ',') %></b></label><br /><br />
+                  </label><br />                  
                   <input type="hidden" name="valorpagamento" value="<%=dado.valor%>" />
                   <input type="hidden" name="taskservice" value="<%=dado.titleService%>" />
                   <input type="hidden" name="profissionalSel" value="<%=dado.developer%>" />

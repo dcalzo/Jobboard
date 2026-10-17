@@ -7,12 +7,17 @@ const task = require("./task.js");
 const chatmensagem = require("./views/chat/mensagens.js");
 const profissional = require("./views/professional/cadastro/profissional");
 const contasPagamentos = require("./contasPagamento.js");
-const { criarTransferenciaPagBank } = require("./views/tiposPagamentos/ted.js");
-const { criarPagamentoBitcoinLightning } = require("./views/tiposPagamentos/bitCoin.js");
-const { criarPagamentoPix } = require("./views/tiposPagamentos/pix.js");
+const { criarTransferenciaPagBank, criarPreviaTransferenciaPagBank, lerDadosBancarios } = require("./views/tiposPagamentos/ted.js");
+const { criarPagamentoBitcoinLightning, criarPreviaPagamentoBitcoin } = require("./views/tiposPagamentos/bitCoin.js");
+const { criarPagamentoPix, criarPreviaPagamentoPix } = require("./views/tiposPagamentos/pix.js");
 const env = require("./dev.env.js");
 const app = express();
 const porta = 8080;
+
+if (process.env.NODE_ENV !== "production") {
+    require("./live-reload")();
+    app.use(require("connect-livereload")());
+}
 
 mongoose.set('strictQuery', false);
                                                                             
@@ -53,7 +58,7 @@ app.get("/", async (req,res)=>{
             senhalog = clienteProf[0].senha;
         }catch(e){}
     });
-    if(((req.query.email == "teste" || req.query.email == "teste2@gmail.com" || req.query.email == "teste3") && req.query.senha == "123") &&
+    if(((req.query.email == "teste" || req.query.email == "teste2@gmail.com" || req.query.email == "teste3" || req.query.email == "calzoli@gmail.com") && req.query.senha == "123") &&
      (req.query.cadastroProf != "Salvar" || req.query.cadastroContractor !="Salvar")){
         if(req.query.typeuser == "contractor"){
             if(req.query.opcao == "Entrar" && task.idtask == undefined){
@@ -161,8 +166,9 @@ app.get("/", async (req,res)=>{
                 let comprovante = ""; 
                 if(req.query.buttonPay == "Pagar"){                    
                     if(req.query.tipoPagamento == "PIX"){
+                        let tarefaPagamento;
                         try {
-                            const tarefaPagamento = await task.findOne({
+                            tarefaPagamento = await task.findOne({
                                 company: req.query.email,
                                 titleService: req.query.taskservice,
                                 developer: req.query.profissionalSel
@@ -174,12 +180,26 @@ app.get("/", async (req,res)=>{
 
                             comprovante = JSON.stringify(await criarPagamentoPix(tarefaPagamento, req.query.email));
                         } catch (error) {
-                            comprovante = "Chave do PIX invalida insira uma chave valida para gerar o pagamento";
-                            console.error("Erro ao criar pagamento PIX:", error.message);
+                            const detalhesErro = error && typeof error === "object" ? error : {};
+                            // teste de pagamento inválido, exibir prévia do QR Code PIX sem criar o pagamento
+                            if (process.env.NODE_ENV !== "production" && detalhesErro.code === "INVALID_PAYER_EMAIL" && tarefaPagamento) {
+                                comprovante = JSON.stringify(criarPreviaPagamentoPix(tarefaPagamento));
+                                console.info("Exibindo pré-visualização dos QR codes PIX; nenhum pagamento foi criado.");
+                            // teste de pagamento inválido, exibir prévia do QR Code PIX sem criar o pagamento
+                            } else {
+                                comprovante = JSON.stringify({
+                                    erro: detalhesErro.message || detalhesErro.error || String(error),
+                                    codigo: detalhesErro.error,
+                                    status: detalhesErro.status,
+                                    detalhes: Array.isArray(detalhesErro.cause) ? detalhesErro.cause : []
+                                });
+                                console.error("Erro ao criar pagamento PIX:", comprovante);
+                            }
                         }
                     }else if(req.query.tipoPagamento == "Bitcoin"){
+                        let tarefaPagamento;
                         try {
-                            const tarefaPagamento = await task.findOne({
+                            tarefaPagamento = await task.findOne({
                                 company: req.query.email,
                                 titleService: req.query.taskservice,
                                 developer: req.query.profissionalSel
@@ -191,29 +211,70 @@ app.get("/", async (req,res)=>{
 
                             comprovante = JSON.stringify(await criarPagamentoBitcoinLightning(tarefaPagamento));
                         } catch (error) {
-                            comprovante = JSON.stringify({ erro: error.message });
-                            console.error("Erro ao criar pagamento Bitcoin Lightning:", error.message);
+                            const detalhesErro = error && typeof error === "object" ? error : {};
+                            const valorTexto = tarefaPagamento ? String(tarefaPagamento.valor).trim() : "";
+                            const valor = Number(valorTexto.includes(",")
+                                ? valorTexto.replace(/\./g, "").replace(",", ".")
+                                : valorTexto);
+                            // teste de pagamento inválido, exibir prévia do QR Code Bitcoin sem criar o pagamento
+                            if (process.env.NODE_ENV !== "production" && tarefaPagamento && Number.isFinite(valor) && valor > 0 && Math.round(valor * 0.15 * 100) / 100 > 0) {
+                                comprovante = JSON.stringify(criarPreviaPagamentoBitcoin(tarefaPagamento));
+                                console.info("Exibindo pré-visualização da tela Bitcoin; nenhuma invoice foi criada.", detalhesErro.message);
+                            // teste de pagamento inválido, exibir prévia do QR Code Bitcoin sem criar o pagamento
+                            } else {
+                                comprovante = JSON.stringify({ erro: detalhesErro.message || String(error) });
+                                console.error("Erro ao criar pagamento Bitcoin Lightning:", detalhesErro.message || error);
+                            }
                         }
                     }else if(req.query.tipoPagamento == "bancodeposito"){
+                        let tarefaPagamento;
+                        let contaProfissional;
                         try {
-                            const tarefaPagamento = await task.findOne({
+                            tarefaPagamento = await task.findOne({
                                 company: req.query.email,
                                 titleService: req.query.taskservice,
                                 developer: req.query.profissionalSel
                             }).exec();
-                            const contaPagamento = await contasPagamentos.findOne({
-                                email: req.query.profissionalSel,
-                                tipo: "bancodeposito"
-                            }).exec();
-
                             if (!tarefaPagamento) {
                                 throw new Error("Serviço não encontrado para pagamento.");
                             }
+                            const dadosBancarios = lerDadosBancarios(tarefaPagamento.codigo);
+                            contaProfissional = await contasPagamentos.findOne({
+                                email: tarefaPagamento.developer,
+                                tipo: "bancodeposito"
+                            }).exec();
+                            if (!contaProfissional) {
+                                throw new Error("Os dados do titular da conta bancária não foram cadastrados.");
+                            }
 
-                            comprovante = JSON.stringify(await criarTransferenciaPagBank(tarefaPagamento, contaPagamento));
+                            comprovante = JSON.stringify(await criarTransferenciaPagBank(tarefaPagamento, {
+                                nome: contaProfissional.nome,
+                                documento: contaProfissional.documento,
+                                banco: dadosBancarios.banco,
+                                agencia: dadosBancarios.agencia,
+                                numeroConta: dadosBancarios.numeroConta,
+                                tipoConta: dadosBancarios.tipoConta,
+                                ispb: contaProfissional.ispb
+                            }));
                         } catch (error) {
-                            comprovante = JSON.stringify({ erro: error.message });
-                            console.error("Erro ao criar transferência PagBank:", error.message);
+                            const detalhesErro = error && typeof error === "object" ? error : {};
+                            const valorTexto = tarefaPagamento ? String(tarefaPagamento.valor).trim() : "";
+                            const valor = Number(valorTexto.includes(",")
+                                ? valorTexto.replace(/\./g, "").replace(",", ".")
+                                : valorTexto);
+                            // teste de pagamento inválido, exibir prévia da transferência PagBank sem criar a transferência
+                            if (process.env.NODE_ENV !== "production" && tarefaPagamento && Number.isFinite(valor) && valor > 0 && Math.round(valor * 0.15 * 100) / 100 > 0) {
+                                comprovante = JSON.stringify(criarPreviaTransferenciaPagBank(
+                                    tarefaPagamento,
+                                    contaProfissional || {},
+                                    detalhesErro.message || String(error)
+                                ));
+                                console.info("Exibindo prévia da transferência PagBank; nenhuma transferência foi enviada.", detalhesErro.message || error);
+                            // teste de pagamento inválido, exibir prévia da transferência PagBank sem criar a transferência
+                            } else {
+                                comprovante = JSON.stringify({ erro: detalhesErro.message || String(error) });
+                                console.error("Erro ao criar transferência PagBank:", detalhesErro.message || error);
+                            }
                         }
                     }                     
                 }
@@ -476,13 +537,18 @@ app.get("/", async (req,res)=>{
                     }); 
                 }
                 if(req.query.contaTED == "TED"){
-                    contasPagamentos.find({tipo: "bancodeposito"}).sort({"_id":1}).exec(function(err, dadosPag){
+                    contasPagamentos.find({email: req.query.email, tipo: "bancodeposito"}).sort({"_id":1}).exec(function(err, dadosPag){
                         try{
                             task.collection.updateOne({
                                 idtask: req.query.idtask,
                             }, {
                                 $set: {
-                                    codigo: "{Banco:'" + dadosPag[0].banco + "',agencia:'" + dadosPag[0].agencia + "',conta:'" + dadosPag[0].numeroConta + "',tipo:'" + dadosPag[0].tipoConta + "'}"
+                                    codigo: JSON.stringify({
+                                        Banco: dadosPag[0].banco,
+                                        agencia: dadosPag[0].agencia,
+                                        conta: dadosPag[0].numeroConta,
+                                        tipo: dadosPag[0].tipoConta
+                                    })
                                 }
                             });
                             console.log("Carteira TED alterada");
@@ -894,7 +960,3 @@ app.get("/", async (req,res)=>{
 app.listen(porta,()=>{
    console.log(`funcionando\nhttp://localhost:${porta}/`);    
 });
-
-
-
-

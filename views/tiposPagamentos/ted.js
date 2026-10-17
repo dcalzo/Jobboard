@@ -14,6 +14,77 @@ const ispbPorCodigoBanco = {
 	"707": "62232889"
 };
 
+function lerDadosBancarios(codigo) {
+	if (typeof codigo !== "string" || !codigo.trim()) {
+		throw new Error("Os dados bancários do serviço não foram cadastrados.");
+	}
+
+	let dadosBancarios;
+	try {
+		dadosBancarios = JSON.parse(codigo);
+	} catch (error) {
+		const codigoLegado = codigo.match(/^\{Banco:'([\s\S]*)',agencia:'([\s\S]*)',conta:'([\s\S]*)',tipo:'([\s\S]*)'\}$/);
+		if (!codigoLegado) {
+			throw new Error("Os dados bancários do serviço não estão em um formato válido.");
+		}
+		dadosBancarios = {
+			Banco: codigoLegado[1],
+			agencia: codigoLegado[2],
+			conta: codigoLegado[3],
+			tipo: codigoLegado[4]
+		};
+	}
+
+	if (!dadosBancarios || typeof dadosBancarios !== "object" || Array.isArray(dadosBancarios)) {
+		throw new Error("Os dados bancários do serviço não estão em um formato válido.");
+	}
+
+	return {
+		banco: String(dadosBancarios.Banco || dadosBancarios.banco || "").trim(),
+		agencia: String(dadosBancarios.agencia || "").trim(),
+		numeroConta: String(dadosBancarios.conta || dadosBancarios.numeroConta || "").trim(),
+		tipoConta: String(dadosBancarios.tipo || dadosBancarios.tipoConta || "").trim()
+	};
+}
+
+function criarPreviaTransferenciaPagBank(taskPagamento, contaPagamento = {}, erro = "") {
+	const valorTexto = String(taskPagamento.valor).trim();
+	const valor = Number(valorTexto.includes(",")
+		? valorTexto.replace(/\./g, "").replace(",", ".")
+		: valorTexto);
+	if (!Number.isFinite(valor) || valor <= 0) {
+		throw new Error("O valor do serviço é inválido para pré-visualização da transferência.");
+	}
+
+	const valorTaxaPlataforma = Math.round(valor * 0.15 * 100) / 100;
+	if (valorTaxaPlataforma <= 0) {
+		throw new Error("O valor da taxa da plataforma deve ser maior que zero.");
+	}
+
+	let dadosBancarios = {};
+	try {
+		dadosBancarios = lerDadosBancarios(taskPagamento.codigo);
+	} catch (error) {
+		dadosBancarios = {};
+	}
+
+	return {
+		preview: true,
+		id: "PRÉVIA",
+		status: "SIMULAÇÃO - NÃO ENVIADA",
+		tipo: "Prévia de transferência PagBank",
+		valorServico: valor.toFixed(2),
+		taxaPlataforma: valorTaxaPlataforma.toFixed(2),
+		valorTotal: (valor + valorTaxaPlataforma).toFixed(2),
+		banco: dadosBancarios.banco || "",
+		agencia: dadosBancarios.agencia || "",
+		conta: dadosBancarios.numeroConta || "",
+		tipoConta: dadosBancarios.tipoConta || "",
+		titular: contaPagamento.nome || "",
+		erro: erro || "Transferência não enviada: pré-visualização de desenvolvimento."
+	};
+}
+
 async function criarTransferenciaPagBank(taskPagamento, contaPagamento) {
 	const valorTexto = String(taskPagamento.valor).trim();
 	const valor = Number(valorTexto.includes(",")
@@ -86,5 +157,7 @@ async function criarTransferenciaPagBank(taskPagamento, contaPagamento) {
 
 module.exports = {
 	criarTransferenciaPagBank,
+	criarPreviaTransferenciaPagBank,
+	lerDadosBancarios,
 	ispbPorCodigoBanco
 };

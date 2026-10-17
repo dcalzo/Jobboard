@@ -5,6 +5,15 @@
     text-align: center;
 }
 
+.qr-code{
+    display: block;
+    width: 180px;
+    height: auto;
+    max-width: 90vw;
+    margin: 12px auto;
+    image-rendering: pixelated;
+}
+
 .divLista{   
     width: 100%;   
     text-align: center;   

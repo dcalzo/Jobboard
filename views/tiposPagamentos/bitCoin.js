@@ -1,6 +1,31 @@
 const BitPay = require("bitpay-sdk");
 const env = require("../../dev.env.js");
 
+function criarPreviaPagamentoBitcoin(taskPagamento) {
+	const valorTexto = String(taskPagamento.valor).trim();
+	const valor = Number(valorTexto.includes(",")
+		? valorTexto.replace(/\./g, "").replace(",", ".")
+		: valorTexto);
+	if (!Number.isFinite(valor) || valor <= 0) {
+		throw new Error("O valor do serviço é inválido para pré-visualização do Bitcoin.");
+	}
+
+	const valorTaxaPlataforma = Math.round(valor * 0.15 * 100) / 100;
+	if (valorTaxaPlataforma <= 0) {
+		throw new Error("O valor da taxa da plataforma deve ser maior que zero.");
+	}
+
+	return {
+		preview: true,
+		invoiceId: "PRÉVIA",
+		valorServico: valor.toFixed(2),
+		taxaPlataforma: valorTaxaPlataforma.toFixed(2),
+		valorTotal: (valor + valorTaxaPlataforma).toFixed(2),
+		paymentUrl: "#",
+		lightningInvoice: "PREVIA-LIGHTNING-NAO-PAGAVEL"
+	};
+}
+
 async function criarPagamentoBitcoinLightning(taskPagamento) {
 	const valorTexto = String(taskPagamento.valor).trim();
 	const valor = Number(valorTexto.includes(",")
@@ -51,5 +76,6 @@ async function criarPagamentoBitcoinLightning(taskPagamento) {
 }
 
 module.exports = {
-	criarPagamentoBitcoinLightning
+	criarPagamentoBitcoinLightning,
+	criarPreviaPagamentoBitcoin
 };

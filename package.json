@@ -4,6 +4,7 @@
   "description": "um quadro de serviços para empresas e profissionais",
   "main": "index.js",
   "scripts": {
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Dario Calzoli",
@@ -36,6 +37,9 @@
     "url": "^0.11.3"
   },
   "devDependencies": {
+    "concurrently": "^10.0.6",
+    "connect-livereload": "^0.6.1",
+    "livereload": "^0.10.3",
     "nodemon": "^3.1.11"
   }
 }
