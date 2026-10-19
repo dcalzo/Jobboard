@@ -29,7 +29,7 @@
                     <%}%>
                   </td>
                   <td id="conteudo" name="conteudo" style="width: 85%;" >
-                    <div style="height: 390px; overflow-y: scroll;">
+                    <div style="height: 600px; overflow-y: scroll;">
                     <table style="width: 99%;">
                       <thead>
                         <tr>
@@ -52,33 +52,34 @@
                       </thead>
                       <tbody>
                         <%for(let x =0; x<task.length; x++){%>
-                          <%if(task[x].column == "postEnd"){%>
                         <tr>
-                          <td style="width: 10%;">
-                            <%=task[x].gitLocal%>
-                          </td>
-                          <td style="width: 10%;">
-                            <%=task[x].titleService%>
-                          </td>
-                          <td style="width: 10%;">
-                            <%=task[x].developer%>
-                          </td>
-                          <td style="width: 10%;">
-                            <%=task[x].valor%>
-                          </td>
-                          <td style="width: 10%;">
-                            <%if(task[x].column == "postEnd"){%>
-                              <a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&idtask=<%=task[x].idtask%>&emailDev=<%=task[x].developer%>&estadoPg=postPag&tipoPagamento=<%=task[x].tipoPagamento%>">
-                                Pagar
-                              </a>                              
-                            <%}else{%>
-                              <div class="divMensagensPago">
-                                Pago
-                              </div>
-                            <%}%>
-                          </td>
+                            <td style="width: 10%;">
+                              <%=task[x].gitLocal%>
+                            </td>
+                            <td style="width: 10%;">
+                              <%=task[x].titleService%>
+                            </td>
+                            <td style="width: 10%;">
+                              <%=task[x].developer%>
+                            </td>
+                            <td style="width: 10%;">
+                              <%=task[x].valor%>
+                            </td>
+                            <td style="width: 10%;">
+                              <%if(task[x].column=="postRev"){%>
+                                <input type="text" name="comprovante" id="comprovante" placeholder="comprovante do pagamento do profissional" value="<%=task[x].comprovante%>" />
+                                <a href="?taskServ=altera&id=<%=task[x]._id%>&menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>">
+                                    Salvar comprovante do profissional
+                                </a>
+                              <%}%>
+                              <%if(task[x].column=="postRev" || task[x].column=="postEnd" ){%>
+                                <input type="text" name="comprovantePlataforma" id="comprovantePlataforma" placeholder="comprovante do pagamento da plataforma" value="<%=task[x].comprovantePlataforma%>" />
+                                <a href="?taskServ=altera&id=<%=task[x]._id%>&menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>">
+                                    Salvar comprovante da plataforma
+                                </a>
+                              <%}%>
+                            </td> 
                         </tr>
-                        <%}%>
                       <%}%>
                       </tbody>
                     </table>

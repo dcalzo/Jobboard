@@ -302,18 +302,7 @@ app.get("/", async (req,res)=>{
             } 
             else if(req.query.menu == "historico"){
                 if(req.query.taskServ == "altera"){
-                    try{
-                        task.collection.updateOne({
-                            idtask: req.query.count
-                        }, {
-                            $set: {
-                                column: req.query.column
-                            }
-                        });
-                        console.log("task finalizada");
-                    }catch(e){
-                        console.log("Erro: "+e.message);
-                    }
+                    console.log("area historico");
                 }
                 task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
                     contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){
@@ -345,7 +334,24 @@ app.get("/", async (req,res)=>{
                     senha2: req.query.senha2, 
                     seletor: req.query.seletor});
             }
+            // -------------------CONCLUIDOS-----------------------
             else if(req.query.menu == "concluidos"){
+                    if(req.query.taskServ == "altera"){
+                        try{
+                        task.collection.updateOne({
+                            idtask: req.query.count
+                        }, {
+                            $set: {
+                                column: req.query.column,
+                                comprovante: req.query.comprovante,
+                                comprovantePlataforma: req.query.comprovantePlataforma
+                            }
+                        });
+                        console.log("task atualizada");
+                    }catch(e){
+                        console.log("Erro: "+e.message);
+                    }
+                    }
                     contratante.find({email:req.query.email}).sort({"_id":1}).exec(function(err, contratante){  
                             task.find({email:req.query.email}).sort({"_id":1}).exec(function(err, task){
                                 res.render("company/concluidos/index",{

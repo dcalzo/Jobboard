@@ -69,12 +69,16 @@
                             <%=task[x].valor%><br />
                           </td>    
                           <td style="width: 10%;">
-                            <%if(task[x].column=="postRev"){%>
-                              <a href="?taskServ=altera&id=<%=task[x]._id%>&menu=historico&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>">
-                                  finalizar
-                              </a>
+                            <%if(task[x].column == "postRev"){%>
+                              <a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&idtask=<%=task[x].idtask%>&emailDev=<%=task[x].developer%>&estadoPg=postPag&tipoPagamento=<%=task[x].tipoPagamento%>">
+                                Pagar
+                              </a>                              
+                            <%}else if(task[x].column == "postEnd"){%>
+                              <div class="divMensagensPago">
+                                Pago
+                              </div>
                             <%}%>
-                          </td>                     
+                          </td>                                              
                           <td style="width: 10%;">
                             <button type="button" data-toggle="modal" data-target="#myModal" 
                               onclick="jobTask(
