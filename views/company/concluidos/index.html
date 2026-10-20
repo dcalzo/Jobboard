@@ -30,7 +30,7 @@
                   </td>
                   <td id="conteudo" name="conteudo" style="width: 85%;" >
                     <div style="height: 600px; overflow-y: scroll;">
-                    <table style="width: 99%;">
+                    <table class="concludedServicesTable" style="width: 99%;">
                       <thead>
                         <tr>
                           <td style="width: 10%;">
@@ -68,13 +68,13 @@
                             <td style="width: 10%;">
                               <%if(task[x].column=="postRev" || task[x].column=="postEnd"){%>
                                 <input type="text" name="comprovante" id="comprovante" placeholder="comprovante do pagamento do profissional" value="<%=task[x].comprovante%>" />
-                                <a href="?taskServ=altera&id=<%=task[x]._id%>&menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>">
+                                <a href="?taskServ=altera&id=<%=task[x]._id%>&menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>" onclick="return incluirComprovantes(this)">
                                     Salvar comprovante do profissional
                                 </a>
                               <%}%>
                               <%if(task[x].column=="postRev" || task[x].column=="postEnd" ){%>
                                 <input type="text" name="comprovantePlataforma" id="comprovantePlataforma" placeholder="comprovante do pagamento da plataforma" value="<%=task[x].comprovantePlataforma%>" />
-                                <a href="?taskServ=altera&id=<%=task[x]._id%>&menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>">
+                                <a href="?taskServ=altera&id=<%=task[x]._id%>&menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>" onclick="return incluirComprovantes(this)">
                                     Salvar comprovante da plataforma
                                 </a>
                               <%}%>
@@ -88,5 +88,15 @@
                 </tr>
               </table>    
         </form>        
+        <script>
+          function incluirComprovantes(link) {
+            const container = link.parentElement;
+            const url = new URL(link.href);
+            url.searchParams.set('comprovante', container.querySelector('input[name="comprovante"]').value);
+            url.searchParams.set('comprovantePlataforma', container.querySelector('input[name="comprovantePlataforma"]').value);
+            link.href = url.toString();
+            return true;
+          }
+        </script>
     </body>
 </html>

@@ -88,8 +88,8 @@ app.get("/", async (req,res)=>{
             else if(req.query.menu == "board"){                
                 if(req.query.taskServ == "altera"){  
                     try{
-                        task.collection.updateOne({
-                            idtask: req.query.count
+                        await task.updateOne({
+                            _id: req.query.id
                         }, {
                             $set: {
                                 column: req.query.column

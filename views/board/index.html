@@ -128,7 +128,6 @@
                                                         data-task-id="<%=taskList[x]._id%>"
                                                         data-task-count="<%=taskList[x].idtask%>"
                                                         data-next-column="postEnd"
-                                                        ondragstart="dragTask(event)"
                                                         onclick="jobTask(
                                                             '<%=taskList[x].titleService%>', 
                                                             '<%=taskList[x].description%>', 
@@ -142,8 +141,8 @@
                                                             <%=taskList[x].developer%><br />
                                                             <%=taskList[x].email%><br />
                                                             <%if(typeuser=="contractor"){%>
-                                                                <a onclick="event.stopPropagation()" href="?taskServ=altera&id=<%=taskList[x]._id%>&menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=taskList[x].idtask%>">
-                                                                     próxima coluna
+                                                                <a onclick="event.stopPropagation()" href="?id=<%=taskList[x]._id%>&menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postRev&count=<%=taskList[x].idtask%>">
+                                                                     cadastro financeiro
                                                                 </a>
                                                             <%}%>
                                                             <%intWidth = intWidth+50%>

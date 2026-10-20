@@ -122,6 +122,27 @@
     margin-top: 0;  
 }
 
+.ScrollTable,
+.concludedServicesTable{
+    border-collapse: collapse;
+}
+
+.ScrollTable td,
+.concludedServicesTable td{
+    border: 1px solid #9bb8c9;
+    padding: 6px;
+}
+
+.ScrollTable tr:nth-child(odd),
+.concludedServicesTable tr:nth-child(odd){
+    background-color: #ffffff;
+}
+
+.ScrollTable tr:nth-child(even),
+.concludedServicesTable tr:nth-child(even){
+    background-color: #eaf6ff;
+}
+
 .divMensagensPago{
     width: 98%;
     height: 20px;

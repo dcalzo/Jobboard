@@ -56,18 +56,12 @@
                         <td style="width: 25%; border: 1px solid #020202;">
                           <%=task.column%>
                         </td>
-                        <td style="width: 25%; border: 1px solid #020202; margin-left: 0px;">
-                          <%
-                            const pagamentoConfirmado = task.column === "postEnd" && (
-                              task.tipoPagamento === "PIX"
-                                  ? typeof pagamentoRecebido !== 'undefined' && pagamentoRecebido
-                                  : task.tipoPagamento === "bancodeposito"
-                                    ? typeof pagamentoRecebidoTED !== 'undefined' && pagamentoRecebidoTED
-                                    : true
-                            );
-                          %>
-                          <% if (pagamentoConfirmado) { %>
+                        <td style="width: 25%; border: 1px solid #020202; margin-left: 0px;">                          
+                          <% if (task.comprovante !== undefined && task.comprovante.trim() !== "") { %>
                             <p style="color: green;">pay</p>
+                            <p style="color: green;">
+                              Comprovante<br /><%=task.comprovante%>
+                            </p>
                           <% } else { %>
                             <p style="color: red;">Wait</p>
                           <% } %>

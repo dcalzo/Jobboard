@@ -12,7 +12,7 @@
         <h1><b>historico de Serviços</b></h1><br />    
         <form class="backForm">
             <%=typeuser%>
-            <table style="width: 98%;">
+            <table>
                 <tr>
                   <td style="width: 15%;">
                     <ul>
@@ -74,9 +74,13 @@
                                 Pagar
                               </a>                              
                             <%}else if(task[x].column == "postEnd"){%>
-                              <div class="divMensagensPago">
-                                Pago
-                              </div>
+                              <%if(task[x].comprovante && task[x].comprovante.trim() && task[x].comprovantePlataforma && task[x].comprovantePlataforma.trim()){%>
+                                <div class="divMensagensPago">Pago</div>
+                              <%}else if(task[x].comprovante && task[x].comprovante.trim()){%>
+                                <div class="divMensagensPago">Pagou só o profissional</div><br />
+                              <%}else if(task[x].comprovantePlataforma && task[x].comprovantePlataforma.trim()){%>
+                                <div class="divMensagensPago">Pagou só a plataforma</div><br />
+                              <%}%>
                             <%}%>
                           </td>                                              
                           <td style="width: 10%;">
