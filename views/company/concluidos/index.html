@@ -68,13 +68,13 @@
                             <td style="width: 10%;">
                               <%if(task[x].column=="postRev" || task[x].column=="postEnd"){%>
                                 <input type="text" name="comprovante" id="comprovante" placeholder="comprovante do pagamento do profissional" value="<%=task[x].comprovante%>" />
-                                <a href="?taskServ=altera&id=<%=task[x]._id%>&menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>" onclick="return incluirComprovantes(this)">
+                                <a href="?developer=<%=task[x].developer%>&contabilidade=comprovante&taskServ=altera&id=<%=task[x]._id%>&menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>" onclick="return incluirComprovantes(this)">
                                     Salvar comprovante do profissional
                                 </a>
                               <%}%>
                               <%if(task[x].column=="postRev" || task[x].column=="postEnd" ){%>
                                 <input type="text" name="comprovantePlataforma" id="comprovantePlataforma" placeholder="comprovante do pagamento da plataforma" value="<%=task[x].comprovantePlataforma%>" />
-                                <a href="?taskServ=altera&id=<%=task[x]._id%>&menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>" onclick="return incluirComprovantes(this)">
+                                <a href="?developer=<%=task[x].developer%>&contabilidade=comprovantePlataforma&taskServ=altera&id=<%=task[x]._id%>&menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>" onclick="return incluirComprovantes(this)">
                                     Salvar comprovante da plataforma
                                 </a>
                               <%}%>

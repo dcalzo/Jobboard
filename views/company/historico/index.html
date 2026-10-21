@@ -102,7 +102,50 @@
                   </div>
                   </td>
                 </tr>
-              </table>    
+              </table><br />
+              <label>Gastos Anuais</label><br />
+              <table class="concludedServicesTable monthlyIncomeTable">
+                        <tr>
+                          <td>Ano</td>
+                          <td>Janeiro</td>
+                          <td>Fevereiro</td>
+                          <td>Março</td>
+                          <td>Abril</td>
+                          <td>Maio</td>
+                          <td>Junho</td>
+                          <td>Julho</td>
+                          <td>Agosto</td>
+                          <td>Setembro</td>
+                          <td>Outubro</td>
+                          <td>Novembro</td>
+                          <td>Dezembro</td>
+                          <td>Total</td>
+                        </tr>
+                        <%
+                          var anoContabilidade = contabilidade.length
+                            ? contabilidade[0].ano
+                            : String(new Date().getFullYear());
+                          var totaisPorMes = Array(12).fill(0);
+                          contabilidade.forEach(function(registro) {
+                            var mes = Number(registro.mes);
+                            var valor = Number(String(registro.valor).replace(',', '.'));
+                            if (String(registro.ano) === String(anoContabilidade) && mes >= 1 && mes <= 12 && Number.isFinite(valor)) {
+                              totaisPorMes[mes - 1] += valor;
+                            }
+                          });
+                          var totalAnual = totaisPorMes.reduce(function(total, valor) {
+                            return total + valor;
+                          }, 0);
+                        %>
+                        <tr>
+                          <td><%=anoContabilidade%></td>
+                          <% totaisPorMes.forEach(function(totalMes) { %>
+                            <td>R$<%=totalMes.toFixed(2)%></td>
+                          <% }); %>
+                          <td>R$<%=totalAnual.toFixed(2)%></td>
+                        </tr>
+               </table>
+              <br />
               <script>
                 function jobTask(titulo, description, valor, developer, email) {
                   document.getElementById("titulo").innerHTML = titulo;                   

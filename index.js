@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const contratante = require("./contratante");
 const task = require("./task.js");
+const contabilidade = require("./contabilidade.js");
 const chatmensagem = require("./views/chat/mensagens.js");
 const profissional = require("./views/professional/cadastro/profissional");
 const contasPagamentos = require("./contasPagamento.js");
@@ -301,20 +302,20 @@ app.get("/", async (req,res)=>{
                 });
             } 
             else if(req.query.menu == "historico"){
-                if(req.query.taskServ == "altera"){
-                    console.log("area historico");
-                }
-                task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
-                    contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){
+               task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
+                contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){
+                    contabilidade.find({contato:req.query.email}).sort({"_id":1}).exec(function(err, contabilidade){
                         res.render("company/historico/index",{
                             typeuser: req.query.typeuser, 
                             email:req.query.email, 
                             senha:req.query.senha,
                             contratante: contratante,
+                            contabilidade: contabilidade,
                             task: task
                         });
-                        });
-                    });   
+                    });                        
+                    });
+                });   
             } 
             else if(req.query.menu == "fichaCont" || req.query.cadastroContractor == "Salvar"){                               
                 res.render("company/cadastroCont/index",{typeuser: req.query.typeuser, 
@@ -335,9 +336,9 @@ app.get("/", async (req,res)=>{
                     seletor: req.query.seletor});
             }
             // -------------------CONCLUIDOS-----------------------
-            else if(req.query.menu == "concluidos"){
-                    if(req.query.taskServ == "altera"){
-                        try{
+            else if(req.query.menu == "concluidos"){ 
+                if(req.query.taskServ == "altera"){
+                    try{
                         task.collection.updateOne({
                             idtask: req.query.count
                         }, {
@@ -351,20 +352,71 @@ app.get("/", async (req,res)=>{
                     }catch(e){
                         console.log("Erro: "+e.message);
                     }
-                    }
-                    contratante.find({email:req.query.email}).sort({"_id":1}).exec(function(err, contratante){  
-                            task.find({email:req.query.email}).sort({"_id":1}).exec(function(err, task){
-                                res.render("company/concluidos/index",{
-                                typeuser: req.query.typeuser,
-                                task: task,
-                                contratante: contratante,
-                                profissional: profissional,
-                                email:req.query.email,
-                                senha:req.query.senha
-                            });
+                }
+                if(req.query.contabilidade == "comprovante"){
+                    task.find({developer:req.query.developer}).sort({"_id":1}).exec(function(err, tasks){
+                        if(err){
+                            console.log("Erro ao buscar tarefa: "+err.message);
+                            return;
+                        }
+                        if(!tasks || tasks.length === 0){
+                            console.log("Nenhuma tarefa encontrada para contabilizar");
+                            return;
+                        }
+                        var dataAtual = new Date();
+                        contabilidade.collection.insertMany([{
+                            contato: req.query.developer,
+                            ano: String(dataAtual.getFullYear()),
+                            mes: String(dataAtual.getMonth() + 1),
+                            dia: String(dataAtual.getDate()),
+                            valor: tasks[0].valor
+                        }]).then(function(){
+                            msg = "contabilidade salvo"
+                            console.log(msg) 
+                        }).catch(function(error){
+                            console.log("Erro ao salvar contabilidade: "+error.message);
                         });
-                    });  
-            } 
+                    });
+                }                
+                if(req.query.contabilidade == "comprovantePlataforma"){                    
+                    task.find({email:req.query.email}).sort({"_id":1}).exec(function(err, tasks){
+                        if(err){
+                            console.log("Erro ao buscar tarefa: "+err.message);
+                            return;
+                        }
+                        console.log(tasks);
+                        if(!tasks || tasks.length === 0){
+                            console.log("Nenhuma tarefa encontrada para contabilizar");
+                            return;
+                        }
+                        var dataAtual = new Date();
+                        contabilidade.collection.insertMany([{
+                            contato: tasks[0].email,
+                            ano: String(dataAtual.getFullYear()),
+                            mes: String(dataAtual.getMonth() + 1),
+                            dia: String(dataAtual.getDate()),
+                            valor: tasks[0].valor
+                        }]).then(function(){
+                            msg = "contabilidade plataforma salva"
+                            console.log(msg) 
+                        }).catch(function(error){
+                            console.log("Erro ao salvar contabilidade da plataforma: "+error.message);
+                        });
+                    });
+                }
+                contratante.find({email:req.query.email}).sort({"_id":1}).exec(function(err, contratante){
+                    task.find({email:req.query.email}).sort({"_id":1}).exec(function(err, task){
+                        res.render("company/concluidos/index",{
+                            typeuser: req.query.typeuser,
+                            task: task,
+                            contratante: contratante,
+                            profissional: profissional,
+                            email:req.query.email,
+                            senha:req.query.senha
+                        });
+                    });
+                });
+            }
             else  if(req.query.menu == "chatC"){  
                 if( req.query.conversa == "Enviar" && req.query.usuario != "" ){
                     try{
@@ -566,15 +618,18 @@ app.get("/", async (req,res)=>{
                 contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, dadosPag){
                     task.find({developer: req.query.email}).sort({"_id":1}).exec(function(err, task){
                     profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, profissional){
-                       res.render("professional/ganho/index",{
-                            typeuser: req.query.typeuser,
-                            email: req.query.email,
-                            senha: req.query.senha,
-                            task: task,
-                            codigoBarras: req.query.hiddenCodigoBarras,
-                            tipoPagamento: req.query.tipoPagamento
+                        contabilidade.find({contato:req.query.email}).sort({"_id":1}).exec(function(err, contabilidade){
+                            res.render("professional/ganho/index",{
+                                typeuser: req.query.typeuser,
+                                email: req.query.email,
+                                senha: req.query.senha,
+                                task: task,
+                                contabilidade: contabilidade,
+                                codigoBarras: req.query.hiddenCodigoBarras,
+                                tipoPagamento: req.query.tipoPagamento
                             });
                         });
+                    });
                   });
               });                                     
             }else  if(req.query.menu == "fichaPro" || req.query.cadastroProf=="Salvar"){                   

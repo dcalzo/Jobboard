@@ -127,6 +127,19 @@
     border-collapse: collapse;
 }
 
+.monthlyIncomeTable{
+    width: 98%;
+    table-layout: fixed;
+}
+
+.monthlyIncomeTable td{
+    width: 7.6923%;
+    box-sizing: border-box;
+    padding: 2px 1px;
+    font-size: clamp(8px, 1vw, 12px);
+    overflow-wrap: anywhere;
+}
+
 .ScrollTable td,
 .concludedServicesTable td{
     border: 1px solid #9bb8c9;
