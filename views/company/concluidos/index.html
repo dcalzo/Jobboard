@@ -10,7 +10,7 @@
     </head>
     <body>
         <h1><b>Seviços Concluidos</b></h1><br />    
-        <form class="backForm">
+        <div class="backForm">
             <%=typeuser%>
             <table style="width: 100%;">
                 <tr>
@@ -20,7 +20,7 @@
                     <%}%>
                   </td>
                   <td id="conteudo" name="conteudo" style="width: 85%;" >
-                    <div style="height: 600px; overflow-y: scroll;">
+                    <div style="height: 325px; overflow-y: scroll;">
                     <table class="concludedServicesTable" style="width: 99%;">
                       <thead>
                         <tr>
@@ -75,10 +75,19 @@
                       </tbody>
                     </table>
                   </div>
+                  <br />
+                   <%- include('../avaliacao/index.html', {
+                     typeuser: typeuser,
+                     email: email,
+                     senha: senha,
+                     profissionais: profissionais
+                   }) %>
+                  <br />
                   </td>
                 </tr>
-              </table>    
-        </form>        
+              </table>
+              <br />
+        </div>
         <script>
           function incluirComprovantes(link) {
             const container = link.parentElement;

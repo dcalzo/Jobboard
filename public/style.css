@@ -168,6 +168,43 @@
     color: #77befc;
 }
 
+.rating{
+    display: inline-flex;
+    flex-direction: row;
+    direction: rtl;
+    align-items: center;
+    width: auto;
+    margin-left: 0;
+}
+
+.rating input{
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+}
+
+.rating label{
+    width: auto;
+    margin: 0 2px;
+    color: #b8b8b8;
+    cursor: pointer;
+    font-size: 32px;
+    line-height: 1;
+}
+
+.rating input:checked ~ label,
+.rating label:hover,
+.rating label:hover ~ label{
+    color: #f5b301;
+}
+
+.rating input:focus-visible + label{
+    outline: 2px solid #333;
+    outline-offset: 2px;
+}
+
   .atras{
     background: rgb(54, 144, 248);
     display: flex;

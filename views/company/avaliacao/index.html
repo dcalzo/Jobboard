@@ -1,0 +1,40 @@
+<html>
+    <head>
+      <meta charset="utf-8">
+      <link href="public/style.css" rel="stylesheet">
+      <title>board jobs</title>
+    </head>
+    <body>
+        <form action="/" method="GET">
+            <fieldset>
+                <Label>Como você avalia o profissional selecionado?</label>
+                <select id="profissionalSel" name="profissionalSel" required>
+                    <option value="">Selecione um profissional</option>
+                    <% profissionais.forEach(function(profissional) { %>
+                        <option value="<%=profissional.email%>"><%=profissional.nome || profissional.email%></option>
+                    <% }); %>
+                </select>
+                <div class="rating">
+                    <input type="radio" id="nota-5" name="nota" value="5" required>
+                    <label for="nota-5" aria-label="5 estrelas">★</label>
+                    <input type="radio" id="nota-4" name="nota" value="4">
+                    <label for="nota-4" aria-label="4 estrelas">★</label>
+                    <input type="radio" id="nota-3" name="nota" value="3">
+                    <label for="nota-3" aria-label="3 estrelas">★</label>
+                    <input type="radio" id="nota-2" name="nota" value="2">
+                    <label for="nota-2" aria-label="2 estrelas">★</label>
+                    <input type="radio" id="nota-1" name="nota" value="1">
+                    <label for="nota-1" aria-label="1 estrela">★</label>
+                </div>
+            </fieldset>
+            <label for="comentario">Deixe seu comentário:</label>
+            <textarea id="comentarioProf" name="comentarioProf" rows="4" placeholder="Escreva sua opinião...">                    
+            </textarea>
+            <input type="submit" id="enviaNota" name="enviaNota" value="Enviar Avaliação" />
+            <input type="hidden" id="typeuser" name="typeuser" value="<%=typeuser%>" />
+            <input type="hidden" id="email" name="email" value="<%=email%>" />
+            <input type="hidden" id="senha" name="senha" value="<%=senha%>" />
+            <input type="hidden" id="menu" name="menu" value="concluidos" />
+        </form>   
+    </body>
+</html>

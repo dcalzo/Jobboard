@@ -12,6 +12,7 @@ const { criarTransferenciaPagBank, criarPreviaTransferenciaPagBank, lerDadosBanc
 const { criarPagamentoBitcoinLightning, criarPreviaPagamentoBitcoin } = require("./views/tiposPagamentos/bitCoin.js");
 const { criarPagamentoPix, criarPreviaPagamentoPix } = require("./views/tiposPagamentos/pix.js");
 const env = require("./dev.env.js");
+const avaliar = require("./views/avaliar/avaliar.js");
 const app = express();
 const porta = 8080;
 
@@ -404,15 +405,51 @@ app.get("/", async (req,res)=>{
                         });
                     });
                 }
+                if(req.query.enviaNota == "Enviar Avaliação"){
+                    if(!req.query.profissionalSel || !["1", "2", "3", "4", "5"].includes(String(req.query.nota))){
+                        return res.status(400).send("Selecione um profissional e uma nota para avaliar.");
+                    }
+                    try{
+                        const servicoAvaliado = await task.findOne({
+                            email: req.query.email,
+                            developer: req.query.profissionalSel
+                        });
+                        if(!servicoAvaliado){
+                            return res.status(400).send("O profissional selecionado não foi contratado por este contratante.");
+                        }
+                        await avaliar.collection.insertOne({
+                            contato: req.query.profissionalSel,
+                            comentario: req.query.comentarioProf,
+                            nota: req.query.nota
+                        });
+                        msg = "Avaliação salva";
+                    }catch(error){
+                        console.error("Erro ao salvar avaliação do profissional:", error.message);
+                        return res.status(500).send("Não foi possível salvar a avaliação.");
+                    }
+                }
                 contratante.find({email:req.query.email}).sort({"_id":1}).exec(function(err, contratante){
-                    task.find({email:req.query.email}).sort({"_id":1}).exec(function(err, task){
-                        res.render("company/concluidos/index",{
-                            typeuser: req.query.typeuser,
-                            task: task,
-                            contratante: contratante,
-                            profissional: profissional,
-                            email:req.query.email,
-                            senha:req.query.senha
+                    task.find({email:req.query.email}).sort({"_id":1}).exec(function(err, tasks){
+                        if(err){
+                            console.error("Erro ao buscar serviços concluídos:", err.message);
+                            return res.status(500).send("Não foi possível carregar os serviços concluídos.");
+                        }
+                        const emailsProfissionais = [...new Set(
+                            tasks.map((service) => service.developer).filter(Boolean)
+                        )];
+                        profissional.find({email: {$in: emailsProfissionais}}).sort({"_id":1}).exec(function(err, profissionais){
+                            if(err){
+                                console.error("Erro ao buscar profissionais contratados:", err.message);
+                                return res.status(500).send("Não foi possível carregar os profissionais contratados.");
+                            }
+                            res.render("company/concluidos/index",{
+                                typeuser: req.query.typeuser,
+                                task: tasks,
+                                contratante: contratante,
+                                profissionais: profissionais,
+                                email:req.query.email,
+                                senha:req.query.senha
+                            });
                         });
                     });
                 });
@@ -615,21 +652,52 @@ app.get("/", async (req,res)=>{
                         }
                     }); 
                 }
+                if(req.query.enviaNota == "Enviar Avaliação"){
+                    if(!req.query.contratanteSel || !["1", "2", "3", "4", "5"].includes(String(req.query.nota))){
+                        return res.status(400).send("Selecione um contratante e uma nota para avaliar.");
+                    }
+                    try{
+                        await avaliar.collection.insertOne({
+                            contato: req.query.contratanteSel,
+                            comentario: req.query.comentarioConta,
+                            nota: req.query.nota
+                        });
+                        msg = "Avaliação salva";
+                        console.log(msg);
+                    }catch(error){
+                        console.error("Erro ao salvar avaliação do contratante:", error.message);
+                        return res.status(500).send("Não foi possível salvar a avaliação.");
+                    }
+                }
                 contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, dadosPag){
                     task.find({developer: req.query.email}).sort({"_id":1}).exec(function(err, task){
-                    profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, profissional){
-                        contabilidade.find({contato:req.query.email}).sort({"_id":1}).exec(function(err, contabilidade){
-                            res.render("professional/ganho/index",{
-                                typeuser: req.query.typeuser,
-                                email: req.query.email,
-                                senha: req.query.senha,
-                                task: task,
-                                contabilidade: contabilidade,
-                                codigoBarras: req.query.hiddenCodigoBarras,
-                                tipoPagamento: req.query.tipoPagamento
+                        if(err){
+                            console.error("Erro ao buscar serviços do profissional:", err.message);
+                            return res.status(500).send("Não foi possível carregar os serviços do profissional.");
+                        }
+                        const emailsContratantes = [...new Set(
+                            task.map((service) => service.email).filter(Boolean)
+                        )];
+                        contratante.find({email: {$in: emailsContratantes}}).sort({"_id":1}).exec(function(err, contratantes){
+                            if(err){
+                                console.error("Erro ao buscar contratantes dos serviços:", err.message);
+                                return res.status(500).send("Não foi possível carregar os contratantes dos serviços.");
+                            }
+                            profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, profissional){
+                                contabilidade.find({contato:req.query.email}).sort({"_id":1}).exec(function(err, contabilidade){
+                                    res.render("professional/ganho/index",{
+                                        typeuser: req.query.typeuser,
+                                        email: req.query.email,
+                                        senha: req.query.senha,
+                                        task: task,
+                                        contratante: contratantes,
+                                        contabilidade: contabilidade,
+                                        codigoBarras: req.query.hiddenCodigoBarras,
+                                        tipoPagamento: req.query.tipoPagamento
+                                    });
+                                });
                             });
                         });
-                    });
                   });
               });                                     
             }else  if(req.query.menu == "fichaPro" || req.query.cadastroProf=="Salvar"){                   

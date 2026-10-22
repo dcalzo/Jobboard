@@ -6,8 +6,7 @@
     </head>
     <body>
         <h1><b>Board</b></h1><br />    
-        <form>
-            <%=typeuser%>
+        <div>
             <table style="width: 100%;">
                 <tr>
                   <td style="width: 25%;">
@@ -17,7 +16,7 @@
                   </td>
                   <td id="conteudo" name="conteudo" style="width: 75%;" >
                     controle financeiro   
-                    <div style="width: 100%; height: 250px; overflow-y: scroll;">
+                    <div style="width: 100%; height: 220px; overflow-y: scroll;">
                     <table class="concludedServicesTable">
                       <tr style="background-color: #f2f2f2; border: 1px solid #020202;">
                         <td style="width: 25%; border: 1px solid #020202;"><b>trabalho</b></td>
@@ -62,9 +61,9 @@
                       </tr>                      
                       <%})%>
                     </table>                    
-                    </div> 
-                    <br />                    
-                    <div style="width: 100%; height: 250px; overflow-y: scroll;">
+                    </div>
+                    <br />
+                    <div style="width: 100%; height: 135px; overflow-y: scroll;">
                       Ganho Mensal<br />                      
                       <table class="concludedServicesTable monthlyIncomeTable">
                         <tr>
@@ -107,15 +106,22 @@
                           <td>R$<%=totalAnual.toFixed(2)%></td>
                         </tr>
                       </table>
-                </div>  
-                    <br />                    
-                  </td>
+                </div>
+                <br />
+                <%- include('../avaliacao/index.html', {
+                  typeuser: typeuser,
+                  email: email,
+                  senha: senha,
+                  contratante: contratante
+                }) %>
+                <br />
+               </td>
                 </tr>                
               </table>  
               <input type="hidden" id="typeuser" name="typeuser" value="<%=typeuser%>" />              
               <input type="hidden" id="email" name="email" value="<%=email%>" />              
               <input type="hidden" id="senha" name="senha" value="<%=senha%>" />
-              <input type="hidden" id="menu" name="menu" value="ganho" />      
-        </form>        
+              <input type="hidden" id="menu" name="menu" value="ganho" />
+        </div>
     </body>
 </html>
