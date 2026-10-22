@@ -10,16 +10,7 @@
         <tr>
           <td style="width: 15%;">
             <%if(typeuser=="contractor"){%>
-                  <ul>
-                    <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Board</a></li>
-                    <li><a href="?menu=createTask&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Criar Serviço</a></li>
-                    <li><a href="?menu=historico&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Historico de serviços</a></li>
-                    <li><a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Cadastro Financeiro</a></li>
-                    <li><a href="?menu=fichaCad&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">ficha Cadastral</a></li>
-                    <li><a href="?menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">serviços Concluidos</a></li>
-                    <li><a href="?menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Chat com os contratados</a></li>
-                    <li><a href="?menu=ProdutosCaju&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">Produtos Caju</a></li>
-                  </ul>    
+              <%- include('../../menu/menu.html') %>
             <%}%>
           </td>
           <td id="conteudo" name="conteudo" style="width: 85%;" >

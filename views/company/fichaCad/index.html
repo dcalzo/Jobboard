@@ -15,16 +15,7 @@
             <table style="width: 100%;">
                 <tr>
                   <td style="width: 15%;">
-                    <ul>
-                      <li><a href="?menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">Board</a></li>
-                      <li><a href="?menu=createTask&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">Criar Serviço</a></li>
-                      <li><a href="?menu=historico&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">Historico de Serviços</a></li>
-                      <li><a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">Cadastro Financeiro</a></li>
-                      <li><a href="?menu=fichaCad&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">ficha Cadastral</a></li>
-                      <li><a href="?menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">serviços Concluidos</a></li>
-                      <li><a href="?menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">Chat com os contratados</a></li>
-                      <li><a href="?menu=ProdutosCaju&senha=<%=senha%>&email=<%=email%>&typeuser=contractor">Produtos Caju</a></li>
-                  </ul>
+                    <%- include('../../menu/menu.html') %>
                   </td>
                   <td id="conteudo" name="conteudo" style="width: 85%;" >
                     <form>
