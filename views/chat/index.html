@@ -33,23 +33,26 @@
                 <tr>
                   <td class="contactsScroll">
                     <table class="chatcontacts">
+                      <%const contatosExibidos = new Set();%>
                       <%for(let x = 0; x < task.length; x++ ){%>
-                        <tr>
-                          <%if(typeuser=="professional"){%>
-                            <td>
-                              <%if(remetente == task[x].developer && (task[x].column == "postDev" || task[x].column == "postRev" || task[x].column == "postEnd")){%>
+                        <%if(typeuser=="professional"){%>
+                          <%if(remetente == task[x].developer && (task[x].column == "postDev" || task[x].column == "postRev" || task[x].column == "postEnd") && task[x].email && !contatosExibidos.has(task[x].email)){%>
+                            <%contatosExibidos.add(task[x].email);%>
+                            <tr>
+                              <td>
                                 <a href="?usuario=<%=task[x].email%>&menu=chatP&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">
-                                  <b><%=task[x].titleService%> -> <%=task[x].column%></b>
+                                  <b><%=task[x].company%></b>
                                 </a>
-                              <%}%>
-                            </td>
-                            <%}else if(typeuser=="contractor" && (task[x].column == "postDev" || task[x].column == "postRev" || task[x].column == "postEnd")){%>
+                              </td>
+                            </tr>
+                          <%}%>
+                        <%}else if(typeuser=="contractor" && remetente == task[x].email && task[x].developer && (task[x].column == "postDev" || task[x].column == "postRev" || task[x].column == "postEnd") && !contatosExibidos.has(task[x].developer)){%>
+                          <%contatosExibidos.add(task[x].developer);%>
+                          <tr>
                             <td>
-                              <%if(remetente == task[x].email){%>
                                 <a href="?usuario=<%=task[x].developer%>&menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">
-                                  <b><%=task[x].titleService%> -> <%=task[x].column%></b>
+                                  <b><%=task[x].developer%></b>
                                 </a>
-                              <%}%>
                             </td>
                           </tr>
                         <%}%>

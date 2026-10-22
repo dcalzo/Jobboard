@@ -455,7 +455,7 @@ app.get("/", async (req,res)=>{
                 });
             }
             else  if(req.query.menu == "chatC"){  
-                if( req.query.conversa == "Enviar" && req.query.usuario != "" ){
+                if( req.query.conversa == "Enviar"){
                     try{
                         chatmensagem.collection.insertMany([
                         {           
