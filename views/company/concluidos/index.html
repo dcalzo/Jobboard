@@ -92,10 +92,26 @@
           function incluirComprovantes(link) {
             const container = link.parentElement;
             const url = new URL(link.href);
-            url.searchParams.set('comprovante', container.querySelector('input[name="comprovante"]').value);
-            url.searchParams.set('comprovantePlataforma', container.querySelector('input[name="comprovantePlataforma"]').value);
-            link.href = url.toString();
-            return true;
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/';
+
+            const parameters = {
+              q: url.searchParams.get('q'),
+              comprovante: container.querySelector('input[name="comprovante"]').value,
+              comprovantePlataforma: container.querySelector('input[name="comprovantePlataforma"]').value
+            };
+            for (const [name, value] of Object.entries(parameters)) {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = name;
+              input.value = value;
+              form.appendChild(input);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+            return false;
           }
         </script>
     </body>

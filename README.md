@@ -20,6 +20,27 @@ npm run dev
 
 Abra http://localhost:8080/. O LiveReload atualiza o navegador ao salvar arquivos HTML, incluindo os templates em `views`. Para ativar a recarga automática, inicie a aplicação com `npm run dev`; o servidor de recarga é iniciado junto com a aplicação.
 
+### Criptografia dos parâmetros da URL
+
+Os parâmetros de navegação são enviados em um único parâmetro `q`, criptografado com AES-256-GCM. Os formulários são enviados por POST para que credenciais e outros campos não apareçam na URL.
+
+Em desenvolvimento, se `URL_ENCRYPTION_KEY` não estiver definida, a aplicação cria e reutiliza automaticamente uma chave local aleatória em `.url-encryption-key`. Esse arquivo é ignorado pelo Git; mantenha-o para que links criptografados continuem funcionando após reiniciar.
+
+Em produção, configure `URL_ENCRYPTION_KEY` no ambiente do processo Node com uma chave aleatória de pelo menos 32 bytes. Gere uma chave com:
+
+```text
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+No PowerShell, defina-a antes de iniciar a aplicação em produção:
+
+```powershell
+$env:URL_ENCRYPTION_KEY = "<chave-gerada>"
+npm run dev
+```
+
+Use a mesma chave após reinicializações e em todas as instâncias do servidor. Não a grave no repositório nem a compartilhe. URLs antigas com parâmetros em texto puro devem ser substituídas: abra a página inicial e navegue usando os links e formulários do sistema.
+
 ### database used
 
 mongodb-compass (localhost)

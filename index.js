@@ -13,8 +13,13 @@ const { criarPagamentoBitcoinLightning, criarPreviaPagamentoBitcoin } = require(
 const { criarPagamentoPix, criarPreviaPagamentoPix } = require("./views/tiposPagamentos/pix.js");
 const env = require("./dev.env.js");
 const avaliar = require("./views/avaliar/avaliar.js");
+const { createUrlEncryption, queryParameter, resolveEncryptionSecret } = require("./urlEncryption");
 const app = express();
 const porta = 8080;
+const urlEncryption = createUrlEncryption(resolveEncryptionSecret(process.env.URL_ENCRYPTION_KEY, {
+    isProduction: process.env.NODE_ENV === "production",
+    keyFilePath: path.join(__dirname, ".url-encryption-key")
+}));
 
 if (process.env.NODE_ENV !== "production") {
     require("./live-reload")();
@@ -44,6 +49,55 @@ app.use("/public", express.static(path.join(__dirname,"public")));
 app.set("views", path.join(__dirname,"/views"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+    const send = res.send;
+    res.send = function(body) {
+        if (typeof body === "string") {
+            body = urlEncryption.encryptHtmlLinks(body);
+        }
+        return send.call(this, body);
+    };
+
+    if (req.path !== "/") return next();
+
+    if (req.method === "POST") {
+        if (Object.keys(req.query).length > 0) {
+            return res.status(400).send("Não envie parâmetros pela URL; use os formulários do sistema.");
+        }
+        const body = req.body || {};
+        if (Object.prototype.hasOwnProperty.call(body, queryParameter)) {
+            try {
+                const decryptedQuery = urlEncryption.decryptQuery(body[queryParameter]);
+                delete body[queryParameter];
+                req.query = { ...decryptedQuery, ...body };
+            } catch (error) {
+                console.error("Não foi possível descriptografar os parâmetros do formulário:", error.message);
+                return res.status(400).send("Parâmetros do formulário inválidos ou não foi possível descriptografá-los.");
+            }
+        } else {
+            req.query = body;
+        }
+        req.method = "GET";
+        return next();
+    }
+
+    if ((req.method !== "GET" && req.method !== "HEAD") || Object.keys(req.query).length === 0) {
+        return next();
+    }
+
+    if (Object.keys(req.query).length !== 1 ||
+        !Object.prototype.hasOwnProperty.call(req.query, queryParameter)) {
+        return res.status(400).send("Parâmetros da URL não criptografados. Acesse a página inicial e use os links do sistema.");
+    }
+
+    try {
+        req.query = urlEncryption.decryptQuery(req.query[queryParameter]);
+        return next();
+    } catch (error) {
+        console.error("Não foi possível descriptografar os parâmetros da URL:", error.message);
+        return res.status(400).send("Parâmetros da URL inválidos ou não foi possível descriptografá-los.");
+    }
+});
 
 app.get("/", async (req,res)=>{    
     let emailLog = "";

@@ -198,7 +198,18 @@
                                         column: destination,
                                         count: draggedTask.dataset.taskCount
                                     });
-                                    window.location.href = "?" + params.toString();
+                                    const form = document.createElement("form");
+                                    form.method = "POST";
+                                    form.action = "/";
+                                    for (const [name, value] of params) {
+                                        const input = document.createElement("input");
+                                        input.type = "hidden";
+                                        input.name = name;
+                                        input.value = value;
+                                        form.appendChild(input);
+                                    }
+                                    document.body.appendChild(form);
+                                    form.submit();
                                     draggedTask = null;
                                 }
 
