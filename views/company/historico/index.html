@@ -10,7 +10,7 @@
     </head>
     <body>
         <h1><b>historico de Serviços</b></h1><br />    
-        <form class="backForm">
+        <div class="backForm">
             <%=typeuser%>
             <table>
                 <tr>
@@ -19,7 +19,7 @@
                   </td>
                   <td id="conteudo" name="conteudo"  >
                     <br><br>  
-                    <div style="width: 100%; height: 400px; overflow-y: scroll;">        
+                    <div style="width: 100%; height: 300px; overflow-y: scroll;">        
                       <table class="ScrollTable">
                         <tr>
                           <td style="width: 10%;">
@@ -94,8 +94,45 @@
                   </td>
                 </tr>
               </table><br />
-              <label>Gastos Anuais</label><br />
-              <table class="concludedServicesTable monthlyIncomeTable">
+              <div style="width: 80%; margin-left: 270px">
+              <%
+                var gastosPorAno = {};
+                contabilidade.forEach(function(registro) {
+                  var ano = String(registro.ano || "").trim();
+                  var mes = Number(registro.mes);
+                  var valorTexto = String(registro.valor || "").trim().replace(/[^\d,.-]/g, "");
+                  var valor = Number(valorTexto.includes(",")
+                    ? valorTexto.replace(/\./g, "").replace(",", ".")
+                    : valorTexto);
+
+                  if (/^\d{4}$/.test(ano) && mes >= 1 && mes <= 12 && Number.isFinite(valor)) {
+                    if (!gastosPorAno[ano]) {
+                      gastosPorAno[ano] = Array(12).fill(0);
+                    }
+                    gastosPorAno[ano][mes - 1] += valor;
+                  }
+                });
+                var anosComGastos = Object.keys(gastosPorAno).sort(function(a, b) {
+                  return Number(b) - Number(a);
+                });
+                if (anosComGastos.length === 0) {
+                  var anoAtual = String(new Date().getFullYear());
+                  gastosPorAno[anoAtual] = Array(12).fill(0);
+                  anosComGastos.push(anoAtual);
+                }
+              %>
+              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#gastosAnuaisModal">
+                Gastos Anuais
+              </button>
+              <div class="modal fade" id="gastosAnuaisModal" role="dialog" aria-labelledby="gastosAnuaisTitulo">
+                <div class="modal-dialog modal-lg" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">&times;</button>
+                      <h4 class="modal-title" id="gastosAnuaisTitulo">Gastos Anuais</h4>
+                    </div>
+                    <div class="modal-body" style="overflow-x: auto;">
+                      <table class="concludedServicesTable monthlyIncomeTable">
                         <tr>
                           <td>Ano</td>
                           <td>Janeiro</td>
@@ -112,30 +149,97 @@
                           <td>Dezembro</td>
                           <td>Total</td>
                         </tr>
-                        <%
-                          var anoContabilidade = contabilidade.length
-                            ? contabilidade[0].ano
-                            : String(new Date().getFullYear());
-                          var totaisPorMes = Array(12).fill(0);
-                          contabilidade.forEach(function(registro) {
-                            var mes = Number(registro.mes);
-                            var valor = Number(String(registro.valor).replace(',', '.'));
-                            if (String(registro.ano) === String(anoContabilidade) && mes >= 1 && mes <= 12 && Number.isFinite(valor)) {
-                              totaisPorMes[mes - 1] += valor;
-                            }
-                          });
+                        <% anosComGastos.forEach(function(ano) {
+                          var totaisPorMes = gastosPorAno[ano];
                           var totalAnual = totaisPorMes.reduce(function(total, valor) {
                             return total + valor;
                           }, 0);
                         %>
-                        <tr>
-                          <td><%=anoContabilidade%></td>
-                          <% totaisPorMes.forEach(function(totalMes) { %>
-                            <td>R$<%=totalMes.toFixed(2)%></td>
-                          <% }); %>
-                          <td>R$<%=totalAnual.toFixed(2)%></td>
-                        </tr>
-               </table>
+                          <tr>
+                            <td><%=ano%></td>
+                            <% totaisPorMes.forEach(function(totalMes) { %>
+                              <td>R$<%=totalMes.toFixed(2)%></td>
+                            <% }); %>
+                            <td>R$<%=totalAnual.toFixed(2)%></td>
+                          </tr>
+                        <% }); %>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <br />
+               <br />
+               <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#avaliarProfissionalModal">
+                 Avaliar profissional
+               </button>
+               <br />
+               <div class="modal fade" id="avaliarProfissionalModal" role="dialog" aria-labelledby="avaliarProfissionalTitulo">
+                 <div class="modal-dialog" role="document">
+                   <div class="modal-content">
+                     <div class="modal-header">
+                       <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">&times;</button>
+                       <h4 class="modal-title" id="avaliarProfissionalTitulo">Avaliar profissional</h4>
+                     </div>
+                     <div class="modal-body">
+                       <%- include('../avaliacao/index.html', {
+                         typeuser: typeuser,
+                         email: email,
+                         senha: senha,
+                         profissionais: profissionais
+                       }) %>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+              <br />
+              </div>
+              <div style="width: 80%; margin-left: 270px">
+              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#avaliacoesEmpresaModal">
+                Consultar avaliações
+              </button>
+              </div>
+              <div class="modal fade" id="avaliacoesEmpresaModal" role="dialog" aria-labelledby="avaliacoesEmpresaTitulo">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">&times;</button>
+                      <h4 class="modal-title" id="avaliacoesEmpresaTitulo">Avaliações dos profissionais</h4>
+                    </div>
+                    <div class="modal-body">
+                      <%
+                        var totalAvaliacoes = avaliacoesContratante.length;
+                        var somaNotas = avaliacoesContratante.reduce(function(acumulador, avaliacao) {
+                          return acumulador + Number(avaliacao.nota || 0);
+                        }, 0);
+                        var mediaAvaliacoes = totalAvaliacoes > 0 ? (somaNotas / totalAvaliacoes) : 0;
+                      %>
+                      <% if (totalAvaliacoes === 0) { %>
+                        <p>A empresa ainda não recebeu avaliações dos profissionais.</p>
+                      <% } else { %>
+                        <div class="panel panel-info">
+                          <div class="panel-heading">
+                            Média geral: <%=mediaAvaliacoes.toFixed(1)%>/5
+                          </div>
+                          <div class="panel-body">
+                            Soma das notas: <%=somaNotas%> / <%=totalAvaliacoes * 5%> em <%=totalAvaliacoes%> avaliação<%=totalAvaliacoes === 1 ? "" : "es"%>.
+                          </div>
+                        </div>
+                        <% avaliacoesContratante.forEach(function(avaliacao) { %>
+                          <div class="panel panel-default">
+                            <div class="panel-heading">
+                              Nota: <%=avaliacao.nota%>/5
+                            </div>
+                            <div class="panel-body">
+                              <%=avaliacao.comentario || "Sem comentário."%>
+                            </div>
+                          </div>
+                        <% }); %>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <br />
               <script>
                 function jobTask(titulo, description, valor, developer, email) {
@@ -143,7 +247,7 @@
                   document.getElementById("valor").innerHTML = valor;
                   document.getElementById("description").innerHTML = description;                   
                   document.getElementById("developer").innerHTML = developer;
-                  document.getElementById("email").innerHTML = email;
+                  document.getElementById("emailTask").innerHTML = email;
                 }
                 </script>
               <div class="container" style="width: 200px;">
@@ -157,13 +261,13 @@
                       <div class="modal-body">
                         <p id="description"></p>
                         <p id="developer"></p>
-                        <p id="email"></p>
+                        <p id="emailTask"></p>
                         <p id="valor"></p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-        </form>        
+        </div>
     </body>
 </html>

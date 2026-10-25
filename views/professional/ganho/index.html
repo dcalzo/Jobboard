@@ -2,6 +2,9 @@
     <head>
       <meta charset="utf-8">
       <link href="public/style.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
       <title>board jobs</title>
     </head>
     <body>
@@ -108,12 +111,75 @@
                       </table>
                 </div>
                 <br />
-                <%- include('../avaliacao/index.html', {
-                  typeuser: typeuser,
-                  email: email,
-                  senha: senha,
-                  contratante: contratante
-                }) %>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#avaliarContratanteModal">
+                  Avaliar contratante
+                </button>
+                <br />
+                <div class="modal fade" id="avaliarContratanteModal" role="dialog" aria-labelledby="avaliarContratanteTitulo">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">&times;</button>
+                        <h4 class="modal-title" id="avaliarContratanteTitulo">Avaliar contratante</h4>
+                      </div>
+                      <div class="modal-body">
+                        <%- include('../avaliacao/index.html', {
+                          typeuser: typeuser,
+                          email: email,
+                          senha: senha,
+                          contratante: contratante
+                        }) %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <br />
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#avaliacoesProfissionalModal">
+                  Consultar avaliações dos contratantes
+                </button>
+                <div class="modal fade" id="avaliacoesProfissionalModal" role="dialog" aria-labelledby="avaliacoesProfissionalTitulo">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">&times;</button>
+                        <h4 class="modal-title" id="avaliacoesProfissionalTitulo">Avaliações recebidas</h4>
+                      </div>
+                      <div class="modal-body">
+                        <%
+                          var totalAvaliacoesProfissional = avaliacoesProfissional.length;
+                          var somaNotasProfissional = avaliacoesProfissional.reduce(function(total, avaliacao) {
+                            return total + Number(avaliacao.nota || 0);
+                          }, 0);
+                          var mediaAvaliacoesProfissional = totalAvaliacoesProfissional > 0
+                            ? somaNotasProfissional / totalAvaliacoesProfissional
+                            : 0;
+                        %>
+                        <% if (totalAvaliacoesProfissional === 0) { %>
+                          <p>Você ainda não recebeu avaliações dos contratantes.</p>
+                        <% } else { %>
+                          <div class="panel panel-info">
+                            <div class="panel-heading">
+                              Média geral: <%=mediaAvaliacoesProfissional.toFixed(1)%>/5
+                            </div>
+                            <div class="panel-body">
+                              <%=totalAvaliacoesProfissional%> avaliação<%=totalAvaliacoesProfissional === 1 ? "" : "es"%>
+                            </div>
+                          </div>
+                          <% avaliacoesProfissional.forEach(function(avaliacao) { %>
+                            <div class="panel panel-default">
+                              <div class="panel-heading">
+                                Nota: <%=avaliacao.nota%>/5
+                              </div>
+                              <div class="panel-body">
+                                <%=avaliacao.comentario || "Sem comentário."%>
+                              </div>
+                            </div>
+                          <% }); %>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <br />
                </td>
                 </tr>                

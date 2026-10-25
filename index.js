@@ -43,6 +43,46 @@ mongoose.connect(env.LOCAL_HOST).then(function(){
 let msg = null;
 let codigoBarrasPagBank = "";
 
+async function salvarLancamentoContabilidade({ contato, tipo, servico, ano, mes, dia, valor }) {
+    const taskId = String(servico._id);
+    const idtaskNumero = Number(servico.idtask);
+    const idsTask = [...new Set([servico.idtask, idtaskNumero].filter((value) =>
+        value !== undefined && value !== null && Number.isFinite(Number(value))
+    ))];
+    const lancamento = {
+        idtask: idtaskNumero,
+        taskId: taskId,
+        contato: contato,
+        tipo: tipo,
+        ano: ano,
+        mes: mes,
+        dia: dia,
+        valor: valor
+    };
+    const identidade = { contato: contato, tipo: tipo, taskId: taskId };
+    const lancamentoAntigo = await contabilidade.findOne({
+        contato: contato,
+        taskId: { $exists: false },
+        idtask: { $in: idsTask },
+        $or: [
+            { tipo: tipo },
+            { tipo: { $exists: false } },
+            { tipo: null }
+        ]
+    }).sort({ _id: 1 }).exec();
+
+    if (lancamentoAntigo) {
+        return contabilidade.updateOne({ _id: lancamentoAntigo._id }, { $set: lancamento }).exec();
+    }
+
+    try {
+        return await contabilidade.updateOne(identidade, { $set: lancamento }, { upsert: true }).exec();
+    } catch (error) {
+        if (error.code !== 11000) throw error;
+        return contabilidade.updateOne(identidade, { $set: lancamento }).exec();
+    }
+}
+
 app.engine("html", require("ejs").renderFile);
 app.set("view engine", "html");
 app.use("/public", express.static(path.join(__dirname,"public")));
@@ -357,20 +397,73 @@ app.get("/", async (req,res)=>{
                 });
             } 
             else if(req.query.menu == "historico"){
-               task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
-                contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){
-                    contabilidade.find({contato:req.query.email}).sort({"_id":1}).exec(function(err, contabilidade){
-                        res.render("company/historico/index",{
-                            typeuser: req.query.typeuser, 
-                            email:req.query.email, 
-                            senha:req.query.senha,
-                            contratante: contratante,
-                            contabilidade: contabilidade,
-                            task: task
+            //--------------------HISTORICO-----------------------
+              if(req.query.enviaNota == "Enviar Avaliação"){
+                console.log("salvar avaliação");
+                    if(!req.query.profissionalSel || !["1", "2", "3", "4", "5"].includes(String(req.query.nota))){
+                        return res.status(400).send("Selecione um profissional e uma nota para avaliar.");
+                    }
+                    try{
+                        const servicoAvaliado = await task.findOne({
+                            email: req.query.email,
+                            developer: req.query.profissionalSel
                         });
-                    });                        
+                        if(!servicoAvaliado){
+                            return res.status(400).send("O profissional selecionado não foi contratado por este contratante.");
+                        }
+                        await avaliar.collection.insertOne({
+                            contato: req.query.profissionalSel,
+                            comentario: req.query.comentarioProf,
+                            nota: req.query.nota
+                        });
+                        msg = "Avaliação salva";
+                        const historicoQuery = urlEncryption.encryptQuery({
+                            typeuser: req.query.typeuser,
+                            email: req.query.email,
+                            senha: req.query.senha,
+                            menu: "historico"
+                        });
+                        return res.redirect(`/?${queryParameter}=${historicoQuery}`);
+                    }catch(error){
+                        console.error("Erro ao salvar avaliação do profissional:", error.message);
+                        return res.status(500).send("Não foi possível salvar a avaliação.");
+                    }
+                }
+                task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, tasks){
+                    if(err){
+                        console.error("Erro ao buscar serviços do histórico:", err.message);
+                        return res.status(500).send("Não foi possível carregar o histórico.");
+                    }
+                    const emailsProfissionais = [...new Set(
+                        tasks.map((service) => service.developer).filter(Boolean)
+                    )];
+                    profissional.find({email: {$in: emailsProfissionais}}).sort({"_id":1}).exec(function(err, profissionais){
+                        if(err){
+                            console.error("Erro ao buscar profissionais do histórico:", err.message);
+                            return res.status(500).send("Não foi possível carregar os profissionais do histórico.");
+                        }
+                        contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){
+                            contabilidade.find({contato:{$in: emailsProfissionais}}).sort({ano:-1, _id:-1}).exec(function(err, contabilidade){
+                                avaliar.find({contato: req.query.email}).sort({"_id":-1}).exec(function(err, avaliacoesContratante){
+                                    if(err){
+                                        console.error("Erro ao buscar avaliações da empresa:", err.message);
+                                        return res.status(500).send("Não foi possível carregar as avaliações da empresa.");
+                                    }
+                                    res.render("company/historico/index",{
+                                        typeuser: req.query.typeuser,
+                                        email:req.query.email,
+                                        senha:req.query.senha,
+                                        profissionais: profissionais,
+                                        contratante: contratante,
+                                        contabilidade: contabilidade,
+                                        avaliacoesContratante: avaliacoesContratante,
+                                        task: tasks
+                                    });
+                                });
+                            });
+                        });
                     });
-                });   
+                });
             } 
             else if(req.query.menu == "fichaCont" || req.query.cadastroContractor == "Salvar"){                               
                 res.render("company/cadastroCont/index",{typeuser: req.query.typeuser, 
@@ -394,8 +487,14 @@ app.get("/", async (req,res)=>{
             else if(req.query.menu == "concluidos"){ 
                 if(req.query.taskServ == "altera"){
                     try{
-                        task.collection.updateOne({
-                            idtask: req.query.count
+                        const idtaskTexto = String(req.query.count || "").trim();
+                        const idtaskNumero = Number(idtaskTexto);
+                        const idsTask = Number.isFinite(idtaskNumero)
+                            ? [idtaskTexto, idtaskNumero]
+                            : [idtaskTexto];
+                        await task.collection.updateOne({
+                            email: req.query.email,
+                            idtask: { $in: idsTask }
                         }, {
                             $set: {
                                 column: req.query.column,
@@ -409,79 +508,74 @@ app.get("/", async (req,res)=>{
                     }
                 }
                 if(req.query.contabilidade == "comprovante"){
-                    task.find({developer:req.query.developer}).sort({"_id":1}).exec(function(err, tasks){
-                        if(err){
-                            console.log("Erro ao buscar tarefa: "+err.message);
-                            return;
-                        }
-                        if(!tasks || tasks.length === 0){
-                            console.log("Nenhuma tarefa encontrada para contabilizar");
-                            return;
-                        }
-                        var dataAtual = new Date();
-                        contabilidade.collection.insertMany([{
-                            contato: req.query.developer,
-                            ano: String(dataAtual.getFullYear()),
-                            mes: String(dataAtual.getMonth() + 1),
-                            dia: String(dataAtual.getDate()),
-                            valor: tasks[0].valor
-                        }]).then(function(){
-                            msg = "contabilidade salvo"
-                            console.log(msg) 
-                        }).catch(function(error){
-                            console.log("Erro ao salvar contabilidade: "+error.message);
-                        });
-                    });
-                }                
-                if(req.query.contabilidade == "comprovantePlataforma"){                    
-                    task.find({email:req.query.email}).sort({"_id":1}).exec(function(err, tasks){
-                        if(err){
-                            console.log("Erro ao buscar tarefa: "+err.message);
-                            return;
-                        }
-                        console.log(tasks);
-                        if(!tasks || tasks.length === 0){
-                            console.log("Nenhuma tarefa encontrada para contabilizar");
-                            return;
-                        }
-                        var dataAtual = new Date();
-                        contabilidade.collection.insertMany([{
-                            contato: tasks[0].email,
-                            ano: String(dataAtual.getFullYear()),
-                            mes: String(dataAtual.getMonth() + 1),
-                            dia: String(dataAtual.getDate()),
-                            valor: tasks[0].valor
-                        }]).then(function(){
-                            msg = "contabilidade plataforma salva"
-                            console.log(msg) 
-                        }).catch(function(error){
-                            console.log("Erro ao salvar contabilidade da plataforma: "+error.message);
-                        });
-                    });
-                }
-                if(req.query.enviaNota == "Enviar Avaliação"){
-                    if(!req.query.profissionalSel || !["1", "2", "3", "4", "5"].includes(String(req.query.nota))){
-                        return res.status(400).send("Selecione um profissional e uma nota para avaliar.");
-                    }
                     try{
-                        const servicoAvaliado = await task.findOne({
+                        const idtaskTexto = String(req.query.count || "").trim();
+                        const idtaskNumero = Number(idtaskTexto);
+                        const idsTask = Number.isFinite(idtaskNumero)
+                            ? [idtaskTexto, idtaskNumero]
+                            : [idtaskTexto];
+                        const servico = await task.collection.findOne({
                             email: req.query.email,
-                            developer: req.query.profissionalSel
+                            idtask: { $in: idsTask },
+                            developer: req.query.developer
                         });
-                        if(!servicoAvaliado){
-                            return res.status(400).send("O profissional selecionado não foi contratado por este contratante.");
+                        if(!idtaskTexto || !servico){
+                            return res.status(404).send("Serviço não encontrado para contabilizar o pagamento.");
                         }
-                        await avaliar.collection.insertOne({
-                            contato: req.query.profissionalSel,
-                            comentario: req.query.comentarioProf,
-                            nota: req.query.nota
+                        const dataAtual = new Date();
+                        const dataLancamento = {
+                            ano: String(dataAtual.getFullYear()),
+                            mes: String(dataAtual.getMonth() + 1),
+                            dia: String(dataAtual.getDate())
+                        };
+                        await salvarLancamentoContabilidade({
+                            ...dataLancamento,
+                            contato: req.query.developer,
+                            tipo: "rendaProfissional",
+                            servico: servico,
+                            valor: servico.valor
                         });
-                        msg = "Avaliação salva";
                     }catch(error){
-                        console.error("Erro ao salvar avaliação do profissional:", error.message);
-                        return res.status(500).send("Não foi possível salvar a avaliação.");
+                        console.error("Erro ao contabilizar pagamento do profissional:", error.message);
+                        return res.status(500).send("Não foi possível atualizar os gastos anuais.");
                     }
-                }
+                }                
+                if(req.query.contabilidade == "comprovantePlataforma"){
+                    try{
+                        const idtaskTexto = String(req.query.count || "").trim();
+                        const idtaskNumero = Number(idtaskTexto);
+                        const idsTask = Number.isFinite(idtaskNumero)
+                            ? [idtaskTexto, idtaskNumero]
+                            : [idtaskTexto];
+                        const servico = await task.collection.findOne({
+                            email: req.query.email,
+                            idtask: { $in: idsTask }
+                        });
+                        if(!idtaskTexto || !servico){
+                            return res.status(404).send("Serviço não encontrado para contabilizar a taxa da plataforma.");
+                        }
+                        const valorTexto = String(servico.valor || "").trim();
+                        const valorServico = Number(valorTexto.includes(",")
+                            ? valorTexto.replace(/\./g, "").replace(",", ".")
+                            : valorTexto);
+                        if(!Number.isFinite(valorServico)){
+                            return res.status(400).send("O valor do serviço não é válido para contabilizar a taxa.");
+                        }
+                        const dataAtual = new Date();
+                        await salvarLancamentoContabilidade({
+                            contato: req.query.email,
+                            tipo: "despesaPlataforma",
+                            servico: servico,
+                            ano: String(dataAtual.getFullYear()),
+                            mes: String(dataAtual.getMonth() + 1),
+                            dia: String(dataAtual.getDate()),
+                            valor: (valorServico * 0.15).toFixed(2)
+                        });
+                    }catch(error){
+                        console.error("Erro ao contabilizar taxa da plataforma:", error.message);
+                        return res.status(500).send("Não foi possível atualizar os gastos anuais.");
+                    }
+                }                
                 contratante.find({email:req.query.email}).sort({"_id":1}).exec(function(err, contratante){
                     task.find({email:req.query.email}).sort({"_id":1}).exec(function(err, tasks){
                         if(err){
@@ -739,15 +833,22 @@ app.get("/", async (req,res)=>{
                             }
                             profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, profissional){
                                 contabilidade.find({contato:req.query.email}).sort({"_id":1}).exec(function(err, contabilidade){
-                                    res.render("professional/ganho/index",{
-                                        typeuser: req.query.typeuser,
-                                        email: req.query.email,
-                                        senha: req.query.senha,
-                                        task: task,
-                                        contratante: contratantes,
-                                        contabilidade: contabilidade,
-                                        codigoBarras: req.query.hiddenCodigoBarras,
-                                        tipoPagamento: req.query.tipoPagamento
+                                    avaliar.find({contato: req.query.email}).sort({"_id":-1}).exec(function(err, avaliacoesProfissional){
+                                        if(err){
+                                            console.error("Erro ao buscar avaliações do profissional:", err.message);
+                                            return res.status(500).send("Não foi possível carregar as avaliações.");
+                                        }
+                                        res.render("professional/ganho/index",{
+                                            typeuser: req.query.typeuser,
+                                            email: req.query.email,
+                                            senha: req.query.senha,
+                                            task: task,
+                                            contratante: contratantes,
+                                            contabilidade: contabilidade,
+                                            avaliacoesProfissional: avaliacoesProfissional,
+                                            codigoBarras: req.query.hiddenCodigoBarras,
+                                            tipoPagamento: req.query.tipoPagamento
+                                        });
                                     });
                                 });
                             });
