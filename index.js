@@ -140,21 +140,23 @@ app.use((req, res, next) => {
 });
 
 app.get("/", async (req,res)=>{    
-    let emailLog = "";
-    let senhalog ="";
-    contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, clienteContato){
-        try{
-            emailLog = clienteContato[0].email;
-            senhalog = clienteContato[0].senha;
-        }catch(e){}
-    });
-    profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, clienteProf){
-         try{
-            emailLog = clienteProf[0].email;
-            senhalog = clienteProf[0].senha;
-        }catch(e){}
-    });
-    if(((req.query.email == "teste" || req.query.email == "teste2@gmail.com" || req.query.email == "teste3" || req.query.email == "calzoli@gmail.com") && req.query.senha == "123") &&
+    let usuarioAutenticado = null;
+    if (typeof req.query.email === "string" &&
+        typeof req.query.senha === "string" &&
+        (req.query.typeuser === "contractor" || req.query.typeuser === "professional")) {
+        try {
+            const modeloUsuario = req.query.typeuser === "contractor" ? contratante : profissional;
+            usuarioAutenticado = await modeloUsuario.findOne({
+                email: req.query.email,
+                senha: req.query.senha
+            }).exec();
+        } catch (error) {
+            console.error("Erro ao consultar as credenciais no banco:", error.message);
+            return res.status(500).send("Não foi possível verificar o login. Tente novamente.");
+        }
+    }
+
+    if (usuarioAutenticado &&
      (req.query.cadastroProf != "Salvar" || req.query.cadastroContractor !="Salvar")){
         if(req.query.typeuser == "contractor"){
             if(req.query.opcao == "Entrar" && task.idtask == undefined){
@@ -169,7 +171,8 @@ app.get("/", async (req,res)=>{
                     aviso: msg});
                 });
             }  
-            else if(req.query.opcao == "Entrar" && task.idtask != undefined){//----------------------------------------Inicio Board  
+            else if(req.query.opcao == "Entrar" && task.idtask != undefined){
+            //----------------------------------------Inicio Board--------------  
                 task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){  
                 res.render("board/index",{
                     typeuser: req.query.typeuser, 
@@ -215,7 +218,8 @@ app.get("/", async (req,res)=>{
                             aviso: msg});
                     }
                 });                 
-            }//-------------------------------------------------------------------------Fim BOARD
+            }
+            //-------------------------------------------------------Fim BOARD
             else if(req.query.menu == "createTask"){  
                 if( req.query.taskServ == "Salvar Serviço" ){
                     msg = "serviço salvo com sucesso";
@@ -258,7 +262,6 @@ app.get("/", async (req,res)=>{
                 });
             }
             else if(req.query.menu == "fincadCont" || req.query.tipoPagamento != null){
-                // -------------------------------------------------------------------------------------------------------------------- 
                 let comprovante = ""; 
                 if(req.query.buttonPay == "Pagar"){                    
                     if(req.query.tipoPagamento == "PIX"){
@@ -397,7 +400,6 @@ app.get("/", async (req,res)=>{
                 });
             } 
             else if(req.query.menu == "historico"){
-            //--------------------HISTORICO-----------------------
               if(req.query.enviaNota == "Enviar Avaliação"){
                 console.log("salvar avaliação");
                     if(!req.query.profissionalSel || !["1", "2", "3", "4", "5"].includes(String(req.query.nota))){
@@ -483,7 +485,6 @@ app.get("/", async (req,res)=>{
                     senha2: req.query.senha2, 
                     seletor: req.query.seletor});
             }
-            // -------------------CONCLUIDOS-----------------------
             else if(req.query.menu == "concluidos"){ 
                 if(req.query.taskServ == "altera"){
                     try{
@@ -680,7 +681,8 @@ app.get("/", async (req,res)=>{
             }            
         }
         else  if(req.query.typeuser == "professional"){
-            if(req.query.opcao == "Entrar"){//-------------------------------------Inicio Board  
+            if(req.query.opcao == "Entrar"){
+            //-------------------------------------Inicio Board  
                 if(req.query.taskServ == "altera"){   
                     try{
                         task.collection.updateOne({
@@ -738,7 +740,8 @@ app.get("/", async (req,res)=>{
                         aviso: msg});
                 }               
             }); 
-            }//-------------------------------------------------------------------------Fim Board
+            }
+            //---------------------------------------------------Fim Board
             else  if(req.query.menu == "ProdutosCaju"){     
                 res.render("professional/caju/index",{
                     typeuser: req.query.typeuser,
@@ -746,7 +749,7 @@ app.get("/", async (req,res)=>{
                     senha:req.query.senha,
                     tipoPagamento: req.query.hiddenCodigoBarras
                 });       
-            }else  if(req.query.menu == "ganho"){ ////////////////////////////////////////////////////////////////////////// 
+            }else  if(req.query.menu == "ganho"){ 
                 if(req.query.chavePix == "PIX"){
                     contasPagamentos.find({tipo: "PIX"}).sort({"_id":1}).exec(function(err, dadosPag){
                         try{
@@ -870,7 +873,7 @@ app.get("/", async (req,res)=>{
                     }); 
                 }      
             
-            }else if(req.query.menu == "fincadPro"){ ////////////////////////////////////////////////////////////////////////////////////////////////////////  
+            }else if(req.query.menu == "fincadPro"){ 
                 if( req.query.cadastraPagamento == "Cadastrar Pagamento"){
                     try{
                         contasPagamentos.collection.insertMany([
@@ -1050,7 +1053,14 @@ app.get("/", async (req,res)=>{
         }             
     }
     else{
-        if(req.query.opcao == "login-pro" && req.query.opcaoPag != "cadastroPro"){   
+        if (req.query.opcao === "Entrar" &&
+            (req.query.typeuser === "contractor" || req.query.typeuser === "professional")) {
+            res.status(401).render("login/index", {
+                logado: "",
+                user: req.query.typeuser,
+                mensagem: "E-mail ou senha inválidos."
+            });
+        }else if(req.query.opcao == "login-pro" && req.query.opcaoPag != "cadastroPro"){
             res.render("login/index",{logado: "", user:"professional"});
         }else if(req.query.opcao == "login-cont" && req.query.opcao != "cadastroCon"){   
             res.render("login/index",{logado: "", user:"contractor"});

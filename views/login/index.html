@@ -5,19 +5,18 @@
       <title>board jobs</title>
     </head>
     <body>
-      <form>
+      <p>
         <a href="?opcao=home">Home</a>
-      </form>                 
-        <form>
+      </p>
+        <form method="post">
           <h1><b>Board Jobs</b></h1><br />    
           <h3><b>LOGIN</b></h3><br />   
           <%=user%><br />    
+          <%if(typeof mensagem !== "undefined" && mensagem){%><p role="alert"><%=mensagem%></p><%}%>
           <input type="text" id="email" name="email" placeholder="E-Mail" /><br />
           <input type="password" id="senha" name="senha" placeholder="Senha" /><br />
           <input type="hidden" id="typeuser" name="typeuser" value="<%=user%>"  />
           <input type="submit" id="opcao" name="opcao" value="Entrar" />          
-        <form>       
-        </form>
         </form>
     </body>
 </html>
