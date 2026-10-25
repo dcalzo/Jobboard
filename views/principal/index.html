@@ -35,7 +35,7 @@
                   <p>Demonstração para Profissionais</p>
                   <table>
                     <tr>
-                      <td style="width: 20%; margin-left: 0px;">
+                      <td style="width: 10%; margin-left: 0px;">
                          <ul>
                         <li><a href="?demo2=demo-boardprof&demo=demo-prof">Board</a></li>
                         <li><a href="?demo2=demo-ganho&demo=demo-prof">Ganhos Financeiros</a></li>
@@ -43,10 +43,10 @@
                         <li><a href="?demo2=demo-chatprof&demo=demo-prof">Chat</a></li>
                       </ul> 
                       </td>
-                      <td style="width: 15%;">
+                      <td style="width: 25%;">
                         <%if(demo2 == undefined || demo2 == "demo-boardprof"){%>    
                           <p>Board</p>
-                          <table class="boardtable">
+                          <table class="boardtable demo-board">
                             <thead class="boardhead">
                               <tr>
                               <td style="width: 5%; margin-left: 0px;">Services</td>
@@ -58,7 +58,7 @@
                             <tbody>
                             <tr>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
                                                         <b>ler planilhas em Python</b><br />
@@ -77,7 +77,7 @@
                                 </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
                                                         <b>gerenciador de restaurante</b><br />
@@ -86,7 +86,7 @@
                                 </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
                                                         <b>gerenciador de audiência para Streaming</b><br />
@@ -95,7 +95,7 @@
                                 </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
                                                         <b>api para bet</b><br />
@@ -113,41 +113,112 @@
                           </table>
                         <%} else if(demo2 == "demo-ganho"){%>
                           <p>Ganhos Financeiros</p>
-                          <table style="width: 100%;">
+                          <table class="demoGainsTable" style="width: 100%;">
+                            <thead>
                             <tr>
                               <td style="width: 25%;"><b>trabalho</b></td>
                               <td style="width: 25%;"><b>pagamento</b></td>
                               <td style="width: 25%;"><b>etapa do desenvolvimento</b></td>
                               <td style="width: 25%;"><b>estado do pagamento</b></td>
                             </tr>
+                            </thead>
+                            <tbody>
                             <tr>
-                              <td style="width: 25%;">api para audiência de streaming</td>
-                              <td style="width: 25%;">
-                                <select style="width: 53%;">
-                                  <option value="" selected ></option>
-                                  <option value="Boleto" >Boleto</option>
-                                  <option value="PIX" >PIX</option>
-                                  <option value="Bitcoin" >Bitcoin</option>
-                                  <option value="bancodeposito" >Deposito bancario</option>
-                                </select>
-                              </td>
+                              <td style="width: 25%;">gerenciador de restaurante</td>
+                              <td style="width: 25%;">R$1.000,00</td>
+                              <td style="width: 25%;">Under development</td>
+                              <td style="width: 25%;">Waiting payment</td>
+                            </tr>
+                            <tr>
+                              <td style="width: 25%;">gerenciador de audiência para Streaming</td>
+                              <td style="width: 25%;">R$500,00</td>
                               <td style="width: 25%;">Revision</td>
                               <td style="width: 25%;">Waiting payment</td>
                             </tr>
+                            <tr>
+                              <td style="width: 25%;">api para bet</td>
+                              <td style="width: 25%;">R$600,00</td>
+                              <td style="width: 25%;">Concluded</td>
+                              <td style="width: 25%;">Paid</td>
+                            </tr>
+                            </tbody>
                           </table>
                         <%} else if(demo2 == "demo-fincad"){%>
                           <p>Cadastro Financeiro</p><br />
-                          <label><b>tipo de pagamento:</b></label>
-                           <select style="width: 50%;">
+                          <label for="demo-payment-type"><b>tipo de pagamento:</b></label>
+                           <select id="demo-payment-type" style="width: 50%;" aria-controls="demo-payment-pix demo-payment-bitcoin demo-payment-bank">
                               <option value="" selected ></option>
-                              <option value="Boleto" >Boleto</option>
                               <option value="PIX" >PIX</option>
                               <option value="Bitcoin" >Bitcoin</option>
                               <option value="bancodeposito" >Deposito bancario</option>
-                           </select><br /><br />
-                           Aqui o profissional vai escolher o tipo de pagamento que deseja receber
+                           </select>
+                           <p>Escolha uma forma de pagamento para ver os dados de demonstração.</p>
+                           <section id="demo-payment-pix" class="demoPaymentForm" aria-labelledby="demo-payment-pix-title" hidden>
+                             <h3 id="demo-payment-pix-title">Cadastro de pagamento via PIX</h3>
+                             <label for="demo-pix-key-type">Tipo de chave PIX</label>
+                             <select id="demo-pix-key-type">
+                               <option value="">Selecione</option>
+                               <option value="cpf">CPF</option>
+                               <option value="cnpj">CNPJ</option>
+                               <option value="email">E-mail</option>
+                               <option value="telefone">Telefone</option>
+                               <option value="aleatoria">Chave aleatória</option>
+                             </select>
+                             <label for="demo-pix-key">Chave PIX</label>
+                             <input id="demo-pix-key" type="text" placeholder="Digite a chave PIX">
+                             <label for="demo-pix-holder">Nome do titular</label>
+                             <input id="demo-pix-holder" type="text" placeholder="Nome completo">
+                           </section>
+                           <section id="demo-payment-bitcoin" class="demoPaymentForm" aria-labelledby="demo-payment-bitcoin-title" hidden>
+                             <h3 id="demo-payment-bitcoin-title">Cadastro de pagamento via Bitcoin</h3>
+                             <label for="demo-bitcoin-network">Rede</label>
+                             <select id="demo-bitcoin-network">
+                               <option value="bitcoin">Bitcoin</option>
+                               <option value="lightning">Lightning</option>
+                             </select>
+                             <label for="demo-bitcoin-address">Endereço da carteira</label>
+                             <input id="demo-bitcoin-address" type="text" placeholder="Digite o endereço da carteira">
+                             <label for="demo-bitcoin-holder">Nome do titular</label>
+                             <input id="demo-bitcoin-holder" type="text" placeholder="Nome completo">
+                           </section>
+                           <section id="demo-payment-bank" class="demoPaymentForm" aria-labelledby="demo-payment-bank-title" hidden>
+                             <h3 id="demo-payment-bank-title">Cadastro para depósito bancário</h3>
+                             <label for="demo-bank-name">Banco</label>
+                             <input id="demo-bank-name" type="text" placeholder="Nome do banco">
+                             <label for="demo-bank-agency">Agência</label>
+                             <input id="demo-bank-agency" type="text" placeholder="Número da agência">
+                             <label for="demo-bank-account">Conta</label>
+                             <input id="demo-bank-account" type="text" placeholder="Número da conta e dígito">
+                             <label for="demo-bank-account-type">Tipo de conta</label>
+                             <select id="demo-bank-account-type">
+                               <option value="corrente">Corrente</option>
+                               <option value="poupanca">Poupança</option>
+                             </select>
+                             <label for="demo-bank-holder">Nome do titular</label>
+                             <input id="demo-bank-holder" type="text" placeholder="Nome completo">
+                             <label for="demo-bank-document">CPF ou CNPJ do titular</label>
+                             <input id="demo-bank-document" type="text" placeholder="Digite o CPF ou CNPJ">
+                           </section>
+                           <p class="demoPaymentNotice">Demonstração: os dados preenchidos não serão enviados nem salvos.</p>
                         <%} else if(demo2 == "demo-chatprof"){%>
                           <p>Chat com o Cliente</p>
+                          <section class="demoChat" aria-label="Chat de demonstração">
+                            <header class="demoChatHeader">
+                              <strong>Cliente de demonstração</strong>
+                              <span>Disponível para conversar</span>
+                            </header>
+                            <div class="demoChatMessages" id="demo-chat-messages" aria-live="polite" aria-relevant="additions">
+                              <p class="demoChatBubble demoChatIncoming">Olá! Como está o andamento do serviço?</p>
+                              <p class="demoChatBubble demoChatOutgoing">Está avançando bem. Posso te enviar uma atualização em breve.</p>
+                              <p class="demoChatBubble demoChatIncoming">Ótimo, obrigado por me avisar!</p>
+                            </div>
+                            <div class="demoChatComposer">
+                              <label class="demoChatSrOnly" for="demo-chat-input">Escreva uma mensagem</label>
+                              <input id="demo-chat-input" type="text" maxlength="500" placeholder="Escreva uma mensagem..." autocomplete="off">
+                              <button id="demo-chat-send" type="button">Enviar</button>
+                            </div>
+                            <p class="demoChatNotice">Demonstração: as mensagens e respostas são simuladas e não serão salvas.</p>
+                          </section>
                         <%}%>
                       </td>
                     </tr>
@@ -169,7 +240,7 @@
                       <td style="width: 15%;">
                          <%if(demo2 == undefined || demo2 == "demo-boardcont"){%>  
                           <p>Board</p>
-                          <table class="boardtable">
+                          <table class="boardtable demo-board">
                             <thead class="boardhead">
                               <tr>
                               <td style="width: 5%; margin-left: 0px;">Services</td>
@@ -181,7 +252,7 @@
                             <tbody>
                             <tr>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
                                                         <b>ler planilhas em Python</b><br />
@@ -200,7 +271,7 @@
                                 </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
                                                         <b>gerenciador de restaurante</b><br />
@@ -209,7 +280,7 @@
                                 </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
                                                         <b>gerenciador de audiência para Streaming</b><br />
@@ -218,7 +289,7 @@
                                 </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
                                                         <b>api para bet</b><br />
@@ -236,14 +307,176 @@
                           </table>
                          <%} else if(demo2 == "demo-task"){%>
                           <p>Criar Serviço</p>
+                          <section class="demoService">
+                            <p>Preencha os dados abaixo para simular a publicação de um serviço.</p>
+                            <div class="demoServiceForm" id="demo-service-form">
+                              <label for="demo-service-title">Título do serviço</label>
+                              <input id="demo-service-title" type="text" maxlength="100" placeholder="Ex.: Criar site para restaurante" required>
+                              <label for="demo-service-description">Descrição</label>
+                              <textarea id="demo-service-description" rows="5" maxlength="1000" placeholder="Descreva o que precisa ser feito" required></textarea>
+                              <label for="demo-service-payment">Forma de pagamento</label>
+                              <select id="demo-service-payment" required>
+                                <option value="">Selecione</option>
+                                <option value="PIX">PIX</option>
+                                <option value="Bitcoin">Bitcoin</option>
+                                <option value="Depósito bancário">Depósito bancário</option>
+                              </select>
+                              <label for="demo-service-value">Valor do serviço (R$)</label>
+                              <input id="demo-service-value" type="number" min="0.01" step="0.01" placeholder="Ex.: 500,00" required>
+                              <label for="demo-service-repository">Repositório do projeto (opcional)</label>
+                              <input id="demo-service-repository" type="url" placeholder="https://github.com/...">
+                              <label for="demo-service-document">Link de referência ou documento (opcional)</label>
+                              <input id="demo-service-document" type="url" placeholder="https://...">
+                              <button id="demo-service-create" type="button">Publicar serviço de demonstração</button>
+                            </div>
+                            <p class="demoServiceNotice" id="demo-service-notice" role="status" aria-live="polite">Demonstração: o serviço não será enviado nem salvo.</p>
+                            <div id="demo-service-list" class="demoServiceList" aria-live="polite"></div>
+                          </section>
                          <%} else if(demo2 == "demo-historico"){%>
-                          <p>Historico de Serviços</p>
+                          <p>Histórico de Serviços</p>
+                          <div class="demoHistory">
+                            <table class="demoGainsTable">
+                              <thead>
+                                <tr>
+                                  <td><b>serviço</b></td>
+                                  <td><b>profissional</b></td>
+                                  <td><b>pagamento</b></td>
+                                  <td><b>etapa atual</b></td>
+                                  <td><b>valor</b></td>
+                                  <td><b>publicado em</b></td>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>Site para restaurante</td>
+                                  <td>Marina Costa</td>
+                                  <td>PIX</td>
+                                  <td>Em desenvolvimento</td>
+                                  <td>R$ 1.200,00</td>
+                                  <td>12/08/2026</td>
+                                </tr>
+                                <tr>
+                                  <td>Automação de planilhas</td>
+                                  <td>Rafael Lima</td>
+                                  <td>Bitcoin</td>
+                                  <td>Em revisão</td>
+                                  <td>R$ 450,00</td>
+                                  <td>03/09/2026</td>
+                                </tr>
+                                <tr>
+                                  <td>Identidade visual da loja</td>
+                                  <td>Camila Souza</td>
+                                  <td>Depósito bancário</td>
+                                  <td>Concluído</td>
+                                  <td>R$ 800,00</td>
+                                  <td>18/09/2026</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <p class="demoPaymentNotice">Serviços e dados fictícios para demonstração.</p>
+                          </div>
                          <%} else if(demo2 == "demo-fincadcont"){%>
                           <p>Cadastro Financeiro</p>
+                          <section class="demoPaymentForm">
+                            <h3>Forma de pagamento do contratante</h3>
+                            <label for="demo-contractor-payment-type">Método de pagamento</label>
+                            <select id="demo-contractor-payment-type">
+                              <option value="">Selecione</option>
+                              <option value="pix">PIX</option>
+                              <option value="bitcoin">Bitcoin</option>
+                              <option value="bank">Depósito bancário</option>
+                            </select>
+                            <div id="demo-contractor-pix" hidden>
+                              <label for="demo-contractor-pix-key">Chave PIX</label>
+                              <input id="demo-contractor-pix-key" type="text" placeholder="Chave PIX usada para pagamentos">
+                              <label for="demo-contractor-pix-holder">Nome do titular</label>
+                              <input id="demo-contractor-pix-holder" type="text" placeholder="Nome completo">
+                            </div>
+                            <div id="demo-contractor-bitcoin" hidden>
+                              <label for="demo-contractor-bitcoin-network">Rede</label>
+                              <select id="demo-contractor-bitcoin-network">
+                                <option value="bitcoin">Bitcoin</option>
+                                <option value="lightning">Lightning</option>
+                              </select>
+                              <label for="demo-contractor-bitcoin-wallet">Carteira Bitcoin</label>
+                              <input id="demo-contractor-bitcoin-wallet" type="text" placeholder="Endereço da carteira para pagamentos">
+                            </div>
+                            <div id="demo-contractor-bank" hidden>
+                              <label for="demo-contractor-bank-name">Banco</label>
+                              <input id="demo-contractor-bank-name" type="text" placeholder="Nome do banco">
+                              <label for="demo-contractor-bank-agency">Agência</label>
+                              <input id="demo-contractor-bank-agency" type="text" placeholder="Número da agência">
+                              <label for="demo-contractor-bank-account">Conta</label>
+                              <input id="demo-contractor-bank-account" type="text" placeholder="Número da conta e dígito">
+                              <label for="demo-contractor-bank-account-type">Tipo de conta</label>
+                              <select id="demo-contractor-bank-account-type">
+                                <option value="corrente">Corrente</option>
+                                <option value="poupanca">Poupança</option>
+                              </select>
+                              <label for="demo-contractor-bank-holder">Nome do titular</label>
+                              <input id="demo-contractor-bank-holder" type="text" placeholder="Nome completo">
+                            </div>
+                            <button id="demo-contractor-payment-save" type="button" disabled>Salvar dados de demonstração</button>
+                            <p class="demoPaymentNotice" id="demo-contractor-payment-notice" role="status" aria-live="polite">Escolha um método e preencha os dados para simular o cadastro. Nada será enviado ou salvo.</p>
+                          </section>
                          <%} else if(demo2 == "demo-concluidos"){%>
-                          <p>serviços Concluidos</p>
+                          <p>Serviços Concluídos</p>
+                          <div class="demoHistory">
+                            <table class="demoGainsTable">
+                              <thead>
+                                <tr>
+                                  <td><b>repositório</b></td>
+                                  <td><b>serviço</b></td>
+                                  <td><b>profissional</b></td>
+                                  <td><b>valor</b></td>
+                                  <td><b>estado do pagamento</b></td>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>github.com/demo/site-restaurante</td>
+                                  <td>Site para restaurante</td>
+                                  <td>Marina Costa</td>
+                                  <td>R$ 1.200,00</td>
+                                  <td>Pago ao profissional e à plataforma</td>
+                                </tr>
+                                <tr>
+                                  <td>github.com/demo/automacao-planilhas</td>
+                                  <td>Automação de planilhas</td>
+                                  <td>Rafael Lima</td>
+                                  <td>R$ 450,00</td>
+                                  <td>Pago ao profissional e à plataforma</td>
+                                </tr>
+                                <tr>
+                                  <td>github.com/demo/identidade-visual</td>
+                                  <td>Identidade visual da loja</td>
+                                  <td>Camila Souza</td>
+                                  <td>R$ 800,00</td>
+                                  <td>Pago ao profissional e à plataforma</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <p class="demoPaymentNotice">Serviços, repositórios e dados de pagamento fictícios para demonstração.</p>
+                          </div>
                          <%} else if(demo2 == "demo-chatcont"){%>
                           <p>Chat com os contratados</p>
+                          <section class="demoChat" aria-label="Chat de demonstração com profissional">
+                            <header class="demoChatHeader">
+                              <strong>Profissional: Marina Costa</strong>
+                              <span>Serviço: Site para restaurante · Disponível para conversar</span>
+                            </header>
+                            <div class="demoChatMessages" id="demo-chat-cont-messages" aria-live="polite" aria-relevant="additions">
+                              <p class="demoChatBubble demoChatIncoming">Olá! Já comecei a estruturar as páginas do site. Você tem alguma preferência de cores?</p>
+                              <p class="demoChatBubble demoChatOutgoing">Gostaria de usar tons de verde e branco, combinando com a identidade do restaurante.</p>
+                              <p class="demoChatBubble demoChatIncoming">Perfeito! Vou seguir essa paleta e te envio uma prévia em breve.</p>
+                            </div>
+                            <div class="demoChatComposer">
+                              <label class="demoChatSrOnly" for="demo-chat-cont-input">Escreva uma mensagem para a profissional</label>
+                              <input id="demo-chat-cont-input" type="text" maxlength="500" placeholder="Escreva uma mensagem..." autocomplete="off">
+                              <button id="demo-chat-cont-send" type="button">Enviar</button>
+                            </div>
+                            <p class="demoChatNotice">Demonstração: as mensagens e respostas são simuladas e não serão salvas.</p>
+                          </section>
                          <%}%>
                       </td>
                     </tr>
@@ -254,5 +487,215 @@
             </tr>
           </table>              
         </form>
+      <script>
+        const paymentType = document.getElementById("demo-payment-type");
+        if (paymentType) {
+          const paymentForms = {
+            PIX: document.getElementById("demo-payment-pix"),
+            Bitcoin: document.getElementById("demo-payment-bitcoin"),
+            bancodeposito: document.getElementById("demo-payment-bank")
+          };
+
+          paymentType.addEventListener("change", () => {
+            Object.entries(paymentForms).forEach(([type, form]) => {
+              form.hidden = type !== paymentType.value;
+            });
+          });
+        }
+
+        const contractorPaymentType = document.getElementById("demo-contractor-payment-type");
+        if (contractorPaymentType) {
+          const contractorPaymentForms = {
+            pix: document.getElementById("demo-contractor-pix"),
+            bitcoin: document.getElementById("demo-contractor-bitcoin"),
+            bank: document.getElementById("demo-contractor-bank")
+          };
+          const savePaymentButton = document.getElementById("demo-contractor-payment-save");
+          const paymentNotice = document.getElementById("demo-contractor-payment-notice");
+
+          contractorPaymentType.addEventListener("change", () => {
+            Object.entries(contractorPaymentForms).forEach(([type, form]) => {
+              form.hidden = type !== contractorPaymentType.value;
+            });
+            savePaymentButton.disabled = !contractorPaymentType.value;
+            paymentNotice.textContent = "Preencha os dados do método escolhido e salve para concluir a demonstração.";
+          });
+
+          savePaymentButton.addEventListener("click", () => {
+            const selectedForm = contractorPaymentForms[contractorPaymentType.value];
+            const requiredFields = Array.from(selectedForm.querySelectorAll("input"));
+            const invalidField = requiredFields.find((field) => !field.value.trim());
+            if (invalidField) {
+              invalidField.setCustomValidity("Preencha este campo para continuar.");
+              invalidField.reportValidity();
+              invalidField.addEventListener("input", () => invalidField.setCustomValidity(""), { once: true });
+              return;
+            }
+
+            paymentNotice.textContent = "Cadastro financeiro demonstrativo concluído. Os dados não foram enviados nem salvos.";
+          });
+        }
+
+        document.querySelectorAll(".demoChat").forEach((demoChat) => {
+          const demoChatMessages = demoChat.querySelector(".demoChatMessages");
+          const demoChatInput = demoChat.querySelector(".demoChatComposer input");
+          const demoChatSend = demoChat.querySelector(".demoChatComposer button");
+          if (!demoChatMessages || !demoChatInput || !demoChatSend) return;
+
+          const sendDemoMessage = () => {
+            const message = demoChatInput.value.trim();
+            if (!message) return;
+
+            const outgoingMessage = document.createElement("p");
+            outgoingMessage.className = "demoChatBubble demoChatOutgoing";
+            outgoingMessage.textContent = message;
+            demoChatMessages.appendChild(outgoingMessage);
+            demoChatInput.value = "";
+            demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
+
+            window.setTimeout(() => {
+              const reply = document.createElement("p");
+              reply.className = "demoChatBubble demoChatIncoming";
+              reply.textContent = demoChat.id === "demo-chat-cont-messages"
+                ? "Entendi, obrigado pelo retorno! Vou considerar isso no desenvolvimento e te mantenho informado."
+                : "Entendi! Obrigado pela mensagem. Vou acompanhar por aqui.";
+              demoChatMessages.appendChild(reply);
+              demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
+            }, 700);
+          };
+
+          demoChatSend.addEventListener("click", sendDemoMessage);
+          demoChatInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              sendDemoMessage();
+            }
+          });
+        });
+
+        const demoServiceForm = document.getElementById("demo-service-form");
+        const demoServiceCreate = document.getElementById("demo-service-create");
+        if (demoServiceForm && demoServiceCreate) {
+          const serviceFields = {
+            title: document.getElementById("demo-service-title"),
+            description: document.getElementById("demo-service-description"),
+            payment: document.getElementById("demo-service-payment"),
+            value: document.getElementById("demo-service-value"),
+            repository: document.getElementById("demo-service-repository"),
+            document: document.getElementById("demo-service-document")
+          };
+          const serviceList = document.getElementById("demo-service-list");
+          const serviceNotice = document.getElementById("demo-service-notice");
+
+          const createDemoService = () => {
+            const requiredFields = [
+              serviceFields.title,
+              serviceFields.description,
+              serviceFields.payment,
+              serviceFields.value
+            ];
+            const invalidField = requiredFields.find((field) => !field.checkValidity());
+            if (invalidField) {
+              invalidField.reportValidity();
+              return;
+            }
+
+            const optionalLinks = [serviceFields.repository, serviceFields.document].filter((field) => field.value.trim());
+            const invalidLink = optionalLinks.find((field) => {
+              if (!field.checkValidity()) return true;
+              try {
+                const protocol = new URL(field.value).protocol;
+                return protocol !== "http:" && protocol !== "https:";
+              } catch {
+                return true;
+              }
+            });
+            if (invalidLink) {
+              invalidLink.setCustomValidity("Informe um endereço iniciado por http:// ou https://.");
+              invalidLink.reportValidity();
+              invalidLink.addEventListener("input", () => invalidLink.setCustomValidity(""), { once: true });
+              return;
+            }
+
+            const serviceCard = document.createElement("article");
+            serviceCard.className = "demoServiceCard";
+            const title = document.createElement("h3");
+            title.textContent = serviceFields.title.value.trim();
+            const description = document.createElement("p");
+            description.textContent = serviceFields.description.value.trim();
+            const details = document.createElement("p");
+            const amount = Number(serviceFields.value.value);
+            details.textContent = `${new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL"
+            }).format(amount)} · ${serviceFields.payment.value}`;
+            serviceCard.append(title, description, details);
+
+            [serviceFields.repository, serviceFields.document].forEach((field) => {
+              if (!field.value.trim()) return;
+              const link = document.createElement("a");
+              link.href = field.value;
+              link.target = "_blank";
+              link.rel = "noopener noreferrer";
+              link.textContent = field === serviceFields.repository
+                ? "Abrir repositório"
+                : "Abrir documento de referência";
+              serviceCard.appendChild(link);
+            });
+
+            serviceList.prepend(serviceCard);
+            demoServiceForm.querySelectorAll("input, textarea, select").forEach((field) => {
+              field.value = "";
+            });
+            serviceNotice.textContent = "Serviço criado na demonstração. Ele ficará visível apenas nesta página.";
+            serviceFields.title.focus();
+          };
+
+          demoServiceCreate.addEventListener("click", createDemoService);
+          demoServiceForm.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && event.target.tagName !== "TEXTAREA") {
+              event.preventDefault();
+              createDemoService();
+            }
+          });
+        }
+
+        document.querySelectorAll(".demo-board").forEach((board) => {
+          let draggedCard = null;
+
+          board.querySelectorAll(".post").forEach((card) => {
+            card.draggable = true;
+            card.addEventListener("dragstart", (event) => {
+              draggedCard = card;
+              card.classList.add("is-dragging");
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/plain", card.textContent.trim());
+            });
+            card.addEventListener("dragend", () => {
+              card.classList.remove("is-dragging");
+              draggedCard = null;
+            });
+          });
+
+          board.querySelectorAll(".demo-board-column").forEach((column) => {
+            column.addEventListener("dragover", (event) => {
+              if (!draggedCard) return;
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "move";
+              column.classList.add("is-drop-target");
+            });
+            column.addEventListener("dragleave", (event) => {
+              if (!column.contains(event.relatedTarget)) {
+                column.classList.remove("is-drop-target");
+              }
+            });
+            column.addEventListener("drop", (event) => {
+              event.preventDefault();
+              column.classList.remove("is-drop-target");
+              if (draggedCard) column.appendChild(draggedCard);
+            });
+          });
+        });
+      </script>
     </body>
 </html>
