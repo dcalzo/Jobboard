@@ -1,25 +1,41 @@
 <html>
     <head>
       <meta charset="utf-8">
+      <link rel="icon" type="image/svg+xml" href="/images/logo-caju.svg">
       <link href="public/style.css" rel="stylesheet">
       <title>board jobs</title>
     </head>
-    <body>
-        <h1><b>Board</b></h1><br />    
-        <form>
-            <%=typeuser%>
-            <table style="width: 100%;">
-                <tr>
-                  <td style="width: 15%;">
-                    <%if(typeuser=="professional"){%>            
-                      <%- include('../../menuProfissional/menuProfissional.html') %>
-                     <%}%> 
-                  </td>
-                  <td id="conteudo" name="conteudo" style="width: 85%;" >
-                    CAJU
-                  </td>
-                </tr>
-              </table>    
-        </form>        
+    <body class="caju-products-page">
+      <h1><b>Caju Products</b></h1><br />  
+      <form>
+        <table style="width: 100%;">
+          <tr>
+            <td style="width: 15%;">
+              <%if(typeuser=="professional"){%>   
+                <%- include('../../menuProfissional/menuProfissional.html') %>
+              <%}%> 
+            </td>
+            <td id="conteudo" name="conteudo" style="width: 85%;" >
+              <div style="width: 100%; height: 120px; overflow-x: scroll;">
+                <label>Here are all the Caju products subscribed to by <%=profissional[0].nome%>.</label>
+                <table>
+                  <tr>                    
+                    <%for(let x=0; x < profissional.length; x++){%>
+                      <%if(profissional[x].produto != "jobBoard"){%>
+                        <td>
+                          <img style="margin-left: 32;" src="/images/logo-caju.svg" id="logo" width="50px" height="50px" />
+                          <a href="http://localhost:8080/" target="_blank">
+                            <%=profissional[x].produto%>  
+                          </a>   
+                        </td>
+                      <%}%>
+                    <%}%>
+                  </tr>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </table>    
+      </form>    
     </body>
 </html>

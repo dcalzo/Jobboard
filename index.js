@@ -640,10 +640,15 @@ app.get("/", async (req,res)=>{
                 });
             });  
             }
-            else  if(req.query.menu == "ProdutosCaju"){     
-                res.render("company/caju/index",{typeuser: req.query.typeuser, 
+            else  if(req.query.menu == "ProdutosCaju"){   
+                profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, profissional){                    
+                    res.render("company/caju/index",{typeuser: req.query.typeuser, 
                     email:req.query.email, 
-                    senha:req.query.senha});       
+                    senha:req.query.senha,
+                    profissional: profissional
+                }); 
+            }); 
+                      
             }else if(req.query.menu == "fichaCad"){
                 if( req.query.alteraContractor == "Alterar" ){
                     try{
@@ -764,12 +769,15 @@ app.get("/", async (req,res)=>{
             }
             //---------------------------------------------------Fim Board
             else  if(req.query.menu == "ProdutosCaju"){     
-                res.render("professional/caju/index",{
-                    typeuser: req.query.typeuser,
-                    email:req.query.email,
-                    senha:req.query.senha,
-                    tipoPagamento: req.query.hiddenCodigoBarras
-                });       
+                profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, profissional){
+                    res.render("professional/caju/index",{
+                        typeuser: req.query.typeuser,
+                        email:req.query.email,
+                        senha:req.query.senha,
+                        tipoPagamento: req.query.hiddenCodigoBarras,
+                        profissional: profissional
+                    });     
+                });                 
             }else  if(req.query.menu == "ganho"){ 
                 if(req.query.chavePix == "PIX"){
                     contasPagamentos.find({tipo: "PIX"}).sort({"_id":1}).exec(function(err, dadosPag){
@@ -1022,36 +1030,39 @@ app.get("/", async (req,res)=>{
             }
             else if(req.query.menu == "fichaCad"){ 
                 let mensagemPagamento = null;
-                if( req.query.alteraProf == "Alterar" ){
+                if( req.query.alteraProf == "Alterar" || req.query.alteraProf == "Save changes" ){
                     try{
+                        const atualizacaoPerfil = {
+                            nome: req.query.nome,
+                            endereco: req.query.endereco,
+                            cidade: req.query.cidade,
+                            estado: req.query.estado,
+                            cep: req.query.cep,
+                            pais: req.query.pais,
+                            rg: req.query.rg,
+                            cpf_cnpj: req.query.cpf_cnpj,
+                            email: req.query.email,
+                            sexo: req.query.sexo,
+                            profissao: req.query.profissao,
+                            historico: req.query.historico,
+                            conhecimento: req.query.conhecimento,
+                            tipoPagamento: req.query.tipoPagamento,
+                            chavePixSel: req.query.chavePixSel,
+                            bancopix: req.query.txtBanco,
+                            chavepix: req.query.txtChavePix,
+                            carteiraBitcoin: req.query.carteiraBitcoin,
+                            conta: req.query.conta,
+                            agencia: req.query.agencia,
+                            banco: req.query.banco,
+                            tipoconta: req.query.tipoconta
+                        };
+                        if (typeof req.query.senha === "string" && req.query.senha.trim() !== "") {
+                            atualizacaoPerfil.senha = req.query.senha;
+                        }
                         const resultado = await profissional.collection.updateOne({
                             email: req.query.email
                         }, {
-                            $set: {
-                                nome: req.query.nome,
-                                endereco: req.query.endereco,
-                                 cidade: req.query.cidade,
-                                 estado: req.query.estado,
-                                 cep: req.query.cep,
-                                 pais: req.query.pais,
-                                 rg: req.query.rg,
-                                 cpf_cnpj: req.query.cpf_cnpj,
-                                 email: req.query.email,
-                                 senha: req.query.senha,
-                                 sexo: req.query.sexo,
-                                 profissao: req.query.profissao,
-                                 historico: req.query.historico,
-                                 conhecimento: req.query.conhecimento,
-                                 tipoPagamento: req.query.tipoPagamento,
-                                 chavePixSel: req.query.chavePixSel,
-                                 bancopix: req.query.txtBanco,
-                                 chavepix: req.query.txtChavePix,
-                                 carteiraBitcoin: req.query.carteiraBitcoin,
-                                 conta: req.query.conta,
-                                 agencia: req.query.agencia,
-                                 banco: req.query.banco,
-                                 tipoconta: req.query.tipoconta,
-                            }
+                            $set: atualizacaoPerfil
                         });
                         if (resultado.matchedCount === 0) {
                             console.error("Nenhum perfil profissional foi encontrado para atualização.");
@@ -1079,15 +1090,6 @@ app.get("/", async (req,res)=>{
                         tipoPagamento: tipoPag,
                         email: profissional[0].email, 
                         senha: profissional[0].senha,
-                        conta: profissional[0].conta,
-                        agencia: profissional[0].agencia,
-                        banco: profissional[0].banco,
-                        tipoconta: profissional[0].tipoconta,
-                        carteiraBitcoin: profissional[0].carteiraBitcoin,
-                        chavePixSel: profissional[0].chavePixSel,
-                        chavePix: profissional[0].chavepix,
-                        txtBanco: profissional[0].bancopix,
-                        txtChavePix: profissional[0].chavepix,
                         senha2:  req.query.senha2});                   
                 });
             }
@@ -1154,6 +1156,7 @@ app.get("/", async (req,res)=>{
                             sexo: req.query.sexo,
                             profissao: req.query.profissao,
                             historico: req.query.historico,
+                            produto: "jobBoard",
                             conhecimento: req.query.conhecimento                           
                         }
                     ]).then(function(){
@@ -1184,6 +1187,7 @@ app.get("/", async (req,res)=>{
                     req.query.profissao,
                     req.query.historico,
                     req.query.conhecimento],
+                    produto: "jobBoard",
                     logado: "", 
                     sexo:req.query.sexo,
                     tipoPagamento: req.query.tipoPagamento,

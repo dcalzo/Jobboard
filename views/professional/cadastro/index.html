@@ -1,6 +1,7 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <link rel="icon" type="image/svg+xml" href="/images/logo-caju.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="public/style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
@@ -17,11 +18,11 @@
       background-color: #3690f8;
     }
     </style>
-    <title>Board Jobs (New Professional Account)</title>
+    <title>Board Jobs</title>
   </head>
   <body class="about-page" style="background-color: #e8f5e9;">
     <br /> 
-    <h1><b>Board</b></h1><br /> 
+    <h1><b>Professional Registration</b></h1><br /> 
     <form>
       <table style="width: 100%;">
         <tr>
@@ -40,7 +41,6 @@
               <label style="-webkit-text-fill-color: rgb(4, 0, 255);"><h3><%=mensagem%></h3></label>
             <%}%>
             <br /> <br />
-              <label>Professional Registration</label><br /><br />
               <div style="width:100%; height: 500px; overflow-y: scroll;"> 
                 <input type="text" id="nome" name="nome" placeholder="First and last name" style="width: 50%;" value="<%=ficha[0]%>" required /><br />
                 <input type="text" id="endereco" name="endereco" placeholder="Address" style="width: 50%;" value="<%=ficha[1]%>" required /><br />
@@ -94,6 +94,7 @@
             </td>
           </tr>
         </table>
+        <input type="hidden" id="produto" name="produto" value="jobBoard" />
      </form> 
     <script>
       const password = document.getElementById("senha");

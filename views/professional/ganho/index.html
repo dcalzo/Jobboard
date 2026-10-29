@@ -1,6 +1,7 @@
 <html>
     <head>
       <meta charset="utf-8">
+      <link rel="icon" type="image/svg+xml" href="/images/logo-caju.svg">
       <link href="public/style.css" rel="stylesheet">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -33,7 +34,7 @@
                           <%=task.idtask%> - <%=task.titleService%>                      
                         </td>
                         <td style="width: 25%; border: 1px solid #020202;">
-                          R$ <%=task.valor%>                          
+                          $ <%=task.valor%>                          
                         </td>
                         <td style="width: 25%; border: 1px solid #020202;">
                           <%if(task.tipoPagamento == "PIX"){%>
@@ -100,9 +101,9 @@
                         <tr>
                           <td><%=anoContabilidade%></td>
                           <% totaisPorMes.forEach(function(totalMes) { %>
-                            <td>R$<%=totalMes.toFixed(2)%></td>
+                            <td>$<%=totalMes.toFixed(2)%></td>
                           <% }); %>
-                          <td>R$<%=totalAnual.toFixed(2)%></td>
+                          <td>$<%=totalAnual.toFixed(2)%></td>
                         </tr>
                       </table>
                 </div>

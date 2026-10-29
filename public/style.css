@@ -33,6 +33,10 @@ body.professional-profile-page input[type="text"]{
     background-color: #f2fce1;
 }
 
+body.professional-profile-page input[type="number"]{
+    background-color: #f2fce1;
+}
+
 body.professional-profile-page input[type="password"]{
     background-color: #f2fce1;
 }
@@ -174,6 +178,12 @@ body.earnings-background .earnings-reviews-button{
 .about-page h3,
 .about-page p{
     color: #064b69;
+}
+
+.caju-products-page,
+.caju-products-page *{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .login-page h1,
