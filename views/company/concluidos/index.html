@@ -6,10 +6,10 @@
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-      <title>board jobs (serviços concluidos)</title>
+      <title>Board Jobs (Completed Services)</title>
     </head>
-    <body>
-        <h1><b>Seviços Concluidos</b></h1><br />    
+    <body class="completed-services-page">
+        <h1><b>Completed Services</b></h1><br />
         <div class="backForm">
             <%=typeuser%>
             <table style="width: 100%;">
@@ -25,19 +25,19 @@
                       <thead>
                         <tr>
                           <td style="width: 10%;">
-                            repositorio github
+                            GitHub Repository
                           </td>
                           <td style="width: 10%;">
-                            Titulo do Serviço
+                            Service Title
                           </td>
                           <td style="width: 10%;">
                             E-Mail
                           </td>
                           <td style="width: 10%;">
-                           valor
+                           Amount
                           </td>
                           <td style="width: 10%;">
-                            estado do pagamento
+                            Payment Status
                           </td>
                         </tr>
                       </thead>
@@ -58,15 +58,15 @@
                             </td>
                             <td style="width: 10%;">
                               <%if(task[x].column=="postRev" || task[x].column=="postEnd"){%>
-                                <input type="text" name="comprovante" id="comprovante" placeholder="comprovante do pagamento do profissional" value="<%=task[x].comprovante%>" />
+                                <input type="text" name="comprovante" id="comprovante" placeholder="Professional payment receipt" value="<%=task[x].comprovante%>" />
                                 <a href="?developer=<%=task[x].developer%>&contabilidade=comprovante&taskServ=altera&id=<%=task[x]._id%>&menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>" onclick="return incluirComprovantes(this)">
-                                    Salvar comprovante do profissional
+                                    Save professional payment receipt
                                 </a>
                               <%}%>
                               <%if(task[x].column=="postRev" || task[x].column=="postEnd" ){%>
-                                <input type="text" name="comprovantePlataforma" id="comprovantePlataforma" placeholder="comprovante do pagamento da plataforma" value="<%=task[x].comprovantePlataforma%>" />
+                                <input type="text" name="comprovantePlataforma" id="comprovantePlataforma" placeholder="Platform payment receipt" value="<%=task[x].comprovantePlataforma%>" />
                                 <a href="?developer=<%=task[x].developer%>&contabilidade=comprovantePlataforma&taskServ=altera&id=<%=task[x]._id%>&menu=concluidos&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postEnd&count=<%=task[x].idtask%>" onclick="return incluirComprovantes(this)">
-                                    Salvar comprovante da plataforma
+                                    Save platform payment receipt
                                 </a>
                               <%}%>
                             </td> 

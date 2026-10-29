@@ -94,23 +94,29 @@
                   </td>
                 </tr>
               </table><br />
-              <div style="width: 80%; margin-left: 270px">
               <%
                 var gastosPorAno = {};
-                contabilidade.forEach(function(registro) {
-                  var ano = String(registro.ano || "").trim();
-                  var mes = Number(registro.mes);
-                  var valorTexto = String(registro.valor || "").trim().replace(/[^\d,.-]/g, "");
-                  var valor = Number(valorTexto.includes(",")
+                task.forEach(function(servico) {
+                  if (servico.column !== "postEnd" || !servico._id || typeof servico._id.getTimestamp !== "function") {
+                    return;
+                  }
+
+                  var dataCriacao = servico._id.getTimestamp();
+                  var ano = String(dataCriacao.getFullYear());
+                  var mes = dataCriacao.getMonth();
+                  var valorTexto = String(servico.valor || "").trim().replace(/[^\d,.-]/g, "");
+                  var valorServico = Number(valorTexto.includes(",")
                     ? valorTexto.replace(/\./g, "").replace(",", ".")
                     : valorTexto);
 
-                  if (/^\d{4}$/.test(ano) && mes >= 1 && mes <= 12 && Number.isFinite(valor)) {
-                    if (!gastosPorAno[ano]) {
-                      gastosPorAno[ano] = Array(12).fill(0);
-                    }
-                    gastosPorAno[ano][mes - 1] += valor;
+                  if (!Number.isFinite(valorServico)) {
+                    return;
                   }
+
+                  if (!gastosPorAno[ano]) {
+                    gastosPorAno[ano] = Array(12).fill(0);
+                  }
+                  gastosPorAno[ano][mes] += Math.round(valorServico * 1.15 * 100);
                 });
                 var anosComGastos = Object.keys(gastosPorAno).sort(function(a, b) {
                   return Number(b) - Number(a);
@@ -120,7 +126,14 @@
                   gastosPorAno[anoAtual] = Array(12).fill(0);
                   anosComGastos.push(anoAtual);
                 }
+                var formatarGasto = function(valorEmCentavos) {
+                  return "R$ " + (valorEmCentavos / 100).toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  });
+                };
               %>
+              <div style="width: 80%; margin-left: 270px">
               <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#gastosAnuaisModal">
                 Gastos Anuais
               </button>
@@ -132,37 +145,42 @@
                       <h4 class="modal-title" id="gastosAnuaisTitulo">Gastos Anuais</h4>
                     </div>
                     <div class="modal-body" style="overflow-x: auto;">
-                      <table class="concludedServicesTable monthlyIncomeTable">
-                        <tr>
-                          <td>Ano</td>
-                          <td>Janeiro</td>
-                          <td>Fevereiro</td>
-                          <td>Março</td>
-                          <td>Abril</td>
-                          <td>Maio</td>
-                          <td>Junho</td>
-                          <td>Julho</td>
-                          <td>Agosto</td>
-                          <td>Setembro</td>
-                          <td>Outubro</td>
-                          <td>Novembro</td>
-                          <td>Dezembro</td>
-                          <td>Total</td>
-                        </tr>
-                        <% anosComGastos.forEach(function(ano) {
-                          var totaisPorMes = gastosPorAno[ano];
-                          var totalAnual = totaisPorMes.reduce(function(total, valor) {
-                            return total + valor;
-                          }, 0);
-                        %>
+                      <p>Valores de serviços concluídos, agrupados pelo mês de criação e incluindo a taxa da plataforma de 15%.</p>
+                      <table class="concludedServicesTable annualExpensesTable">
+                        <thead>
                           <tr>
-                            <td><%=ano%></td>
-                            <% totaisPorMes.forEach(function(totalMes) { %>
-                              <td>R$<%=totalMes.toFixed(2)%></td>
-                            <% }); %>
-                            <td>R$<%=totalAnual.toFixed(2)%></td>
+                            <th>Ano</th>
+                            <th>Janeiro</th>
+                            <th>Fevereiro</th>
+                            <th>Março</th>
+                            <th>Abril</th>
+                            <th>Maio</th>
+                            <th>Junho</th>
+                            <th>Julho</th>
+                            <th>Agosto</th>
+                            <th>Setembro</th>
+                            <th>Outubro</th>
+                            <th>Novembro</th>
+                            <th>Dezembro</th>
+                            <th>Total</th>
                           </tr>
-                        <% }); %>
+                        </thead>
+                        <tbody>
+                          <% anosComGastos.forEach(function(ano) {
+                            var totaisPorMes = gastosPorAno[ano];
+                            var totalAnual = totaisPorMes.reduce(function(total, valor) {
+                              return total + valor;
+                            }, 0);
+                          %>
+                            <tr>
+                              <td><%=ano%></td>
+                              <% totaisPorMes.forEach(function(totalMes) { %>
+                                <td><%=formatarGasto(totalMes)%></td>
+                              <% }); %>
+                              <td><%=formatarGasto(totalAnual)%></td>
+                            </tr>
+                          <% }); %>
+                        </tbody>
                       </table>
                     </div>
                   </div>

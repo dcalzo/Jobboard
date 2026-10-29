@@ -8,12 +8,12 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <title>board jobs (chat)</title>
   </head>
-  <body>
-    <h1><b>Board</b></h1><br />
+  <body class="chat-page">
+    <h1><b>Chat of <%=typeuser%></b></h1><br />
     <form class="backForm">  
       <table style="width: 100%;">
         <tr>
-          <td style="width: 10%;">
+          <td style="width: 15%;">
             <%if(typeuser=="professional"){%> 
               <%- include('../menuProfissional/menuProfissional.html') %>
               <%}else if(typeuser=="contractor"){%>
@@ -21,46 +21,44 @@
               <%}%>
           </td>
           <td id="conteudo" name="conteudo" style="width: 90%;" >
-            CHAT do <%=typeuser%><br><br>
-            <table style="width: 96%;">
-              <thead>
-                <tr>
-                  <td style="width: 20%;"></td>
-                  <td style="width: 20%;"></td>
-                </tr>
-              </thead>
-              <tbody>
+            <table class="chatConversationFrame" style="width: 100%;">
                 <tr>
                   <td class="contactsScroll">
-                    <table class="chatcontacts">
-                      <%const contatosExibidos = new Set();%>
-                      <%for(let x = 0; x < task.length; x++ ){%>
-                        <%if(typeuser=="professional"){%>
-                          <%if(remetente == task[x].developer && (task[x].column == "postDev" || task[x].column == "postRev" || task[x].column == "postEnd") && task[x].email && !contatosExibidos.has(task[x].email)){%>
-                            <%contatosExibidos.add(task[x].email);%>
-                            <tr>
-                              <td>
-                                <a href="?usuario=<%=task[x].email%>&menu=chatP&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">
-                                  <b><%=task[x].company%></b>
-                                </a>
-                              </td>
-                            </tr>
+                    <div style="margin-left: 12;" class="chatContactsPanel">
+                      <div class="chatContactsHeader">Contacts</div>
+                      <div style="margin-left: -10; width: 255px;" class="contactsListScroll">
+                        <table class="chatcontacts">
+                          <%const contatosExibidos = new Set();%>
+                          <%for(let x = 0; x < task.length; x++ ){%>
+                            <%if(typeuser=="professional"){%>
+                              <%if(remetente == task[x].developer && (task[x].column == "postDev" || task[x].column == "postRev" || task[x].column == "postEnd") && task[x].email && !contatosExibidos.has(task[x].email)){%>
+                                <%contatosExibidos.add(task[x].email);%>
+                                <tr>
+                                  <td>
+                                    <a class="chatContactLink <%=usuario == task[x].email ? 'is-selected' : ''%>" href="?usuario=<%=task[x].email%>&menu=chatP&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">
+                                      <span class="chatContactAvatar"><%=(task[x].titleService || '?').charAt(0).toUpperCase()%></span>
+                                      <span class="chatContactName"><%=task[x].company%></span>
+                                    </a>
+                                  </td>
+                                </tr>
+                              <%}%>
+                            <%}else if(typeuser=="contractor" && remetente == task[x].email && task[x].developer && (task[x].column == "postDev" || task[x].column == "postRev" || task[x].column == "postEnd") && !contatosExibidos.has(task[x].developer)){%>
+                              <%contatosExibidos.add(task[x].developer);%>
+                              <tr>
+                                <td>
+                                  <a class="chatContactLink <%=usuario == task[x].developer ? 'is-selected' : ''%>" href="?usuario=<%=task[x].developer%>&menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">
+                                    <span class="chatContactAvatar"><%=(task[x].titleService || '?').charAt(0).toUpperCase()%></span>
+                                    <span class="chatContactName"><%=task[x].developer%></span>
+                                  </a>
+                                </td>
+                              </tr>
+                            <%}%>
                           <%}%>
-                        <%}else if(typeuser=="contractor" && remetente == task[x].email && task[x].developer && (task[x].column == "postDev" || task[x].column == "postRev" || task[x].column == "postEnd") && !contatosExibidos.has(task[x].developer)){%>
-                          <%contatosExibidos.add(task[x].developer);%>
-                          <tr>
-                            <td>
-                                <a href="?usuario=<%=task[x].developer%>&menu=chatC&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>">
-                                  <b><%=task[x].developer%></b>
-                                </a>
-                            </td>
-                          </tr>
-                        <%}%>
-                      <%}%>
-                    </table>
+                        </table>
+                    </div>
                   </td> 
                   <td class="chatBackAreaTalk">
-                    <div style="width: 100%; height: 580px; overflow-y: scroll;">
+                    <div class="chatMessagesScroll">
                       <%for(let x = 0; x < chatmensagem.length; x++ ){%>
                         <%if(usuario && chatmensagem[x].remetente == usuario && chatmensagem[x].destinatario == email ){%>
                           <p id="destinatario" class="chatBallonReturn"><%=chatmensagem[x].mensagem%></p>
@@ -75,13 +73,13 @@
                 <tr>
                   <td style="width: 20%;">
                   </td>
-                  <td style="width: 80%;">
-                    <input type="text" id="mensagem" style="width: 84%;" name="mensagem" placeholder="Escreva aqui" /> 
-                    <input type="submit" style="width: 15%;" id="conversa" name="conversa" value="Enviar" />  
+                  <td class="chatMessageComposer">
+                    <input type="text" id="mensagem" class="chatMessageInput" name="mensagem" placeholder="Write here" />
+                    <input type="submit" class="chatSendButton" id="conversa" name="conversa" value="Send" />
                   </td>
                 </tr>
-              </tbody>
-            </table>  
+            </table>
+            </div>
           </td>
         </tr>
       </table> 

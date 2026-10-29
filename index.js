@@ -87,6 +87,7 @@ app.engine("html", require("ejs").renderFile);
 app.set("view engine", "html");
 app.use("/public", express.static(path.join(__dirname,"public")));
 app.set("views", path.join(__dirname,"/views"));
+app.use("/images", express.static(path.join(__dirname, "images")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
@@ -159,6 +160,7 @@ app.get("/", async (req,res)=>{
     if (usuarioAutenticado &&
      (req.query.cadastroProf != "Salvar" || req.query.cadastroContractor !="Salvar")){
         if(req.query.typeuser == "contractor"){
+            //----------------------------------------Inicio Board--------------
             if(req.query.opcao == "Entrar" && task.idtask == undefined){
                 task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
                 res.render("board/index",{
@@ -171,8 +173,7 @@ app.get("/", async (req,res)=>{
                     aviso: msg});
                 });
             }  
-            else if(req.query.opcao == "Entrar" && task.idtask != undefined){
-            //----------------------------------------Inicio Board--------------  
+            else if(req.query.opcao == "Entrar" && task.idtask != undefined){              
                 task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){  
                 res.render("board/index",{
                     typeuser: req.query.typeuser, 
@@ -470,17 +471,17 @@ app.get("/", async (req,res)=>{
             else if(req.query.menu == "fichaCont" || req.query.cadastroContractor == "Salvar"){                               
                 res.render("company/cadastroCont/index",{typeuser: req.query.typeuser, 
                     email:req.query.email, 
-                    ficha: [req.query.nome,
-                        req.query.endereco,
-                        req.query.cidade,
-                        req.query.estado,
-                        req.query.cep,
-                        req.query.pais,
-                        req.query.cpf_cnpj,
-                        req.query.email,
-                        req.query.senha,
-                        req.query.tipoPagamento
-                        ],
+                    ficha: {
+                        nome: req.query.nome,
+                        endereco: req.query.endereco,
+                        cidade: req.query.cidade,
+                        estado: req.query.estado,
+                        cep: req.query.cep,
+                        pais: req.query.pais,
+                        cpf_cnpj: req.query.cpf_cnpj,
+                        email: req.query.email,
+                        senha: req.query.senha
+                    },
                     senha:req.query.senha,
                     senha2: req.query.senha2, 
                     seletor: req.query.seletor});
@@ -604,7 +605,7 @@ app.get("/", async (req,res)=>{
                 });
             }
             else  if(req.query.menu == "chatC"){  
-                if( req.query.conversa == "Enviar"){
+                if( req.query.conversa == "Send"){
                     try{
                         chatmensagem.collection.insertMany([
                         {           
@@ -668,7 +669,7 @@ app.get("/", async (req,res)=>{
                 }
                 contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){ 
                     res.render("company/fichaCad/index",{                
-                        typeuser: "", 
+                        typeuser: "",
                         logado: "", 
                         email:contratante[0].email,
                         senha:contratante.senha,
@@ -685,15 +686,25 @@ app.get("/", async (req,res)=>{
             //-------------------------------------Inicio Board  
                 if(req.query.taskServ == "altera"){   
                     try{
-                        task.collection.updateOne({
-                            idtask: req.query.count
-                        }, {
-                            $set: {
-                                developer: req.query.email,
-                                column: req.query.column
+                        const previousColumnByDestination = {
+                            postDev: "post",
+                            postRev: "postDev"
+                        };
+                        const previousColumn = previousColumnByDestination[req.query.column];
+                        if (previousColumn && typeof req.query.id === "string") {
+                            const result = await task.updateOne({
+                                _id: req.query.id,
+                                column: previousColumn
+                            }, {
+                                $set: {
+                                    developer: req.query.email,
+                                    column: req.query.column
+                                }
+                            });
+                            if (result.matchedCount === 0) {
+                                console.warn("Task não movida: ela já não está na coluna de origem.");
                             }
-                        });
-                        console.log("task alterada");
+                        }
                     }catch(e){
                         console.log("Erro: "+e.message);
                     }
@@ -710,15 +721,25 @@ app.get("/", async (req,res)=>{
                 let msg = null;         
                 if(req.query.taskServ == "altera"){   
                     try{
-                        task.collection.updateOne({
-                            idtask: req.query.count
-                        }, {
-                            $set: {
-                                developer: req.query.email,
-                                column: req.query.column
+                        const previousColumnByDestination = {
+                            postDev: "post",
+                            postRev: "postDev"
+                        };
+                        const previousColumn = previousColumnByDestination[req.query.column];
+                        if (previousColumn && typeof req.query.id === "string") {
+                            const result = await task.updateOne({
+                                _id: req.query.id,
+                                column: previousColumn
+                            }, {
+                                $set: {
+                                    developer: req.query.email,
+                                    column: req.query.column
+                                }
+                            });
+                            if (result.matchedCount === 0) {
+                                console.warn("Task não movida: ela já não está na coluna de origem.");
                             }
-                        });
-                        console.log("task alterada");
+                        }
                     }catch(e){
                         console.log("Erro: "+e.message);
                     }
@@ -803,11 +824,18 @@ app.get("/", async (req,res)=>{
                         }
                     }); 
                 }
-                if(req.query.enviaNota == "Enviar Avaliação"){
+                if(req.query.enviaNota == "Enviar Avaliação" || req.query.enviaNota == "Submit Review"){
                     if(!req.query.contratanteSel || !["1", "2", "3", "4", "5"].includes(String(req.query.nota))){
                         return res.status(400).send("Selecione um contratante e uma nota para avaliar.");
                     }
                     try{
+                        const contratanteAvaliado = await task.findOne({
+                            developer: req.query.email,
+                            email: req.query.contratanteSel
+                        });
+                        if(!contratanteAvaliado){
+                            return res.status(400).send("O contratante selecionado não contratou este profissional.");
+                        }
                         await avaliar.collection.insertOne({
                             contato: req.query.contratanteSel,
                             comentario: req.query.comentarioConta,
@@ -873,10 +901,12 @@ app.get("/", async (req,res)=>{
                     }); 
                 }      
             
-            }else if(req.query.menu == "fincadPro"){ 
-                if( req.query.cadastraPagamento == "Cadastrar Pagamento"){
+            }
+        else if(req.query.menu == "fincadPro"){ 
+                let mensagemPagamento = null;
+                if( req.query.cadastraPagamento == "Save Payment" || req.query.cadastraPagamento == "Cadastrar Pagamento"){
                     try{
-                        contasPagamentos.collection.insertMany([
+                        await contasPagamentos.collection.insertMany([
                         {           
                             nome: req.query.nome,
                             email: req.query.email,
@@ -895,18 +925,15 @@ app.get("/", async (req,res)=>{
                             observacao: req.query.observacao,
                             produto: "JobBaord"                
                         }
-                    ]).then(function(){
-                        msg = "pagamento salvo"
-                        console.log(msg) 
-                    }).catch(function(error){
-                        console.log(error)    
-                    });
-                    }catch(e){
-                        console.log(e.error);
+                    ]);
+                        mensagemPagamento = "Payment saved successfully.";
+                    }catch(error){
+                        console.error("Erro ao cadastrar dados de pagamento:", error);
+                        return res.status(500).send("Não foi possível salvar os dados de pagamento.");
                     }              
-                } else if( req.query.cadastraPagamento == "Alterar Pagamento"){
+                } else if( req.query.cadastraPagamento == "Update Payment" || req.query.cadastraPagamento == "Alterar Pagamento"){
                     try{
-                        contasPagamentos.collection.updateOne({
+                        const resultado = await contasPagamentos.collection.updateOne({
                             email: req.query.email,
                             tipo: req.query.tipoPagamento
                         }, {
@@ -928,29 +955,35 @@ app.get("/", async (req,res)=>{
                                 observacao: req.query.observacao,
                                 produto: "JobBaord"            
                             }
-                        }).then(function(){
-                        msg = "pagamento alterado"
-                        console.log(msg) 
-                    }).catch(function(error){
-                        console.log(error)    
-                    });
-                    }catch(e){
-                        console.log(e.error);
+                        });
+                        if (resultado.matchedCount === 0) {
+                            console.error("Nenhum dado de pagamento foi encontrado para alteração.");
+                            return res.status(404).send("Não foi possível encontrar os dados de pagamento para alterar.");
+                        }
+                        mensagemPagamento = "Payment saved successfully.";
+                    }catch(error){
+                        console.error("Erro ao alterar dados de pagamento:", error);
+                        return res.status(500).send("Não foi possível salvar os dados de pagamento.");
                     }              
-                }  
-                contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contasSalvas){
+                }
+                try {
+                    const contasSalvas = await contasPagamentos.find({email: req.query.email}).sort({"_id":1}).exec();
                     res.render("professional/pagamento/index",{
                     typeuser: req.query.typeuser, 
                     codigoBarras: req.query.codigoBarras,
                     email:req.query.email, 
                     senha:req.query.senha, 
                     tipoPagamento: req.query.tipoPagamento,
-                    contasSalvas: contasSalvas
-                }); 
-                 });                      
-            }
-            else if(req.query.menu == "chatP"){
-                if( req.query.conversa == "Enviar" && req.query.usuario != "" ){           
+                    contasSalvas: contasSalvas,
+                    mensagemPagamento: mensagemPagamento
+                });
+                } catch(error) {
+                    console.error("Erro ao consultar dados de pagamento:", error);
+                    return res.status(500).send("Não foi possível carregar os dados de pagamento.");
+                }
+        }
+        else if(req.query.menu == "chatP"){
+                if( req.query.conversa == "Send" && req.query.usuario != "" ){           
                     try{
                         chatmensagem.collection.insertMany([
                         {     
@@ -988,9 +1021,10 @@ app.get("/", async (req,res)=>{
                 }); 
             }
             else if(req.query.menu == "fichaCad"){ 
+                let mensagemPagamento = null;
                 if( req.query.alteraProf == "Alterar" ){
                     try{
-                        profissional.collection.updateOne({
+                        const resultado = await profissional.collection.updateOne({
                             email: req.query.email
                         }, {
                             $set: {
@@ -1019,9 +1053,15 @@ app.get("/", async (req,res)=>{
                                  tipoconta: req.query.tipoconta,
                             }
                         });
+                        if (resultado.matchedCount === 0) {
+                            console.error("Nenhum perfil profissional foi encontrado para atualização.");
+                            return res.status(404).send("Não foi possível encontrar o perfil profissional para atualizar.");
+                        }
+                        mensagemPagamento = "Payment saved successfully.";
                         console.log("profissional alterado");
-                    }catch(e){
-                        console.log("Erro: "+e.message);
+                    }catch(error){
+                        console.error("Erro ao atualizar o perfil profissional:", error);
+                        return res.status(500).send("Não foi possível salvar as alterações do perfil.");
                     }                                        
                 }
                 profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, profissional){   
@@ -1030,8 +1070,9 @@ app.get("/", async (req,res)=>{
                         tipoPag = req.query.tipoPagamento;
                     }  
                     res.render("professional/fichaCad/index",{ 
-                        typeuser: "", 
+                        typeuser: "professional", 
                         mensagem: msg,
+                        mensagemPagamento: mensagemPagamento,
                         profissional: profissional,
                         logado: "", 
                         sexo: profissional[0].sexo,
@@ -1058,7 +1099,7 @@ app.get("/", async (req,res)=>{
             res.status(401).render("login/index", {
                 logado: "",
                 user: req.query.typeuser,
-                mensagem: "E-mail ou senha inválidos."
+                mensagem: "Invalid email or password."
             });
         }else if(req.query.opcao == "login-pro" && req.query.opcaoPag != "cadastroPro"){
             res.render("login/index",{logado: "", user:"professional"});
@@ -1067,8 +1108,36 @@ app.get("/", async (req,res)=>{
         }else if(req.query.opcao == "About"){   
             res.render("about/index",{logado: ""});
         }else if(req.query.opcao == "cadastroPro" || req.query.opcaoPag == "cadastroPro"){ 
-            if(req.query.cadastroPro == "Salvar" && req.query.senha != "" && req.query.senha == req.query.senha2){
-                msg = "Profissional salvo com sucesso\npode procurar um serviço";
+            const savePressed = req.query.cadastroPro === "Save";
+            const requiredFields = [
+                req.query.nome,
+                req.query.endereco,
+                req.query.cidade,
+                req.query.estado,
+                req.query.cep,
+                req.query.pais,
+                req.query.rg,
+                req.query.cpf_cnpj,
+                req.query.email,
+                req.query.senha,
+                req.query.senha2,
+                req.query.sexo,
+                req.query.profissao,
+                req.query.historico,
+                req.query.conhecimento
+            ];
+            const formIsComplete = requiredFields.every(value =>
+                typeof value === "string" && value.trim() !== ""
+            );
+            const passwordsMatch = req.query.senha === req.query.senha2;
+            let cadastroMensagem = null;
+
+            if (savePressed && !formIsComplete) {
+                cadastroMensagem = "Please complete all fields before saving.";
+            } else if (savePressed && !passwordsMatch) {
+                cadastroMensagem = "Passwords do not match.";
+            } else if (savePressed && passwordsMatch) {
+                cadastroMensagem = "Professional saved successfully\nyou can now look for a service.";
                      try{
                         profissional.insertMany([ 
                         { 
@@ -1085,16 +1154,7 @@ app.get("/", async (req,res)=>{
                             sexo: req.query.sexo,
                             profissao: req.query.profissao,
                             historico: req.query.historico,
-                            conhecimento: req.query.conhecimento,
-                            tipoPagamento: req.query.tipoPagamento,
-                            conta: req.query.conta,
-                            agencia: req.query.agencia,
-                            banco: req.query.banco,
-                            tipoconta: req.query.tipoconta,
-                            carteiraBitcoin: req.query.carteiraBitcoin,
-                            chavePixSel: req.query.chavePixSel,
-                            chavepix: req.query.txtChavePix,
-                            bancopix: req.query.txtBanco
+                            conhecimento: req.query.conhecimento                           
                         }
                     ]).then(function(){
                         console.log("Profissional salvo") 
@@ -1104,100 +1164,60 @@ app.get("/", async (req,res)=>{
                     }catch(e){
                         console.log(e.error);
                     }   
-                    res.render("professional/cadastro/index",{
-                        typeuser: "", 
-                        mensagem: msg,
-                        ficha: [req.query.nome, 
-                            req.query.endereco,                             
-                            req.query.cidade,
-                            req.query.estado,
-                            req.query.cep,
-                            req.query.pais,
-                            req.query.rg,
-                            req.query.cpf_cnpj,
-                            req.query.email, 
-                            req.query.senha, 
-                            req.query.sexo,
-                            req.query.profissao,
-                            req.query.historico,
-                            req.query.conhecimento],
-                        logado: "", 
-                        sexo:req.query.sexo,
-                        tipoPagamento: req.query.tipoPagamento,
-                        conta: req.query.conta,
-                        agencia: req.query.agencia,
-                        banco: req.query.banco,
-                        tipoconta: req.query.tipoconta,
-                        carteiraBitcoin: req.query.carteiraBitcoin,
-                        chavePixSel: req.query.chavePixSel,
-                        chavePix: req.query.chavePix,
-                        txtBanco: req.query.txtBanco,
-                        txtChavePix: req.query.txtChavePix,
-                        senha: req.query.senha,
-                        senha2:  req.query.senha2
-                    });                 
             }
-            else{
-                if(req.query.senha != req.query.senha2){
-                    msg = "As senhas estão diferentes elas precisam ser iguais"
-                }
-                if(req.query.sexo != ""){
-                    res.render("professional/cadastro/index",{
-                        typeuser: "",
-                        logado: "",
-                        ficha: [req.query.nome, 
-                            req.query.endereco,                             
-                            req.query.cidade,
-                            req.query.estado,
-                            req.query.cep,
-                            req.query.pais,
-                            req.query.rg,
-                            req.query.cpf_cnpj,
-                            req.query.email, 
-                            req.query.senha, 
-                            req.query.sexo,
-                            req.query.profissao,
-                            req.query.historico,
-                            req.query.conhecimento],
-                        tipoPagamento: req.query.tipoPagamento,
-                        sexo:req.query.sexo,
-                        conta: req.query.conta,
-                        agencia: req.query.agencia,
-                        banco: req.query.banco,
-                        tipoconta: req.query.tipoconta,
-                        carteiraBitcoin: req.query.carteiraBitcoin,
-                        chavePix: req.query.chavePix,
-                        txtBanco: req.query.txtBanco,
-                        chavePixSel: req.query.chavePixSel,
-                        txtChavePix: req.query.txtChavePix,
-                        mensagem: msg,
-                        senha: req.query.senha,
-                        senha2:  req.query.senha2
-                    });
-                }else{
-                    res.render("professional/cadastro/index",{
-                        typeuser: "",
-                        logado: "",
-                        ficha: [""],
-                        sexo: "",
-                        mensagem: msg,
-                        tipoPagamento: req.query.tipoPagamento,
-                        conta: null,
-                        agencia: null,
-                        banco: null,
-                        tipoconta: "",
-                        senha: "",
-                        senha2:  ""
-                    });
-                } 
-            }
+            res.render("professional/cadastro/index",{
+                typeuser: "", 
+                mensagem: cadastroMensagem,
+                savePressed: savePressed,
+                ficha: [
+                    req.query.nome, 
+                    req.query.endereco,    
+                    req.query.cidade,
+                    req.query.estado,
+                    req.query.cep,
+                    req.query.pais,
+                    req.query.rg,
+                    req.query.cpf_cnpj,
+                    req.query.email, 
+                    req.query.senha, 
+                    req.query.sexo,
+                    req.query.profissao,
+                    req.query.historico,
+                    req.query.conhecimento],
+                    logado: "", 
+                    sexo:req.query.sexo,
+                    tipoPagamento: req.query.tipoPagamento,
+                    senha: req.query.senha,
+                    senha2:  req.query.senha2
+                });           
         }
-        else if(req.query.opcao == "cadastroCon" || req.query.cadastroContractor == "Salvar"){
-            if(req.query.cadastroContractor=="Salvar" && req.query.senhaCad != "" && req.query.senhaCad2 != "" && 
-                req.query.senhaCad == req.query.senhaCad2){
-                msg = "Contratante salvo com sucesso\npode procurar um serviço";
-                 try{  
-                    contratante.insertMany([
+        else if(req.query.opcao == "cadastroCon" || req.query.cadastroContractor == "Save"){
+            const savePressed = req.query.cadastroContractor === "Save";
+            const requiredFields = [
+                req.query.nome,
+                req.query.endereco,
+                req.query.cidade,
+                req.query.estado,
+                req.query.cep,
+                req.query.pais,
+                req.query.cpf_cnpj,
+                req.query.email,
+                req.query.senha,
+                req.query.senha2
+            ];
+            const formIsComplete = requiredFields.every(value =>
+                typeof value === "string" && value.trim() !== ""
+            );
+            const passwordsMatch = req.query.senha === req.query.senha2;
+            let cadastroMensagem = null;
+
+            if (savePressed && !formIsComplete) {
+                cadastroMensagem = "Please complete all fields before saving.";
+            } else if (savePressed && !passwordsMatch) {
+                cadastroMensagem = "Passwords do not match.";
+            } else if (savePressed && passwordsMatch) {
+                try {
+                    await contratante.insertMany([
                         { 
                             nome: req.query.nome, 
                             endereco: req.query.endereco,
@@ -1211,34 +1231,31 @@ app.get("/", async (req,res)=>{
                             tipoPagamento: req.query.tipoPagamento,
                             produto: req.query.produto
                         }
-                    ]).then(function(){
-                        console.log("contratante salvo") 
-                    }).catch(function(error){
-                        console.log(error)    
-                    });                     
-                    }catch(e){
-                        console.log(e.error);
-                    } 
-            }else{
-                msg = "Contratante não foi salvo";                
-            } 
+                    ]);
+                    cadastroMensagem = "Form saved successfully.";
+                    console.log("Contratante salvo");
+                } catch (error) {
+                    console.error("Erro ao salvar contratante:", error);
+                    cadastroMensagem = "Não foi possível salvar o formulário. Tente novamente.";
+                }
+            }
             res.render("company/cadastroCont/index",{                
                 typeuser: "", 
                 logado: "", 
-                ficha: [req.query.nome,
-                req.query.endereco,
-                req.query.cidade,
-                req.query.estado,
-                req.query.cep,
-                req.query.pais,
-                req.query.cpf_cnpj,
-                req.query.email,
-                req.query.senha,
-                req.query.tipoPagamento
-                ],
+                ficha: {
+                    nome: req.query.nome,
+                    endereco: req.query.endereco,
+                    cidade: req.query.cidade,
+                    estado: req.query.estado,
+                    cep: req.query.cep,
+                    pais: req.query.pais,
+                    cpf_cnpj: req.query.cpf_cnpj,
+                    email: req.query.email,
+                    senha: req.query.senha
+                },
                 senha2: req.query.senha2,                
                 produto: req.query.produto,
-                mensagem: msg,
+                mensagem: cadastroMensagem,
                 tipoPagamento: req.query.tipoPagamento}); 
         }
         else if(req.query.opcao == null || req.query.opcao == "home"){ 

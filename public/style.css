@@ -5,6 +5,289 @@
     text-align: center;
 }
 
+body{
+    background-color: #f2fce1;
+}
+
+body.professional-profile-page{
+    background-color: #f2fce1;
+}
+
+body.chat-page{
+    background-color: #f2fce1;
+}
+
+body.chat-page > h1{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+    text-shadow: 0 2px 4px rgba(0, 67, 110, 0.3);
+}
+
+body.professional-profile-page,
+body.professional-profile-page *{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body.professional-profile-page input[type="text"]{
+    background-color: #f2fce1;
+}
+
+body.professional-profile-page input[type="password"]{
+    background-color: #f2fce1;
+}
+
+body.professional-profile-page select{
+    background-color: #f2fce1;
+}
+
+body.professional-profile-page textarea{
+    background-color: #f2fce1;
+}
+
+body.professional-profile-page input[type="submit"]{
+    background-color: #4CAF50;
+    color: #ffffff;
+}
+
+body.payment-details-page input[type="text"],
+body.payment-details-page select,
+body.payment-details-page textarea{
+    border: 1px solid #064b69;
+    border-radius: 8px;
+    background-color: #f2fce1;
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body.professional-profile-page input:not([type="hidden"]),
+body.professional-profile-page select,
+body.professional-profile-page textarea{
+    border-radius: 8px;
+}
+
+body.payment-details-page .about-menu a[href*="menu=fincadPro"],
+body.payment-details-page .about-menu a[href*="menu=fincadCont"]{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body.payment-details-page .payment-save-success,
+body.professional-profile-page .payment-save-success{
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    z-index: 1000;
+    width: fit-content;
+    max-width: calc(100vw - 32px);
+    box-sizing: border-box;
+    margin: 0;
+    padding: 10px 16px;
+    transform: translateX(-50%);
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #246b36;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 67, 110, 0.2);
+}
+
+body.earnings-background{
+    background-color: #f2fce1;
+}
+
+body.earnings-background > h1{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+    text-shadow: 0 2px 4px rgba(0, 67, 110, 0.3);
+}
+
+body.earnings-background .monthly-earnings-title{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.earnings-services-table,
+.earnings-services-table *{
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+
+body.earnings-background .monthly-income-header,
+body.earnings-background .monthly-income-header *{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body.earnings-background .monthly-income-header{
+    background-color: #f2f2f2;
+}
+
+body.earnings-background .earnings-reviews-button,
+body.earnings-background .earnings-rate-button{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f2f2f2;
+}
+
+body.earnings-background .earnings-rate-button{
+    color: #ffffff !important;
+    background-color: #064b69;
+}
+
+body.earnings-background .earnings-reviews-button{
+    color: #ffffff !important;
+    background-color: #064b69;
+}
+
+.earnings-page,
+.earnings-page *{
+    color: #064b69 !important;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.earnings-page{
+    background-color: #f2fce1;
+}
+
+.earnings-page .earnings-pending{
+    color: red !important;
+}
+
+.earnings-page .earnings-paid{
+    color: green !important;
+}
+
+.completed-services-page,
+.completed-services-page h1,
+.completed-services-page td,
+.completed-services-page a,
+.completed-services-page input{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.completed-services-page input::placeholder{
+    color: #064b69;
+    opacity: 1;
+}
+
+.about-page h1,
+.about-page h3,
+.about-page p{
+    color: #064b69;
+}
+
+.login-page h1,
+.login-page label,
+.login-page input,
+.login-page button{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.login-page input::placeholder{
+    color: #064b69;
+    opacity: 1;
+}
+
+.about-page h1,
+.about-page h3{
+    text-shadow: 0 2px 4px rgba(0, 67, 110, 0.3);
+}
+
+.about-page .about-menu,
+.about-menu{
+    list-style: none;
+    padding-left: 0;
+}
+
+.about-menu li{
+    width: 100%;
+    box-sizing: border-box;
+    margin: 8px 0 8px 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgba(70, 157, 190, 0.35);
+    border-radius: 8px;
+    background-image:
+        linear-gradient(rgba(220, 247, 255, 0.5), rgba(220, 247, 255, 0.5)),
+        url("../images/fundoMenu.png");
+    background-position: center;
+    background-size: cover;
+    box-shadow: 0 2px 5px rgba(0, 67, 110, 0.2);
+}
+
+.about-menu li a{
+    display: block;
+    width: auto;
+    margin: 0;
+    padding: 10px 6px;
+    color: #064b69;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.about-menu-title{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.about-menu-copy{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.about-menu li a:hover{
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.about-menu-horizontal{
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    width: auto;
+    margin-left: 0;
+}
+
+.about-menu-horizontal li{
+    flex: 0 1 auto;
+    margin: 8px 0;
+}
+
+.about-page .about-table{
+    width: 10%;
+    position: relative;
+    isolation: isolate;
+    background: transparent;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(0, 67, 110, 0.3);
+}
+
+.about-page .about-table::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: auto;
+    margin: 0;
+    border-radius: inherit;
+    background-image: url("../images/fundoMenu.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    opacity: 0.45;
+}
+
+.professional-menu .about-table::before{
+    opacity: 0.2;
+}
+
+.about-page .about-kanban-image{
+    display: block;
+    width: min(540px, 90%);
+    height: auto;
+    margin: 28px auto 16px;
+}
+
 .qr-code{
     display: block;
     width: 180px;
@@ -18,13 +301,51 @@
     width: 100%;   
     text-align: center;   
 }
+.board-search{
+    position: relative;
+    width: min(420px, 90%);
+    margin: 0 auto 16px;
+}
+.board-search-icon{
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    width: 18px;
+    height: 18px;
+    transform: translateY(-50%);
+    fill: none;
+    stroke: #064b69;
+    stroke-width: 2;
+    pointer-events: none;
+}
+.board-search-input{
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 8px 12px;
+    padding-left: 38px;
+    border: 1px solid #064b69;
+    border-radius: 8px;
+    background-color: #f2fce1;
+    color: #064b69;
+    font-size: 16px;
+    box-sizing: border-box;
+}
 .boardtable{
     width: 97%;    
     text-align: center;    
     font-size: 25px;
     font-family: Arial, Helvetica, sans-serif;
     background-color: #c0fce8;
-    
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 2px solid #064b69;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.board-menu-cell{
+    border-right: 2px solid #064b69;
+    padding-right: 12px;
 }
 .boardhead{
     width: 97%;
@@ -32,6 +353,15 @@
     font-size: 25px;
     font-family: Arial, Helvetica, sans-serif;
     background-color: #7bd1b5;
+}
+.boardhead .columntable{
+    border-bottom: 2px solid #064b69;
+}
+.boardtable .columntable{
+    border-right: 2px solid #064b69;
+}
+.boardtable .columntable:last-child{
+    border-right: 0;
 }
 .boardbody{
     width: 97%;
@@ -125,8 +455,9 @@
     color: #555;
 }
 .demoChat{
-    width: min(95%, 620px);
-    margin: 16px auto;
+    width: 95%;
+    margin-left: 0;
+    margin: 10px auto;
     border: 1px solid #9bb8c9;
     border-radius: 8px;
     background-color: #ffffff;
@@ -136,6 +467,7 @@
 .demoChatHeader{
     display: flex;
     flex-direction: column;
+    margin-left: 0;
     gap: 4px;
     padding: 12px 16px;
     color: #ffffff;
@@ -175,8 +507,9 @@
 }
 .demoChatComposer{
     display: flex;
+    margin-left: 0;
     gap: 8px;
-    padding: 12px;
+    padding: 10px;
 }
 .demoChatComposer input{
     flex: 1;
@@ -282,44 +615,237 @@
     margin: 8px 12px 0 0;
 }
 .chatBackAreaTalk{
-    width: 80%;   
-    height: 400px;
+    width: 80%;
+    height: 580px;
+    padding: 0;
+    vertical-align: top;
     font-family: Arial, Helvetica, sans-serif;
-    background-color: #fcf2bb;
+    background-color: #efeae2;
+}
+
+.chatMessagesScroll{
+    width: 100%;
+    height: 580px;
+    box-sizing: border-box;
+    padding: 12px 8px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #efeae2;
+}
+
+.chatConversationFrame{
+    width: 100%;
+    overflow: hidden;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(11, 20, 26, 0.12);
+}
+
+.chatConversationTable{
+    border-spacing: 0;
+    border-collapse: separate;
 }
 
 .chatBallonTalk{
-    width: 48%;   
-    height: 100px;
-    font-size: 12px;
+    width: fit-content;
+    max-width: 75%;
+    height: auto;
+    box-sizing: border-box;
+    margin: 8px 12px 8px auto;
+    padding: 8px 12px;
+    border-radius: 8px 0 8px 8px;
+    color: #111b21;
+    font-size: 14px;
     text-align: left;
-    margin-left: 50%;
     font-family: Arial, Helvetica, sans-serif;
-    background-color: #6fc93e;
+    background-color: #d9fdd3;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    box-shadow: 0 1px 1px rgba(11, 20, 26, 0.12);
 }
 
 .chatBallonReturn{
-    width: 48%;   
-    height: 100px;
-    font-size: 12px;
+    width: fit-content;
+    max-width: 75%;
+    height: auto;
+    box-sizing: border-box;
+    margin: 8px auto 8px 12px;
+    padding: 8px 12px;
+    border-radius: 0 8px 8px 8px;
+    color: #111b21;
+    font-size: 14px;
     text-align: left;
-    margin-right: 0%;
     font-family: Arial, Helvetica, sans-serif;
-    background-color: #7cd0f7;
+    background-color: #ffffff;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    box-shadow: 0 1px 1px rgba(11, 20, 26, 0.12);
 }
 
 .chatcontacts{
-    width: 100%; 
-    height:100%; 
-    font-size: 16px;
-    text-align: justify;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #e9f073;
+    width: 325px;
+    height: auto;
+    margin-left: -20;
+    border-collapse: collapse;
+    table-layout: fixed;
+    background-color: #f0f5f0;
 }
 
 .contactsScroll{
-    width: 20%; 
-    background-color: #e9f073;
+    width: 0%;
+    padding: 0;
+    vertical-align: top;
+    border-right: 1px solid #d1d7db;
+    background-color: #f0f2f5;
+}
+
+.chatContactsPanel{
+    display: flex;
+    width: 90%;
+    height: 580px;
+    flex-direction: column;
+    background-color: #f0f2f5;
+}
+
+.chatContactsHeader{
+    display: flex;
+    width: 255px;
+    margin-left: -10;
+    min-height: 60px;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 0 16px;
+    background-color: #f0f2f5;
+    border-bottom: 1px solid #101112;
+    color: #111b21;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: left;
+}
+
+.contactsListScroll{
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.chatcontacts td{
+    width: 100%;
+    padding: 0;
+    border-bottom: 1px solid #101112;
+    text-align: left;
+}
+
+.chatContactLink{
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    color: #111b21;
+    text-align: left;
+    text-decoration: none;
+}
+
+.chatContactLink:hover,
+.chatContactLink:focus{
+    background-color: #f5f6f6;
+    color: #111b21;
+    text-decoration: none;
+}
+
+.chatContactLink.is-selected{
+    border-left: 4px solid #00a884;
+    padding-left: 8px;
+    background-color: #f0f2f5;
+}
+
+.chatContactLink.is-selected .chatContactAvatar{
+    background-color: #d9fdd3;
+}
+
+.chatContactAvatar{
+    display: flex;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #dfe5e7;
+    color: #54656f;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.chatContactName{
+    display: block;
+    width: auto;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    color: #111b21;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.chat-page .chatMessageInput{
+    width: 82%;
+    height: 46px;
+    box-sizing: border-box;
+    margin: 8px 1%;
+    padding: 0 18px;
+    border: 1px solid #d1d7db;
+    border-radius: 24px;
+    background-color: #ffffff;
+    color: #111b21;
+    font-size: 15px;
+    text-align: left;
+    box-shadow: 0 1px 2px rgba(11, 20, 26, 0.08);
+}
+
+body.chat-page .chatMessageInput::placeholder{
+    color: #667781;
+    opacity: 1;
+}
+
+body.chat-page .chatMessageInput:focus{
+    border-color: #00a884;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 168, 132, 0.15);
+}
+
+body.chat-page .chatSendButton{
+    width: auto;
+    min-width: 88px;
+    height: 44px;
+    box-sizing: border-box;
+    margin: 8px 0;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 22px;
+    background-color: #00a884;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.chat-page .chatSendButton:hover{
+    background-color: #008f72;
+}
+
+body.chat-page .chatSendButton:focus{
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.25);
 }
 
 .backForm{
@@ -489,8 +1015,39 @@
     transition: right .5s ease-in;
  }
 
+ .task-card{
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 10px 20px 14px 10px;
+    border: 1px solid #bdce79;
+    border-radius: 2px 2px 12px 2px;
+    background: linear-gradient(135deg, #f3f8c7 0%, #dceba0 100%);
+    color: #34421f;
+    text-align: left;
+    box-shadow: 2px 4px 8px rgba(62, 78, 28, 0.25);
+ }
+
+ .board-page .task-card[hidden]{
+    display: none !important;
+ }
+
+ .task-card::after{
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #eaf3b7 0%, #a9bf64 100%);
+    clip-path: polygon(0 100%, 100% 0, 100% 100%);
+ }
+
  .board-column {
-     min-height: 400px;
+     min-height: 0px;
  }
 
  [draggable="true"] {
@@ -526,6 +1083,23 @@
 
   .modal-footer {
     background-color: #f9f9f9;
+  }
+
+  .board-page,
+  .board-page * {
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  body.board-page,
+  .board-page .backForm {
+    background-color: #f2fce1;
+  }
+
+  .board-page .modal-header,
+  .board-page .modal-header h4,
+  .board-page .modal-header .close {
+    color: #064b69 !important;
   }
 
   .button-modal{

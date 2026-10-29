@@ -2,21 +2,47 @@
     <head>
       <meta charset="utf-8">
       <link href="public/style.css" rel="stylesheet">
+      <style>
+        #email,
+        #senha {
+          background-color: #f2fce1;
+          border-radius: 8px;
+        }
+        #opcao {
+          background-color: #3690f8;
+          border-radius: 8px;
+        }
+        [role="alert"] {
+          color: #d00000;
+        }
+      </style>
       <title>board jobs</title>
     </head>
-    <body>
-      <p>
-        <a href="?opcao=home">Home</a>
-      </p>
-        <form method="post">
-          <h1><b>Board Jobs</b></h1><br />    
-          <h3><b>LOGIN</b></h3><br />   
-          <%=user%><br />    
-          <%if(typeof mensagem !== "undefined" && mensagem){%><p role="alert"><%=mensagem%></p><%}%>
-          <input type="text" id="email" name="email" placeholder="E-Mail" /><br />
-          <input type="password" id="senha" name="senha" placeholder="Senha" /><br />
-          <input type="hidden" id="typeuser" name="typeuser" value="<%=user%>"  />
-          <input type="submit" id="opcao" name="opcao" value="Entrar" />          
+    <body class="login-page">
+        <form method="get">
+          <h1><b>Board Jobs</b></h1>
+          <table style="height: 500px;">
+            <tr>
+              <td class="about-table" style="width: 20%;">
+                <ul class="about-menu" style="margin-left: 0;">
+                  <li><a href="?opcao=home">Home</a></li>
+                  <li><a href="?opcao=login-pro">Professional Login</a>
+                  <li><a href="?opcao=login-cont">Contractor Login</a>
+                  <li><a href="?opcao=About">About</a>
+                </ul>
+              </td>
+              <td style="width: 80%;">
+                <label><b>SIGN IN</b></label><br /><br />
+                <label><%=user%></label><br /><br />
+                <%if(typeof mensagem !== "undefined" && mensagem){%>
+                  <p role="alert"><%=mensagem%></p><%}%>
+                  <input style="width: 40%;" type="text" id="email" name="email" placeholder="Email" /><br /><br />
+                  <input style="width: 40%;" type="password" id="senha" name="senha" placeholder="Password" /><br />
+                  <input style="width: 40%;" type="hidden" id="typeuser" name="typeuser" value="<%=user%>"  /><br /><br />
+                  <button style="width: 20%;" type="submit" id="opcao" name="opcao" value="Entrar">Sign in</button>
+              </td>
+            </tr>
+          </table>
         </form>
     </body>
 </html>

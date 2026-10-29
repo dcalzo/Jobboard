@@ -2,46 +2,50 @@
     <head>
       <meta charset="utf-8">
       <link href="public/style.css" rel="stylesheet">
-      <title>board jobs</title>
+      <title>Board Jobs</title>
     </head>
     <body>
       <form>
-        <a href="?opcao=home">Home</a>
-        <a href="?opcao=cadastroPro">Cadastro Profissional</a>
-        <a href="?opcao=cadastroCon">Cadastro Contratante</a>
-      </form>
-        <h1><b>Board Jobs</b></h1><br />                
+        <ul class="about-menu about-menu-horizontal">
+          <li><a href="?opcao=home">Home</a></li>
+          <li><a href="?opcao=cadastroPro">Professional Registration</a></li>
+          <li><a href="?opcao=cadastroCon">Contractor Registration</a></li>
+        </ul>
+      </form>                     
         <form>         
           <table class="boardtableMain">
             <tr>
               <td style="width: 15%;">
-                <ul>
-                  <li><a href="?opcao=login-pro">Login Professional</a>
-                  <li><a href="?opcao=login-cont">Login contractor</a>
+                <ul class="about-menu">
+                  <li><a href="?opcao=login-pro">Professional Login</a>
+                  <li><a href="?opcao=login-cont">Contractor Login</a>
                   <li><a href="?opcao=About">About</a>
                 </ul>    
               </td>
               <td id="conteudo" name="conteudo" class="boardtableMainRow" >
-                Prataforma para contratar profissionais e encontrar serviços a<br />
-                serem executados<br />
-                demonstração do board job<br />
-                <div style="width:100%; height: 325px; overflow-y: scroll;">   
+                <h1 class="about-menu-title"><b>Board Jobs</b></h1>
+                <p class="about-menu-copy">
+                  The platform for hiring professionals and finding services to be completed.<br />
+                  Board Jobs demonstration.<br />
+                </p>                
+                <div style="width:100%; height: 500px; overflow-y: scroll;">   
                   <%if(demo == undefined){%>    
-                  <ul style="width:80%;">
-                  <li><a href="?demo=demo-prof">Profissional</a>
-                  <li><a href="?demo=demo-cont">Contratante</a>
-                </ul>      
+                  <ul class="about-menu">
+                  <li><a href="?demo=demo-prof">Professional</a>
+                  <li><a href="?demo=demo-cont">Contractor</a>
+                </ul>
+                <img style="height: 70%;" class="about-kanban-image" src="../images/kanban-decorativo.svg" alt="" aria-hidden="true" />      
                 <%}else if(demo == "demo-prof"){%>
-                  <p>Demonstração para Profissionais</p>
                   <table>
                     <tr>
                       <td style="width: 10%; margin-left: 0px;">
-                         <ul>
-                        <li><a href="?demo2=demo-boardprof&demo=demo-prof">Board</a></li>
-                        <li><a href="?demo2=demo-ganho&demo=demo-prof">Ganhos Financeiros</a></li>
-                        <li><a href="?demo2=demo-fincad&demo=demo-prof">Cadastro Financeiro</a></li>
-                        <li><a href="?demo2=demo-chatprof&demo=demo-prof">Chat</a></li>
-                      </ul> 
+                        <ul class="about-menu">
+                          <li><a href="?demo2=demo-boardprof&demo=demo-prof">Board</a></li>
+                          <li><a href="?demo2=demo-ganho&demo=demo-prof">Financial Earnings</a></li>
+                          <li><a href="?demo2=demo-fincad&demo=demo-prof">Payout Details</a></li>
+                          <li><a href="?demo2=demo-chatprof&demo=demo-prof">Chat</a></li>
+                          <li><a href="?opcao=home">Back</a></li>
+                        </ul> 
                       </td>
                       <td style="width: 25%;">
                         <%if(demo2 == undefined || demo2 == "demo-boardprof"){%>    
@@ -50,60 +54,60 @@
                             <thead class="boardhead">
                               <tr>
                               <td style="width: 5%; margin-left: 0px;">Services</td>
-                              <td style="width: 5%; margin-left: 0px;">development</td>
-                              <td style="width: 5%; margin-left: 0px;">Revision</td>
-                              <td style="width: 5%; margin-left: 0px;">Concluded</td>
+                              <td style="width: 5%; margin-left: 0px;">In Progress</td>
+                              <td style="width: 5%; margin-left: 0px;">In Review</td>
+                              <td style="width: 5%; margin-left: 0px;">Completed</td>
                             </tr>
                             </thead>
                             <tbody>
                             <tr>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 370px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>ler planilhas em Python</b><br />
+                                                        <b>Read spreadsheets in Python</b><br />
                                                          R$50,00<br /> 
                                   </button>
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>contador de visitantes no site</b><br />
+                                                        <b>Website visitor counter</b><br />
                                                          R$25,00<br /> 
                                   </button>
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>bot para atendimento ao cliente</b><br />
+                                                        <b>Customer support bot</b><br />
                                                          R$100,00<br /> 
                                   </button>
                                 </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 370px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>gerenciador de restaurante</b><br />
+                                                        <b>Restaurant management system</b><br />
                                                          R$1000,00<br /> 
                                   </button>
                                 </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 370px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>gerenciador de audiência para Streaming</b><br />
+                                                        <b>Streaming audience management system</b><br />
                                                          R$500,00<br /> 
                                   </button>
                                 </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 370px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>api para bet</b><br />
+                                                        <b>Betting API</b><br />
                                                          R$600,00<br /> 
                                   </button>
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>bot para distribuir propaganda</b><br />
+                                                        <b>Advertising distribution bot</b><br />
                                                          R$800,00<br /> 
                                   </button>
                                 </div>
@@ -112,31 +116,31 @@
                             </tbody>
                           </table>
                         <%} else if(demo2 == "demo-ganho"){%>
-                          <p>Ganhos Financeiros</p>
+                          <p>Financial Earnings</p>
                           <table class="demoGainsTable" style="width: 100%;">
                             <thead>
                             <tr>
-                              <td style="width: 25%;"><b>trabalho</b></td>
-                              <td style="width: 25%;"><b>pagamento</b></td>
-                              <td style="width: 25%;"><b>etapa do desenvolvimento</b></td>
-                              <td style="width: 25%;"><b>estado do pagamento</b></td>
+                              <td style="width: 25%;"><b>Service</b></td>
+                              <td style="width: 25%;"><b>Payment</b></td>
+                              <td style="width: 25%;"><b>Development Stage</b></td>
+                              <td style="width: 25%;"><b>Payment Status</b></td>
                             </tr>
                             </thead>
                             <tbody>
                             <tr>
-                              <td style="width: 25%;">gerenciador de restaurante</td>
+                              <td style="width: 25%;">Restaurant management system</td>
                               <td style="width: 25%;">R$1.000,00</td>
                               <td style="width: 25%;">Under development</td>
                               <td style="width: 25%;">Waiting payment</td>
                             </tr>
                             <tr>
-                              <td style="width: 25%;">gerenciador de audiência para Streaming</td>
+                              <td style="width: 25%;">Streaming audience management system</td>
                               <td style="width: 25%;">R$500,00</td>
-                              <td style="width: 25%;">Revision</td>
+                              <td style="width: 25%;">In Review</td>
                               <td style="width: 25%;">Waiting payment</td>
                             </tr>
                             <tr>
-                              <td style="width: 25%;">api para bet</td>
+                              <td style="width: 25%;">Betting API</td>
                               <td style="width: 25%;">R$600,00</td>
                               <td style="width: 25%;">Concluded</td>
                               <td style="width: 25%;">Paid</td>
@@ -144,160 +148,160 @@
                             </tbody>
                           </table>
                         <%} else if(demo2 == "demo-fincad"){%>
-                          <p>Cadastro Financeiro</p><br />
-                          <label for="demo-payment-type"><b>tipo de pagamento:</b></label>
+                          <p>Payout Details</p><br />
+                          <label for="demo-payment-type"><b>Payment method:</b></label>
                            <select id="demo-payment-type" style="width: 50%;" aria-controls="demo-payment-pix demo-payment-bitcoin demo-payment-bank">
                               <option value="" selected ></option>
                               <option value="PIX" >PIX</option>
                               <option value="Bitcoin" >Bitcoin</option>
-                              <option value="bancodeposito" >Deposito bancario</option>
+                              <option value="bancodeposito" >Bank transfer</option>
                            </select>
-                           <p>Escolha uma forma de pagamento para ver os dados de demonstração.</p>
+                           <p>Choose a payment method to view the demo details.</p>
                            <section id="demo-payment-pix" class="demoPaymentForm" aria-labelledby="demo-payment-pix-title" hidden>
-                             <h3 id="demo-payment-pix-title">Cadastro de pagamento via PIX</h3>
-                             <label for="demo-pix-key-type">Tipo de chave PIX</label>
+                             <h3 id="demo-payment-pix-title">PIX Payment Details</h3>
+                             <label for="demo-pix-key-type">PIX key type</label>
                              <select id="demo-pix-key-type">
-                               <option value="">Selecione</option>
+                               <option value="">Select a payment method</option>
                                <option value="cpf">CPF</option>
                                <option value="cnpj">CNPJ</option>
                                <option value="email">E-mail</option>
-                               <option value="telefone">Telefone</option>
-                               <option value="aleatoria">Chave aleatória</option>
+                               <option value="telefone">Phone number</option>
+                               <option value="aleatoria">Random key</option>
                              </select>
                              <label for="demo-pix-key">Chave PIX</label>
-                             <input id="demo-pix-key" type="text" placeholder="Digite a chave PIX">
-                             <label for="demo-pix-holder">Nome do titular</label>
-                             <input id="demo-pix-holder" type="text" placeholder="Nome completo">
+                             <input id="demo-pix-key" type="text" placeholder="Enter PIX key">
+                             <label for="demo-pix-holder">Account holder name</label>
+                             <input id="demo-pix-holder" type="text" placeholder="Full name">
                            </section>
                            <section id="demo-payment-bitcoin" class="demoPaymentForm" aria-labelledby="demo-payment-bitcoin-title" hidden>
-                             <h3 id="demo-payment-bitcoin-title">Cadastro de pagamento via Bitcoin</h3>
-                             <label for="demo-bitcoin-network">Rede</label>
+                             <h3 id="demo-payment-bitcoin-title">Bitcoin Payment Details</h3>
+                             <label for="demo-bitcoin-network">Network</label>
                              <select id="demo-bitcoin-network">
                                <option value="bitcoin">Bitcoin</option>
                                <option value="lightning">Lightning</option>
                              </select>
-                             <label for="demo-bitcoin-address">Endereço da carteira</label>
-                             <input id="demo-bitcoin-address" type="text" placeholder="Digite o endereço da carteira">
-                             <label for="demo-bitcoin-holder">Nome do titular</label>
-                             <input id="demo-bitcoin-holder" type="text" placeholder="Nome completo">
+                             <label for="demo-bitcoin-address">Wallet address</label>
+                             <input id="demo-bitcoin-address" type="text" placeholder="Enter wallet address">
+                             <label for="demo-bitcoin-holder">Account holder name</label>
+                             <input id="demo-bitcoin-holder" type="text" placeholder="Full name">
                            </section>
                            <section id="demo-payment-bank" class="demoPaymentForm" aria-labelledby="demo-payment-bank-title" hidden>
-                             <h3 id="demo-payment-bank-title">Cadastro para depósito bancário</h3>
-                             <label for="demo-bank-name">Banco</label>
-                             <input id="demo-bank-name" type="text" placeholder="Nome do banco">
-                             <label for="demo-bank-agency">Agência</label>
-                             <input id="demo-bank-agency" type="text" placeholder="Número da agência">
-                             <label for="demo-bank-account">Conta</label>
-                             <input id="demo-bank-account" type="text" placeholder="Número da conta e dígito">
-                             <label for="demo-bank-account-type">Tipo de conta</label>
+                             <h3 id="demo-payment-bank-title">Bank Transfer Details</h3>
+                             <label for="demo-bank-name">Bank</label>
+                             <input id="demo-bank-name" type="text" placeholder="Bank name">
+                             <label for="demo-bank-agency">Branch</label>
+                             <input id="demo-bank-agency" type="text" placeholder="Branch number">
+                             <label for="demo-bank-account">Account</label>
+                             <input id="demo-bank-account" type="text" placeholder="Account number and check digit">
+                             <label for="demo-bank-account-type">Account type</label>
                              <select id="demo-bank-account-type">
-                               <option value="corrente">Corrente</option>
-                               <option value="poupanca">Poupança</option>
+                               <option value="corrente">Checking</option>
+                               <option value="poupanca">Savings</option>
                              </select>
-                             <label for="demo-bank-holder">Nome do titular</label>
-                             <input id="demo-bank-holder" type="text" placeholder="Nome completo">
-                             <label for="demo-bank-document">CPF ou CNPJ do titular</label>
-                             <input id="demo-bank-document" type="text" placeholder="Digite o CPF ou CNPJ">
+                             <label for="demo-bank-holder">Account holder name</label>
+                             <input id="demo-bank-holder" type="text" placeholder="Full name">
+                             <label for="demo-bank-document">Account holder's CPF or CNPJ</label>
+                             <input id="demo-bank-document" type="text" placeholder="Enter CPF or CNPJ">
                            </section>
-                           <p class="demoPaymentNotice">Demonstração: os dados preenchidos não serão enviados nem salvos.</p>
+                           <p class="demoPaymentNotice">Demo: the information you enter will not be submitted or saved.</p>
                         <%} else if(demo2 == "demo-chatprof"){%>
-                          <p>Chat com o Cliente</p>
-                          <section class="demoChat" aria-label="Chat de demonstração">
+                          <p>Chat with the Client</p>
+                          <section class="demoChat" aria-label="Demo chat">
                             <header class="demoChatHeader">
-                              <strong>Cliente de demonstração</strong>
-                              <span>Disponível para conversar</span>
+                              <strong>Demo Client</strong>
+                              <span>Available to chat</span>
                             </header>
                             <div class="demoChatMessages" id="demo-chat-messages" aria-live="polite" aria-relevant="additions">
-                              <p class="demoChatBubble demoChatIncoming">Olá! Como está o andamento do serviço?</p>
-                              <p class="demoChatBubble demoChatOutgoing">Está avançando bem. Posso te enviar uma atualização em breve.</p>
-                              <p class="demoChatBubble demoChatIncoming">Ótimo, obrigado por me avisar!</p>
+                              <p class="demoChatBubble demoChatIncoming">Hello! How is the service coming along?</p>
+                              <p class="demoChatBubble demoChatOutgoing">It's going well. I can send you an update soon.</p>
+                              <p class="demoChatBubble demoChatIncoming">Great, thanks for letting me know!</p>
                             </div>
                             <div class="demoChatComposer">
-                              <label class="demoChatSrOnly" for="demo-chat-input">Escreva uma mensagem</label>
-                              <input id="demo-chat-input" type="text" maxlength="500" placeholder="Escreva uma mensagem..." autocomplete="off">
-                              <button id="demo-chat-send" type="button">Enviar</button>
+                              <label class="demoChatSrOnly" for="demo-chat-input">Write a message</label>
+                              <input id="demo-chat-input" type="text" maxlength="500" placeholder="Write a message..." autocomplete="off">
+                              <button id="demo-chat-send" type="button">Send</button>
                             </div>
-                            <p class="demoChatNotice">Demonstração: as mensagens e respostas são simuladas e não serão salvas.</p>
+                            <p class="demoChatNotice">Demo: messages and replies are simulated and will not be saved.</p>
                           </section>
                         <%}%>
                       </td>
                     </tr>
                   </table>
                 <%}else if(demo == "demo-cont"){%>
-                  <p>Demonstração para Contratantes</p>
                   <table>
                     <tr>
-                      <td style="width: 20%; margin-left: 0px;">
-                        <ul>
-                                <li><a href="?demo2=demo-boardcont&demo=demo-cont">Board</a></li>
-                                <li><a href="?demo2=demo-task&demo=demo-cont">Criar Serviço</a></li>
-                                <li><a href="?demo2=demo-historico&demo=demo-cont">Historico de Serviços</a></li>
-                                <li><a href="?demo2=demo-fincadcont&demo=demo-cont">Cadastro Financeiro</a></li>
-                                <li><a href="?demo2=demo-concluidos&demo=demo-cont">serviços Concluidos</a></li>
-                                <li><a href="?demo2=demo-chatcont&demo=demo-cont">Chat</a></li>
-                              </ul>    
+                      <td style="width: 10%; margin-left: 0px;">
+                        <ul class="about-menu">
+                          <li><a href="?demo2=demo-boardcont&demo=demo-cont">Board</a></li>
+                          <li><a href="?demo2=demo-task&demo=demo-cont">Create a Service</a></li>
+                          <li><a href="?demo2=demo-historico&demo=demo-cont">Service History</a></li>
+                          <li><a href="?demo2=demo-fincadcont&demo=demo-cont">Payment Details</a></li>
+                          <li><a href="?demo2=demo-concluidos&demo=demo-cont">Completed Services</a></li>
+                          <li><a href="?demo2=demo-chatcont&demo=demo-cont">Chat</a></li>
+                          <li><a href="?opcao=home">Back</a></li>
+                        </ul>    
                       </td>
-                      <td style="width: 15%;">
+                      <td style="width: 40%;">
                          <%if(demo2 == undefined || demo2 == "demo-boardcont"){%>  
                           <p>Board</p>
                           <table class="boardtable demo-board">
                             <thead class="boardhead">
                               <tr>
                               <td style="width: 5%; margin-left: 0px;">Services</td>
-                              <td style="width: 5%; margin-left: 0px;">development</td>
-                              <td style="width: 5%; margin-left: 0px;">Revision</td>
-                              <td style="width: 5%; margin-left: 0px;">Concluded</td>
+                              <td style="width: 5%; margin-left: 0px;">In Progress</td>
+                              <td style="width: 5%; margin-left: 0px;">In Review</td>
+                              <td style="width: 5%; margin-left: 0px;">Completed</td>
                             </tr>
                             </thead>
                             <tbody>
                             <tr>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 370px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>ler planilhas em Python</b><br />
+                                                        <b>Read spreadsheets in Python</b><br />
                                                          R$50,00<br /> 
                                   </button>
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>contador de visitantes no site</b><br />
+                                                        <b>Website visitor counter</b><br />
                                                          R$25,00<br /> 
                                   </button>
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>bot para atendimento ao cliente</b><br />
+                                                        <b>Customer support bot</b><br />
                                                          R$100,00<br /> 
                                   </button>
                                 </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 370px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>gerenciador de restaurante</b><br />
+                                                        <b>Restaurant management system</b><br />
                                                          R$1000,00<br /> 
                                   </button>
                                 </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 370px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>gerenciador de audiência para Streaming</b><br />
+                                                        <b>Streaming audience management system</b><br />
                                                          R$500,00<br /> 
                                   </button>
                                 </div>
                               </td>
                               <td style="width: 5%; margin-left: 0px;">
-                                <div class="demo-board-column" style="width:100%; height: 180px; overflow-y: scroll;">
+                                <div class="demo-board-column" style="width:100%; height: 370px; overflow-y: scroll;">
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>api para bet</b><br />
+                                                        <b>Betting API</b><br />
                                                          R$600,00<br /> 
                                   </button>
                                   <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 0px; width: 80%;" 
                                                 class="post" data-toggle="modal" data-target="#myModal">
-                                                        <b>bot para distribuir propaganda</b><br />
+                                                        <b>Advertising distribution bot</b><br />
                                                          R$800,00<br /> 
                                   </button>
                                 </div>
@@ -306,176 +310,176 @@
                             </tbody>
                           </table>
                          <%} else if(demo2 == "demo-task"){%>
-                          <p>Criar Serviço</p>
+                          <p>Create a Service</p>
                           <section class="demoService">
-                            <p>Preencha os dados abaixo para simular a publicação de um serviço.</p>
+                            <p>Fill in the details below to simulate posting a service.</p>
                             <div class="demoServiceForm" id="demo-service-form">
-                              <label for="demo-service-title">Título do serviço</label>
-                              <input id="demo-service-title" type="text" maxlength="100" placeholder="Ex.: Criar site para restaurante" required>
-                              <label for="demo-service-description">Descrição</label>
-                              <textarea id="demo-service-description" rows="5" maxlength="1000" placeholder="Descreva o que precisa ser feito" required></textarea>
-                              <label for="demo-service-payment">Forma de pagamento</label>
+                              <label for="demo-service-title">Service title</label>
+                              <input id="demo-service-title" type="text" maxlength="100" placeholder="E.g., Build a website for a restaurant" required>
+                              <label for="demo-service-description">Description</label>
+                              <textarea id="demo-service-description" rows="5" maxlength="1000" placeholder="Describe what needs to be done" required></textarea>
+                              <label for="demo-service-payment">Payment method</label>
                               <select id="demo-service-payment" required>
-                                <option value="">Selecione</option>
+                                <option value="">Select a payment method</option>
                                 <option value="PIX">PIX</option>
                                 <option value="Bitcoin">Bitcoin</option>
-                                <option value="Depósito bancário">Depósito bancário</option>
+                                <option value="Bank transfer">Bank transfer</option>
                               </select>
-                              <label for="demo-service-value">Valor do serviço (R$)</label>
-                              <input id="demo-service-value" type="number" min="0.01" step="0.01" placeholder="Ex.: 500,00" required>
-                              <label for="demo-service-repository">Repositório do projeto (opcional)</label>
+                              <label for="demo-service-value">Service amount (BRL)</label>
+                              <input id="demo-service-value" type="number" min="0.01" step="0.01" placeholder="E.g., 500.00" required>
+                              <label for="demo-service-repository">Project repository (optional)</label>
                               <input id="demo-service-repository" type="url" placeholder="https://github.com/...">
-                              <label for="demo-service-document">Link de referência ou documento (opcional)</label>
+                              <label for="demo-service-document">Reference link or document (optional)</label>
                               <input id="demo-service-document" type="url" placeholder="https://...">
-                              <button id="demo-service-create" type="button">Publicar serviço de demonstração</button>
+                              <button id="demo-service-create" type="button">Post demo service</button>
                             </div>
-                            <p class="demoServiceNotice" id="demo-service-notice" role="status" aria-live="polite">Demonstração: o serviço não será enviado nem salvo.</p>
+                            <p class="demoServiceNotice" id="demo-service-notice" role="status" aria-live="polite">Demo: the service will not be submitted or saved.</p>
                             <div id="demo-service-list" class="demoServiceList" aria-live="polite"></div>
                           </section>
                          <%} else if(demo2 == "demo-historico"){%>
-                          <p>Histórico de Serviços</p>
+                          <p>Service History</p>
                           <div class="demoHistory">
                             <table class="demoGainsTable">
                               <thead>
                                 <tr>
-                                  <td><b>serviço</b></td>
-                                  <td><b>profissional</b></td>
-                                  <td><b>pagamento</b></td>
-                                  <td><b>etapa atual</b></td>
-                                  <td><b>valor</b></td>
-                                  <td><b>publicado em</b></td>
+                                  <td><b>Service</b></td>
+                                  <td><b>Professional</b></td>
+                                  <td><b>Payment method</b></td>
+                                  <td><b>Current stage</b></td>
+                                  <td><b>Amount</b></td>
+                                  <td><b>Posted on</b></td>
                                 </tr>
                               </thead>
                               <tbody>
                                 <tr>
-                                  <td>Site para restaurante</td>
+                                  <td>Restaurant website</td>
                                   <td>Marina Costa</td>
                                   <td>PIX</td>
-                                  <td>Em desenvolvimento</td>
+                                  <td>In progress</td>
                                   <td>R$ 1.200,00</td>
                                   <td>12/08/2026</td>
                                 </tr>
                                 <tr>
-                                  <td>Automação de planilhas</td>
+                                  <td>Spreadsheet automation</td>
                                   <td>Rafael Lima</td>
                                   <td>Bitcoin</td>
-                                  <td>Em revisão</td>
+                                  <td>In review</td>
                                   <td>R$ 450,00</td>
                                   <td>03/09/2026</td>
                                 </tr>
                                 <tr>
-                                  <td>Identidade visual da loja</td>
+                                  <td>Store visual identity</td>
                                   <td>Camila Souza</td>
-                                  <td>Depósito bancário</td>
-                                  <td>Concluído</td>
+                                  <td>Bank transfer</td>
+                                  <td>Completed</td>
                                   <td>R$ 800,00</td>
                                   <td>18/09/2026</td>
                                 </tr>
                               </tbody>
                             </table>
-                            <p class="demoPaymentNotice">Serviços e dados fictícios para demonstração.</p>
+                            <p class="demoPaymentNotice">Services and details are fictional and shown for demonstration purposes.</p>
                           </div>
                          <%} else if(demo2 == "demo-fincadcont"){%>
-                          <p>Cadastro Financeiro</p>
+                          <p>Payment Details</p>
                           <section class="demoPaymentForm">
-                            <h3>Forma de pagamento do contratante</h3>
-                            <label for="demo-contractor-payment-type">Método de pagamento</label>
+                            <h3>Contractor Payment Method</h3>
+                            <label for="demo-contractor-payment-type">Payment method</label>
                             <select id="demo-contractor-payment-type">
-                              <option value="">Selecione</option>
+                              <option value="">Select a payment method</option>
                               <option value="pix">PIX</option>
                               <option value="bitcoin">Bitcoin</option>
-                              <option value="bank">Depósito bancário</option>
+                              <option value="bank">Bank transfer</option>
                             </select>
                             <div id="demo-contractor-pix" hidden>
                               <label for="demo-contractor-pix-key">Chave PIX</label>
-                              <input id="demo-contractor-pix-key" type="text" placeholder="Chave PIX usada para pagamentos">
-                              <label for="demo-contractor-pix-holder">Nome do titular</label>
-                              <input id="demo-contractor-pix-holder" type="text" placeholder="Nome completo">
+                              <input id="demo-contractor-pix-key" type="text" placeholder="PIX key used for payments">
+                              <label for="demo-contractor-pix-holder">Account holder name</label>
+                              <input id="demo-contractor-pix-holder" type="text" placeholder="Full name">
                             </div>
                             <div id="demo-contractor-bitcoin" hidden>
-                              <label for="demo-contractor-bitcoin-network">Rede</label>
+                              <label for="demo-contractor-bitcoin-network">Network</label>
                               <select id="demo-contractor-bitcoin-network">
                                 <option value="bitcoin">Bitcoin</option>
                                 <option value="lightning">Lightning</option>
                               </select>
-                              <label for="demo-contractor-bitcoin-wallet">Carteira Bitcoin</label>
-                              <input id="demo-contractor-bitcoin-wallet" type="text" placeholder="Endereço da carteira para pagamentos">
+                              <label for="demo-contractor-bitcoin-wallet">Bitcoin wallet</label>
+                              <input id="demo-contractor-bitcoin-wallet" type="text" placeholder="Wallet address for payments">
                             </div>
                             <div id="demo-contractor-bank" hidden>
-                              <label for="demo-contractor-bank-name">Banco</label>
-                              <input id="demo-contractor-bank-name" type="text" placeholder="Nome do banco">
-                              <label for="demo-contractor-bank-agency">Agência</label>
-                              <input id="demo-contractor-bank-agency" type="text" placeholder="Número da agência">
-                              <label for="demo-contractor-bank-account">Conta</label>
-                              <input id="demo-contractor-bank-account" type="text" placeholder="Número da conta e dígito">
-                              <label for="demo-contractor-bank-account-type">Tipo de conta</label>
+                              <label for="demo-contractor-bank-name">Bank</label>
+                              <input id="demo-contractor-bank-name" type="text" placeholder="Bank name">
+                              <label for="demo-contractor-bank-agency">Branch</label>
+                              <input id="demo-contractor-bank-agency" type="text" placeholder="Branch number">
+                              <label for="demo-contractor-bank-account">Account</label>
+                              <input id="demo-contractor-bank-account" type="text" placeholder="Account number and check digit">
+                              <label for="demo-contractor-bank-account-type">Account type</label>
                               <select id="demo-contractor-bank-account-type">
-                                <option value="corrente">Corrente</option>
-                                <option value="poupanca">Poupança</option>
+                                <option value="corrente">Checking</option>
+                                <option value="poupanca">Savings</option>
                               </select>
-                              <label for="demo-contractor-bank-holder">Nome do titular</label>
-                              <input id="demo-contractor-bank-holder" type="text" placeholder="Nome completo">
+                              <label for="demo-contractor-bank-holder">Account holder name</label>
+                              <input id="demo-contractor-bank-holder" type="text" placeholder="Full name">
                             </div>
-                            <button id="demo-contractor-payment-save" type="button" disabled>Salvar dados de demonstração</button>
-                            <p class="demoPaymentNotice" id="demo-contractor-payment-notice" role="status" aria-live="polite">Escolha um método e preencha os dados para simular o cadastro. Nada será enviado ou salvo.</p>
+                            <button id="demo-contractor-payment-save" type="button" disabled>Save demo details</button>
+                            <p class="demoPaymentNotice" id="demo-contractor-payment-notice" role="status" aria-live="polite">Choose a method and enter the details to simulate registration. Nothing will be submitted or saved.</p>
                           </section>
                          <%} else if(demo2 == "demo-concluidos"){%>
-                          <p>Serviços Concluídos</p>
+                          <p>Completed Services</p>
                           <div class="demoHistory">
                             <table class="demoGainsTable">
                               <thead>
                                 <tr>
-                                  <td><b>repositório</b></td>
-                                  <td><b>serviço</b></td>
-                                  <td><b>profissional</b></td>
-                                  <td><b>valor</b></td>
-                                  <td><b>estado do pagamento</b></td>
+                                  <td><b>Repository</b></td>
+                                  <td><b>Service</b></td>
+                                  <td><b>Professional</b></td>
+                                  <td><b>Amount</b></td>
+                                  <td><b>Payment status</b></td>
                                 </tr>
                               </thead>
                               <tbody>
                                 <tr>
-                                  <td>github.com/demo/site-restaurante</td>
-                                  <td>Site para restaurante</td>
+                                  <td>github.com/demo/restaurant-website</td>
+                                  <td>Restaurant website</td>
                                   <td>Marina Costa</td>
                                   <td>R$ 1.200,00</td>
-                                  <td>Pago ao profissional e à plataforma</td>
+                                  <td>Paid to the professional and the platform</td>
                                 </tr>
                                 <tr>
-                                  <td>github.com/demo/automacao-planilhas</td>
-                                  <td>Automação de planilhas</td>
+                                  <td>github.com/demo/spreadsheet-automation</td>
+                                  <td>Spreadsheet automation</td>
                                   <td>Rafael Lima</td>
                                   <td>R$ 450,00</td>
-                                  <td>Pago ao profissional e à plataforma</td>
+                                  <td>Paid to the professional and the platform</td>
                                 </tr>
                                 <tr>
-                                  <td>github.com/demo/identidade-visual</td>
-                                  <td>Identidade visual da loja</td>
+                                  <td>github.com/demo/visual-identity</td>
+                                  <td>Store visual identity</td>
                                   <td>Camila Souza</td>
                                   <td>R$ 800,00</td>
-                                  <td>Pago ao profissional e à plataforma</td>
+                                  <td>Paid to the professional and the platform</td>
                                 </tr>
                               </tbody>
                             </table>
-                            <p class="demoPaymentNotice">Serviços, repositórios e dados de pagamento fictícios para demonstração.</p>
+                            <p class="demoPaymentNotice">Services, repositories, and payment details are fictional and shown for demonstration purposes.</p>
                           </div>
                          <%} else if(demo2 == "demo-chatcont"){%>
-                          <p>Chat com os contratados</p>
-                          <section class="demoChat" aria-label="Chat de demonstração com profissional">
+                          <p>Chat with Hired Professionals</p>
+                          <section class="demoChat" aria-label="Demo chat with a professional">
                             <header class="demoChatHeader">
-                              <strong>Profissional: Marina Costa</strong>
-                              <span>Serviço: Site para restaurante · Disponível para conversar</span>
+                              <strong>Professional: Marina Costa</strong>
+                              <span>Service: Restaurant website · Available to chat</span>
                             </header>
                             <div class="demoChatMessages" id="demo-chat-cont-messages" aria-live="polite" aria-relevant="additions">
-                              <p class="demoChatBubble demoChatIncoming">Olá! Já comecei a estruturar as páginas do site. Você tem alguma preferência de cores?</p>
-                              <p class="demoChatBubble demoChatOutgoing">Gostaria de usar tons de verde e branco, combinando com a identidade do restaurante.</p>
-                              <p class="demoChatBubble demoChatIncoming">Perfeito! Vou seguir essa paleta e te envio uma prévia em breve.</p>
+                              <p class="demoChatBubble demoChatIncoming">Hello! I've started structuring the website pages. Do you have any color preferences?</p>
+                              <p class="demoChatBubble demoChatOutgoing">I'd like to use shades of green and white to match the restaurant's branding.</p>
+                              <p class="demoChatBubble demoChatIncoming">Perfect! I'll use that palette and send you a preview soon.</p>
                             </div>
                             <div class="demoChatComposer">
-                              <label class="demoChatSrOnly" for="demo-chat-cont-input">Escreva uma mensagem para a profissional</label>
-                              <input id="demo-chat-cont-input" type="text" maxlength="500" placeholder="Escreva uma mensagem..." autocomplete="off">
-                              <button id="demo-chat-cont-send" type="button">Enviar</button>
+                              <label class="demoChatSrOnly" for="demo-chat-cont-input">Write a message to the professional</label>
+                              <input id="demo-chat-cont-input" type="text" maxlength="500" placeholder="Write a message..." autocomplete="off">
+                              <button id="demo-chat-cont-send" type="button">Send</button>
                             </div>
-                            <p class="demoChatNotice">Demonstração: as mensagens e respostas são simuladas e não serão salvas.</p>
+                            <p class="demoChatNotice">Demo: messages and replies are simulated and will not be saved.</p>
                           </section>
                          <%}%>
                       </td>
@@ -518,7 +522,7 @@
               form.hidden = type !== contractorPaymentType.value;
             });
             savePaymentButton.disabled = !contractorPaymentType.value;
-            paymentNotice.textContent = "Preencha os dados do método escolhido e salve para concluir a demonstração.";
+            paymentNotice.textContent = "Enter the details for the selected method and save to complete the demo.";
           });
 
           savePaymentButton.addEventListener("click", () => {
@@ -526,13 +530,13 @@
             const requiredFields = Array.from(selectedForm.querySelectorAll("input"));
             const invalidField = requiredFields.find((field) => !field.value.trim());
             if (invalidField) {
-              invalidField.setCustomValidity("Preencha este campo para continuar.");
+              invalidField.setCustomValidity("Fill in this field to continue.");
               invalidField.reportValidity();
               invalidField.addEventListener("input", () => invalidField.setCustomValidity(""), { once: true });
               return;
             }
 
-            paymentNotice.textContent = "Cadastro financeiro demonstrativo concluído. Os dados não foram enviados nem salvos.";
+            paymentNotice.textContent = "Demo payment details saved. The information was not submitted or stored.";
           });
         }
 
@@ -557,8 +561,8 @@
               const reply = document.createElement("p");
               reply.className = "demoChatBubble demoChatIncoming";
               reply.textContent = demoChat.id === "demo-chat-cont-messages"
-                ? "Entendi, obrigado pelo retorno! Vou considerar isso no desenvolvimento e te mantenho informado."
-                : "Entendi! Obrigado pela mensagem. Vou acompanhar por aqui.";
+                ? "Understood, thanks for the update! I'll keep that in mind during development and keep you informed."
+                : "Understood! Thanks for your message. I'll follow up here.";
               demoChatMessages.appendChild(reply);
               demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
             }, 700);
@@ -611,7 +615,7 @@
               }
             });
             if (invalidLink) {
-              invalidLink.setCustomValidity("Informe um endereço iniciado por http:// ou https://.");
+              invalidLink.setCustomValidity("Enter a URL that starts with http:// or https://.");
               invalidLink.reportValidity();
               invalidLink.addEventListener("input", () => invalidLink.setCustomValidity(""), { once: true });
               return;
@@ -625,7 +629,7 @@
             description.textContent = serviceFields.description.value.trim();
             const details = document.createElement("p");
             const amount = Number(serviceFields.value.value);
-            details.textContent = `${new Intl.NumberFormat("pt-BR", {
+            details.textContent = `${new Intl.NumberFormat("en-US", {
               style: "currency",
               currency: "BRL"
             }).format(amount)} · ${serviceFields.payment.value}`;
@@ -638,8 +642,8 @@
               link.target = "_blank";
               link.rel = "noopener noreferrer";
               link.textContent = field === serviceFields.repository
-                ? "Abrir repositório"
-                : "Abrir documento de referência";
+                ? "Open repository"
+                : "Open reference document";
               serviceCard.appendChild(link);
             });
 
@@ -647,7 +651,7 @@
             demoServiceForm.querySelectorAll("input, textarea, select").forEach((field) => {
               field.value = "";
             });
-            serviceNotice.textContent = "Serviço criado na demonstração. Ele ficará visível apenas nesta página.";
+            serviceNotice.textContent = "Demo service created. It will only be visible on this page.";
             serviceFields.title.focus();
           };
 

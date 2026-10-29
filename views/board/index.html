@@ -8,12 +8,12 @@
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>      
       <title>board jobs (Board)</title>
     </head>
-    <body>
+    <body class="about-page board-page">
         <h1><b>Board</b></h1><br />    
         <form class="backForm"> 
             <table style="width: 100%;">
                 <tr>
-                  <td style="width: 15%;">
+                    <td style="width: 15%;">
                     <%if(typeuser=="professional"){%>            
                         <%- include('../menuProfissional/menuProfissional.html') %>
                         <%}else if(typeuser=="contractor"){%>
@@ -21,6 +21,20 @@
                         <%}%>
                   </td>
                   <td id="conteudo" name="conteudo" style="width: 80%;" >
+                    <br />
+                    <div class="board-search">
+                        <svg class="board-search-icon" aria-hidden="true" viewBox="0 0 24 24">
+                            <circle cx="10.8" cy="10.8" r="6.8"></circle>
+                            <path d="m16 16 5 5"></path>
+                        </svg>
+                        <input
+                            type="search"
+                            id="taskSearch"
+                            class="board-search-input"
+                            placeholder="Search by title, email, value, or payment method"
+                            aria-label="Search tasks by title, email, value, or payment method"
+                        />
+                    </div>
                     <table class="boardtable">
                         <thead class="boardhead">
                             <tr>
@@ -32,13 +46,19 @@
                         </thead>
                         <tbody class="boardbody">  
                             <tr> 
-                                <%let intWidth=130;%>        
                                 <td class="columntable">
-                                    <div class="board-column" data-column="post" style="width: 220px; height: 400px; overflow-y: scroll;" ondragover="allowDrop(event)" ondrop="dropTask(event)">
+                                    <div class="board-column" data-column="post" style="width: 280px; height: 499px; overflow-y: scroll;" ondragover="allowDrop(event)" ondrop="dropTask(event)">
                                     <%for(let x = 0; x < taskList.length; x++ ){%>
                                         <%if(taskList[x].column=="post"){%>
-                                            <button type="button" style="background: rgb(54, 144, 248); display: block; margin-bottom: 10px; width: 100%;" 
-                                                class="post" data-toggle="modal" data-target="#myModal"
+                                            <button
+                                                type="button"
+                                                style="display: block; margin-bottom: 10px; width: 100%; height: 180px;"
+                                                class="task-card" data-toggle="modal" data-target="#myModal"
+                                                data-task-title="<%=taskList[x].titleService%>"
+                                                data-contractor-email="<%=taskList[x].email%>"
+                                                data-developer-email="<%=taskList[x].developer%>"
+                                                data-task-value="<%=taskList[x].valor%>"
+                                                data-payment-method="<%=taskList[x].tipoPagamento%>"
                                                 draggable="<%=typeuser=='professional' && taskList[x].column=='post' ? 'true' : 'false'%>"
                                                 data-task-id="<%=taskList[x]._id%>"
                                                 data-task-count="<%=taskList[x].idtask%>"
@@ -51,28 +71,27 @@
                                                     '<%=taskList[x].developer%>',
                                                     '<%=taskList[x].email%>'
                                                     )">
-                                                        <b><%=taskList[x].titleService%></b><br />
-                                                         R$<%=taskList[x].valor%><br />
-                                                         <%=taskList[x].description.substring(0,25).trim()%>...<br />
-                                                         <%=taskList[x].email%><br />
-                                                         <%if(typeuser=="professional"){%>
-                                                          <a onclick="event.stopPropagation()" href="?taskServ=altera&id=<%=taskList[x]._id%>&menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postDev&count=<%=taskList[x].idtask%>">
-                                                              próxima coluna
-                                                         </a>  
-                                                         <%}%> 
-                                                         <%intWidth = intWidth+50%>
+                                                        <b><u><%=taskList[x].titleService%></u></b><br /><br />
+                                                        <b>Company:</b><br />
+                                                        <b><%=taskList[x].company%></b>
                                             </button>
                                         <%}%>  
                                     <%}%>  
                                     </div>                     
                                 </td>
-                                <%intWidth=0;%>   
                                 <td class="columntable">  
-                                    <div class="board-column" data-column="postDev" style="width: 220px; height: 400px; overflow-y: scroll;" ondragover="allowDrop(event)" ondrop="dropTask(event)">
+                                    <div class="board-column" data-column="postDev" style="width: 320px; height: 499px; overflow-y: scroll;" ondragover="allowDrop(event)" ondrop="dropTask(event)">
                                             <%for(let x = 0; x < taskList.length; x++ ){%>
                                                 <%if(taskList[x].column=="postDev"){%>
-                                                        <button type="button" style="background: rgb(54, 144, 248); top: <%=intWidth%>;"
-                                                            class="postDev" data-toggle="modal" data-target="#myModal" 
+                                                        <button
+                                                            type="button"
+                                                            class="task-card" data-toggle="modal" data-target="#myModal"
+                                                            style="height: 180px;"
+                                                            data-task-title="<%=taskList[x].titleService%>"
+                                                            data-contractor-email="<%=taskList[x].email%>"
+                                                            data-developer-email="<%=taskList[x].developer%>"
+                                                            data-task-value="<%=taskList[x].valor%>"
+                                                            data-payment-method="<%=taskList[x].tipoPagamento%>"
                                                             draggable="<%=typeuser=='professional' && taskList[x].column=='postDev' ? 'true' : 'false'%>"
                                                             data-task-id="<%=taskList[x]._id%>"
                                                             data-task-count="<%=taskList[x].idtask%>"
@@ -85,31 +104,29 @@
                                                                 '<%=taskList[x].developer%>',
                                                                 '<%=taskList[x].email%>'
                                                                 )">
-                                                                <b><%=taskList[x].titleService%></b><br />
-                                                                R$<%=taskList[x].valor%><br />
-                                                                <%=taskList[x].description.substring(0,25).trim()%>...<br />
-                                                                <%=taskList[x].developer%><br />
-                                                                <%=taskList[x].email%><br />
-                                                                 <%if(typeuser=="professional"){%>
-                                                                    <a onclick="event.stopPropagation()" href="?taskServ=altera&id=<%=taskList[x]._id%>&menu=board&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postRev&count=<%=taskList[x].idtask%>">
-                                                                        próxima coluna
-                                                                    </a>
-                                                                <%}%>
-                                                                <%intWidth = intWidth+50%>
+                                                                <b><u><%=taskList[x].titleService%></u></b><br /><br />
+                                                                <b>Company:</b><br />
+                                                                <b><%=taskList[x].company%></b>
                                                         </button>
                                             <%}%> 
                                         <%}%> 
                                     </div>                               
                                 </td>
-                                <%intWidth=130;%>   
                                 <td class="columntable">
-                                    <div class="board-column" data-column="postRev" style="width: 220px; height: 400px; overflow-y: scroll;" ondragover="allowDrop(event)" ondrop="dropTask(event)">
+                                    <div class="board-column" data-column="postRev" style="width: 280px; height: 499px; overflow-y: scroll;" ondragover="allowDrop(event)" ondrop="dropTask(event)">
                                         <%for(let x = 0; x < taskList.length; x++ ){%>
                                             <%if(taskList[x].column=="postRev"){%>
-                                                    <button type="button" style="background: rgb(54, 144, 248); top: <%=intWidth%>;" 
-                                                        class="postRev" data-toggle="modal" data-target="#myModal" 
+                                                    <button
+                                                        type="button"
+                                                        class="task-card" data-toggle="modal" data-target="#myModal"
+                                                        data-task-title="<%=taskList[x].titleService%>"
+                                                        data-contractor-email="<%=taskList[x].email%>"
+                                                        data-developer-email="<%=taskList[x].developer%>"
+                                                        data-task-value="<%=taskList[x].valor%>"
+                                                        data-payment-method="<%=taskList[x].tipoPagamento%>"
                                                         draggable="<%=typeuser=='contractor' && taskList[x].column=='postRev' ? 'true' : 'false'%>"
                                                         data-task-id="<%=taskList[x]._id%>"
+                                                        style="height: 180px;"
                                                         data-task-count="<%=taskList[x].idtask%>"
                                                         data-next-column="postEnd"
                                                         onclick="jobTask(
@@ -119,29 +136,32 @@
                                                             '<%=taskList[x].developer%>',
                                                             '<%=taskList[x].email%>'
                                                             )">
-                                                            <b><%=taskList[x].titleService%></b><br />
-                                                            R$<%=taskList[x].valor%><br />
-                                                            <%=taskList[x].description.substring(0,25).trim()%>...<br />
-                                                            <%=taskList[x].developer%><br />
-                                                            <%=taskList[x].email%><br />
+                                                            <b><u><%=taskList[x].titleService%></u></b><br /><br />
+                                                            <b>Company:</b><br />
+                                                            <b><%=taskList[x].company%></b><br />
                                                             <%if(typeuser=="contractor"){%>
                                                                 <a onclick="event.stopPropagation()" href="?id=<%=taskList[x]._id%>&menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&column=postRev&count=<%=taskList[x].idtask%>">
                                                                      cadastro financeiro
                                                                 </a>
                                                             <%}%>
-                                                            <%intWidth = intWidth+50%>
                                                     </button>
                                             <%}%> 
                                         <%}%> 
                                     </div>
                                 </td>
-                                <%intWidth=130;%>   
                                 <td class="columntable">
-                                    <div class="board-column" data-column="postEnd" style="width: 220px; height: 400px; overflow-y: scroll;" ondragover="allowDrop(event)" ondrop="dropTask(event)">
+                                    <div class="board-column" data-column="postEnd" style="width: 280px; height: 499px; overflow-y: scroll;" ondragover="allowDrop(event)" ondrop="dropTask(event)">
                                             <%for(let x = 0; x < taskList.length; x++ ){%>
                                                 <%if(taskList[x].column=="postEnd"){%>                                                    
-                                                      <button type="button" style="background: rgb(54, 144, 248); top: <%=intWidth%>;"
-                                                         class="postEnd" data-toggle="modal" data-target="#myModal" 
+                                                      <button
+                                                         type="button"
+                                                         style="height: 180px;"
+                                                         class="task-card" data-toggle="modal" data-target="#myModal"
+                                                         data-task-title="<%=taskList[x].titleService%>"
+                                                         data-contractor-email="<%=taskList[x].email%>"
+                                                         data-developer-email="<%=taskList[x].developer%>"
+                                                         data-task-value="<%=taskList[x].valor%>"
+                                                         data-payment-method="<%=taskList[x].tipoPagamento%>"
                                                           draggable="false"
                                                          onclick="jobTask(
                                                             '<%=taskList[x].titleService%>', 
@@ -150,12 +170,9 @@
                                                             '<%=taskList[x].developer%>',
                                                             '<%=taskList[x].email%>'
                                                             )">
-                                                             <b><%=taskList[x].titleService%></b><br />
-                                                             R$<%=taskList[x].valor%><br />
-                                                             <%=taskList[x].description.substring(0,25).trim()%>...<br />
-                                                             <%=taskList[x].developer%><br />
-                                                             <%=taskList[x].email%><br />
-                                                             <%intWidth = intWidth+50%>
+                                                             <b><u><%=taskList[x].titleService%></u></b><br /><br />
+                                                             <b>Company:</b><br />
+                                                             <b><%=taskList[x].company%></b>
                                                     </button>
                                                 <%}%>  
                                             <%}%> 
@@ -168,6 +185,28 @@
                 </tr>
               </table>  
               <script>
+                                document.querySelector(".backForm").addEventListener("submit", function(event) {
+                                    event.preventDefault();
+                                });
+
+                                const taskSearch = document.getElementById("taskSearch");
+                                taskSearch.addEventListener("input", function() {
+                                    const query = this.value.trim().toLocaleLowerCase();
+                                    document.querySelectorAll(".task-card").forEach(function(card) {
+                                        const searchableValues = [
+                                            card.dataset.taskTitle,
+                                            card.dataset.contractorEmail,
+                                            card.dataset.developerEmail,
+                                            card.dataset.taskValue,
+                                            card.dataset.paymentMethod
+                                        ];
+                                        const matches = searchableValues.some(function(value) {
+                                            return (value || "").toLocaleLowerCase().includes(query);
+                                        });
+                                        card.hidden = !matches;
+                                    });
+                                });
+
                                 let draggedTask = null;
 
                                 function dragTask(event) {
@@ -230,10 +269,10 @@
                         <h4 class="modal-title"><p id="titulo"></p></h4>
                       </div>
                       <div class="modal-body">
-                        <p id="description"></p>
-                        <p id="developer"></p>
-                        <p id="email"></p>
-                        <p id="valor"></p>
+                        <label>Descrição:</label><p id="description"></p>
+                        <label>Developer:</label><p id="developer"></p>
+                        <label>Company:</label><p id="email"></p>
+                        <label>payment</label><p id="valor"></p>
                       </div>
                     </div>                
                   </div>

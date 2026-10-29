@@ -6,51 +6,72 @@
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-      <title>board jobs (nova conta contratante)</title>
+      <style>
+        .about-page input[type="text"],
+        .about-page input[type="password"] {
+          background-color: #e8f5e9;
+          border-radius: 8px;
+        }
+        #cadastroContractor {
+          background-color: #3690f8;
+          border-radius: 8px;
+        }
+      </style>
+      <title>Board Jobs (New Contractor Account)</title>
     </head>
-    <body>
-        <h1><b>Cadastro do Contratante</b></h1><br />  
-        <form class="backForm">
-            <%=typeuser%>
-            <table style="width: 100%;">
-                <tr>
-                  <td style="width: 15%;">
-                    <ul>
-                      <li><a href="?opcao=login-pro">Login Professional</a></li>
-                      <li><a href="?opcao=login-cont">Login contractor</a></li>
-                      <li><a href="?opcao=About">About</a></li>
-                      <li><a href="?opcao=home">Home</a></li>
-                    </ul>
-                  </td>
-                  <td id="conteudo" name="conteudo" style="width: 85%;" >
-                    <div style="width:100%; height: 430px; overflow-y: scroll;">
-                    <form>
-                      <a href="?opcao=home">Home</a>
-                    </form><br /><br />     
-                      <br /><br />
-                      <form>  
-                        <input type="text" id="nome" name="nome" value="<%=ficha.nome%>"  placeholder="Nome e sobrenome" style="width: 50%;" /><br />
-                        <input type="text" id="endereco" name="endereco" value="<%=ficha.endereco%>" placeholder="Endereço" style="width: 50%;" /><br />
-                        <input type="text" id="cidade" name="cidade" value="<%=ficha.cidade%>" placeholder="Cidade" style="width: 50%;" />
-                        <input type="text" id="estado" name="estado" value="<%=ficha.estado%>" placeholder="Estado" style="width: 50%;" />
-                        <input type="text" id="cep" name="cep" value="<%=ficha.cep%>" placeholder="CEP" style="width: 50%;" /><br />
-                        <input type="text" id="pais" name="pais" value="<%=ficha.pais%>" placeholder="País" style="width: 50%;" /><br /> 
-                        <input type="text" id="cpf_cnpj" name="cpf_cnpj" value="<%=ficha.cpf_cnpj%>" placeholder="CPF/CNPJ" style="width: 50%;" /><br />
-                        <input type="text" id="email" name="email" value="<%=ficha.email%>" placeholder="E-Mail" style="width: 50%;" /><br />
-                        <input type="password" id="senha" name="senha" value="<%=ficha.senha%>" placeholder="Senha" style="width: 50%;" /><br />
-                        <input type="password" id="senha2" name="senha2" value="<%=senha2%>" placeholder="Repetir a Senha" style="width: 50%;" /><br />
-                        <br /><br />
-                        <input type="hidden" id="opcaoPag" name="opcaoPag" value="cadastroCon" /><br />                     
-                        <input type="hidden" id="opcao" name="opcao" value="cadastroCon" /><br />
-                        <input type="hidden" id="typeuser" name="typeuser" value="contractor" />    
-                        <input type="hidden" id="produto" name="produto" value="jobBoard" />                      
-                        <br /><br />     
-                        <input type="submit" id="cadastroContractor" name="cadastroContractor" value="Salvar" style="width: 15%;"/>        
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-              </table>    
+    <body class="about-page" style="background-color: #e8f5e9;">
+      <h1><b>Contractor Registration</b></h1><br />
+      <form>
+        <table style="width: 100%;">
+          <tr>
+            <td style="width: 15%;">
+              <div class="about-table" style="width: 100%;">
+                <ul class="about-menu" style="margin-left: 0;">
+                  <li><a href="?opcao=login-pro">Professional Login</a></li>
+                  <li><a href="?opcao=login-cont">Contractor Login</a></li>
+                  <li><a href="?opcao=About">About</a></li>
+                  <li><a href="?opcao=home">Home</a></li>
+                </ul>
+               </div>
+              </td>
+              <td id="conteudo" name="conteudo" style="width: 85%;" >
+                        <% if (typeof mensagem !== "undefined" && mensagem) { %>
+                          <p><%=mensagem%></p>
+                        <% } %>
+                          <br /><br />
+                            <input type="text" id="nome" name="nome" value="<%=ficha.nome || ''%>" placeholder="First and last name" style="width: 50%;" required /><br />
+                            <input type="text" id="endereco" name="endereco" value="<%=ficha.endereco || ''%>" placeholder="Address" style="width: 50%;" required /><br />
+                            <input type="text" id="cidade" name="cidade" value="<%=ficha.cidade || ''%>" placeholder="City" style="width: 50%;" required />
+                            <input type="text" id="estado" name="estado" value="<%=ficha.estado || ''%>" placeholder="State" style="width: 50%;" required />
+                            <input type="text" id="cep" name="cep" value="<%=ficha.cep || ''%>" placeholder="ZIP / Postal Code" style="width: 50%;" required /><br />
+                            <input type="text" id="pais" name="pais" value="<%=ficha.pais || ''%>" placeholder="Country" style="width: 50%;" required /><br /> 
+                            <input type="text" id="cpf_cnpj" name="cpf_cnpj" value="<%=ficha.cpf_cnpj || ''%>" placeholder="CPF/CNPJ (Brazilian Tax ID)" style="width: 50%;" required /><br />
+                            <input type="text" id="email" name="email" value="<%=ficha.email || ''%>" placeholder="E-Mail" style="width: 50%;" required /><br />
+                            <input type="password" id="senha" name="senha" value="<%=ficha.senha || ''%>" placeholder="Password" style="width: 50%;" required /><br />
+                            <input type="password" id="senha2" name="senha2" value="<%=senha2 || ''%>" placeholder="Confirm Password" style="width: 50%;" required /><br />
+                    <br /><br />
+                    <input type="hidden" id="opcaoPag" name="opcaoPag" value="cadastroCon" /><br />                     
+                    <input type="hidden" id="opcao" name="opcao" value="cadastroCon" /><br />
+                    <input type="hidden" id="typeuser" name="typeuser" value="contractor" />    
+                    <input type="hidden" id="produto" name="produto" value="jobBoard" /> 
+                  <br /><br /> 
+                  <input type="submit" id="cadastroContractor" name="cadastroContractor" value="Save" style="width: 15%;"/>
+              </td>
+            </tr>
+          </table>    
         </form>        
+          <script>
+            const password = document.getElementById("senha");
+            const passwordConfirmation = document.getElementById("senha2");
+            const validatePasswordMatch = () => {
+              const passwordsDiffer = passwordConfirmation.value !== password.value;
+              passwordConfirmation.setCustomValidity(
+                passwordConfirmation.value && passwordsDiffer ? "Passwords do not match." : ""
+              );
+            };
+
+            password.addEventListener("input", validatePasswordMatch);
+            passwordConfirmation.addEventListener("input", validatePasswordMatch);
+          </script>
     </body>
 </html>

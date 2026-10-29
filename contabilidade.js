@@ -5,6 +5,7 @@ var contabilidade = new Schema({
     idtask: Number,
     taskId: String,
     contato: String,
+    company:String,
     tipo: String,
     ano: String,
     mes: String,
