@@ -1153,7 +1153,6 @@ body.chat-page .chatSendButton:focus{
  }
 
  .task-card{
-    position: relative;
     width: 100%;
     max-width: 100%;
     min-width: 0;

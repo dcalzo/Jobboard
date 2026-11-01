@@ -53,8 +53,8 @@
                                         <%if(taskList[x].column=="post"){%>
                                             <button
                                                 type="button"
-                                                style="display: block; margin-bottom: 10px; width: 100%; height: 180px;"
-                                                class="task-card" data-toggle="modal" data-target="#myModal"
+                                                style="display: block; margin-bottom: 10px; width: 100%; height: 150px;"
+                                                class="post task-card" data-toggle="modal" data-target="#myModal"
                                                 data-task-title="<%=taskList[x].titleService%>"
                                                 data-contractor-email="<%=taskList[x].email%>"
                                                 data-developer-email="<%=taskList[x].developer%>"
@@ -86,8 +86,8 @@
                                                 <%if(taskList[x].column=="postDev"){%>
                                                         <button
                                                             type="button"
-                                                            class="task-card" data-toggle="modal" data-target="#myModal"
-                                                            style="height: 180px;"
+                                                            class="postDev task-card" data-toggle="modal" data-target="#myModal"
+                                                            style="height: 150px; margin-bottom: 10px;"
                                                             data-task-title="<%=taskList[x].titleService%>"
                                                             data-contractor-email="<%=taskList[x].email%>"
                                                             data-developer-email="<%=taskList[x].developer%>"
@@ -119,7 +119,7 @@
                                             <%if(taskList[x].column=="postRev"){%>
                                                     <button
                                                         type="button"
-                                                        class="task-card" data-toggle="modal" data-target="#myModal"
+                                                        class="postRev task-card" data-toggle="modal" data-target="#myModal"
                                                         data-task-title="<%=taskList[x].titleService%>"
                                                         data-contractor-email="<%=taskList[x].email%>"
                                                         data-developer-email="<%=taskList[x].developer%>"
@@ -127,7 +127,7 @@
                                                         data-payment-method="<%=taskList[x].tipoPagamento%>"
                                                         draggable="<%=typeuser=='contractor' && taskList[x].column=='postRev' ? 'true' : 'false'%>"
                                                         data-task-id="<%=taskList[x]._id%>"
-                                                        style="height: 180px;"
+                                                        style="height: 150px; margin-bottom: 10px;"
                                                         data-task-count="<%=taskList[x].idtask%>"
                                                         data-next-column="postEnd"
                                                         onclick="jobTask(
@@ -156,8 +156,8 @@
                                                 <%if(taskList[x].column=="postEnd"){%>                                                    
                                                       <button
                                                          type="button"
-                                                         style="height: 180px;"
-                                                         class="task-card" data-toggle="modal" data-target="#myModal"
+                                                         style="height: 150px; margin-bottom: 10px;"
+                                                         class="postEnd task-card" data-toggle="modal" data-target="#myModal"
                                                          data-task-title="<%=taskList[x].titleService%>"
                                                          data-contractor-email="<%=taskList[x].email%>"
                                                          data-developer-email="<%=taskList[x].developer%>"

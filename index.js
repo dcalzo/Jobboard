@@ -705,9 +705,24 @@ app.get("/", async (req,res)=>{
                         senha2: req.query.senha2,                
                         produto: contratante.produto,
                         mensagem: mensagem,
-                        tipoPagamento: req.query.tipoPagamento});  
+                        tipoPagamento: req.query.tipoPagamento
+                    });  
                 });
-            }            
+            }else if(req.query.menu == "bug"){
+                contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){ 
+                    res.render("company/fichaCad/index",{
+                        typeuser: "contractor",
+                        logado: "", 
+                        email:contratante[0].email,
+                        senha:req.query.senha,
+                        contratante: contratante,
+                        senha2: req.query.senha2,                
+                        produto: contratante.produto,
+                        mensagem: mensagem,
+                        tipoPagamento: req.query.tipoPagamento
+                    });  
+                });
+            }        
         }
         else  if(req.query.typeuser == "professional"){
             if(req.query.opcao == "Entrar"){
