@@ -9,10 +9,9 @@
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
       <title>board jobs (ficha Cadastral)</title>
     </head>
-    <body>
+    <body class="company-profile-page">
         <h1><b>Cadastro do Contratante</b></h1><br />  
         <form class="backForm">
-            <%=typeuser%>
             <table style="width: 100%;">
                 <tr>
                   <td style="width: 15%;">
@@ -20,7 +19,6 @@
                   </td>
                   <td id="conteudo" name="conteudo" style="width: 85%;" >
                     <form>
-                      <a href="?opcao=home">Home</a>
                     </form><br /><br />     
                       <br /><br />
                       <form>
@@ -45,7 +43,7 @@
                           <input type="text" id="cpf_cnpj" name="cpf_cnpj" value="<%=contratante[0].cpf_cnpj%>" placeholder="CPF/CNPJ" style="width: 50%;" /><br />
                           <input type="text" id="email" name="email" value="<%=contratante[0].email%>" placeholder="E-Mail" style="width: 50%;" /><br />
                           <input type="password" id="senha" name="senha" value="<%=contratante[0].senha%>" placeholder="Senha" style="width: 50%;" /><br />
-                          <input type="password" id="senha2" name="senha2" value="<%=senha2%>" placeholder="Repetir a Senha" style="width: 50%;" /><br />
+                          <input type="password" id="senha2" name="senha2" value="<%=senha%>" placeholder="Repetir a Senha" style="width: 50%;" /><br />
                         <%}%>
                         <br /><br />
                         <input type="hidden" id="opcaoPag" name="opcaoPag" value="cadastroCon" /><br />                     
@@ -56,6 +54,15 @@
                         <br /><br />     
                         <input type="submit" id="alteraContractor" name="alteraContractor" value="Alterar" style="width: 15%;"/>        
                       </form>
+                       <% if (mensagem) { %>
+                        <p class="payment-save-success" role="<%= mensagem === 'Please fill in all fields and select a payment method.' ? 'alert' : 'status' %>" style="font-size: 30;" aria-live="polite"><%= mensagem %></p>
+                        <script>
+                          window.setTimeout(function() {
+                            var message = document.querySelector(".payment-save-success");
+                            if (message) message.remove();
+                          }, 5000);
+                        </script>
+                      <% } %>  
                   </td>
                 </tr>
               </table>    

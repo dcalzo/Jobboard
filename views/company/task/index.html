@@ -3,10 +3,13 @@
       <meta charset="utf-8">
       <link rel="icon" type="image/svg+xml" href="/images/logo-caju.svg">
       <link href="public/style.css" rel="stylesheet">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
       <title>board jobs</title>
     </head>
-    <body>    
+    <body class="company-task-page">      
       <form class="backForm">
+        <br /> <br /> <br /> <br />        
       <table style="width: 100%;">
         <tr>
           <td style="width: 15%;">
@@ -22,26 +25,32 @@
               <input type="hidden" id="LoginContractor" name="LoginContractor" value="<%=Login%>" />
               <input type="hidden" id="column" name="column" value="post" />
               <input type="hidden" id="count" name="count" value="<%=count.length+1%>" />
-              <h3><b>Criar serviço</b></h3><br />   
-              <input type="text" id="titleService" name="titleService" placeholder="Title" style="width: 50%;" /><br />
-              <textarea id="description" name="description" placeholder="Description for Service" rows="15" cols="50" style="width: 70%;">              
-              </textarea><br />
-              <select style="width: 20%;" name="tipoPagamento" id="tipoPagamento" >                            
+              <h3><b>Create Service</b></h3><br />
+              <input type="text" id="titleService" name="titleService" placeholder="Title" style="width: 50%;" required /><br /><br />
+              <textarea id="description" name="description" placeholder="Description for Service" rows="15" cols="50" style="width: 70%;" required></textarea><br /><br />
+              <select style="width: 20%;" name="tipoPagamento" id="tipoPagamento" required>
                 <option value="" selected ></option>
-                <option value="PIX" >PIX</option>
+                <option value="PIX" >Instant Payment</option>
                 <option value="Bitcoin" >Bitcoin</option>
-                <option value="bancodeposito" >Deposito Bancario</option>                            
-              </select><br />
-              <input type="text" id="valor" name="valor" placeholder="Pagamento do serviço" style="width: 50%;" /><br />
-              <input type="text" id="gitLocal" name="gitLocal" placeholder="repositorio do projeto no Github" style="width: 50%;" /><br />
-              <input type="text" id="urlDoc" name="urlDoc" placeholder="url do documento de explicação do projeto" style="width: 50%;" /><br />
-              <input type="submit" id="taskServ" name="taskServ" style="width: 15%;" value="Salvar Serviço" />                
+                <option value="bancodeposito" >Bank transfer</option>
+              </select><br /><br />
+              $<input type="text" id="valor" name="valor" placeholder="Service payment" style="width: 50%;" required /><br />
+              <input type="text" id="gitLocal" name="gitLocal" placeholder="Project repository on GitHub" style="width: 50%; margin-left: 18;" required /><br />
+              <input type="text" id="urlDoc" name="urlDoc" placeholder="URL of the project description document" style="width: 50%; margin-left: 18;" required /><br />
+              <br />
+              <input type="submit" id="taskServ" name="taskServ" style="width: 15%;" value="Save Service" />
           </td>
         </tr>
-      </table>   
-      <div id="mensagens" name="mensagens" class="divMensagensOk">
-        <%=msg%>             
-      </div>
-      </form>  
+      </table>  
+      </form><br /> <br />   
+       <% if (msg) { %>
+          <p class="payment-save-success" role="<%= msg === 'Please fill in all fields and select a payment method.' ? 'alert' : 'status' %>" style="font-size: 30;" aria-live="polite"><%= msg %></p>
+          <script>
+            window.setTimeout(function() {
+              var message = document.querySelector(".payment-save-success");
+              if (message) message.remove();
+            }, 5000);
+          </script>
+        <% } %>  
     </body>
 </html>

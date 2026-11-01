@@ -64,6 +64,22 @@ body.payment-details-page textarea{
     font-family: Arial, Helvetica, sans-serif;
 }
 
+body.payment-details-page{
+    background-color: #f2fce1;
+}
+
+body.payment-details-page,
+body.payment-details-page *{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body.payment-details-page input[type="submit"]{
+    border-radius: 8px;
+    background-color: #064b69;
+    color: #ffffff;
+}
+
 body.professional-profile-page input:not([type="hidden"]),
 body.professional-profile-page select,
 body.professional-profile-page textarea{
@@ -160,6 +176,10 @@ body.earnings-background .earnings-reviews-button{
     color: green !important;
 }
 
+body.completed-services-page{
+    background-color: #f2fce1;
+}
+
 .completed-services-page,
 .completed-services-page h1,
 .completed-services-page td,
@@ -167,11 +187,6 @@ body.earnings-background .earnings-reviews-button{
 .completed-services-page input{
     color: #064b69;
     font-family: Arial, Helvetica, sans-serif;
-}
-
-.completed-services-page input::placeholder{
-    color: #064b69;
-    opacity: 1;
 }
 
 .about-page h1,
@@ -184,6 +199,61 @@ body.earnings-background .earnings-reviews-button{
 .caju-products-page *{
     color: #064b69;
     font-family: Arial, Helvetica, sans-serif;
+}
+
+.company-task-page,
+.company-task-page *{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body.company-history-page{
+    background-color: #f2fce1;
+}
+
+body.company-profile-page{
+    background-color: #f2fce1;
+}
+
+.company-profile-page,
+.company-profile-page *{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body.company-profile-page input[type="text"]{
+    background-color: #f2fce1;
+    border-radius: 8px;
+}
+
+body.company-profile-page input[type="password"]{
+    background-color: #f2fce1;
+    border-radius: 8px;
+}
+
+body.company-profile-page input[type="submit"]{
+    background-color: #064b69;
+    color: #ffffff;
+    border-radius: 8px;
+}
+
+.company-history-page,
+.company-history-page *{
+    color: #064b69;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.company-task-page input[type="text"],
+.company-task-page textarea,
+.company-task-page select{
+    background-color: #f2fce1;
+    border-radius: 8px;
+}
+
+.company-task-page input[type="submit"]{
+    background-color: #064b69;
+    color: #ffffff;
+    border-radius: 8px;
 }
 
 .login-page h1,
@@ -200,7 +270,8 @@ body.earnings-background .earnings-reviews-button{
 }
 
 .about-page h1,
-.about-page h3{
+.about-page h3,
+.payment-details-page h1{
     text-shadow: 0 2px 4px rgba(0, 67, 110, 0.3);
 }
 
@@ -910,9 +981,23 @@ body.chat-page .chatSendButton:focus{
     overflow-wrap: normal;
 }
 
+.annualExpensesTable th,
+.annualExpensesTable td{
+    width: 100px;
+    text-align: center;
+}
+
+.annualExpensesTable tbody tr:nth-child(odd){
+    background-color: #ffffff;
+}
+
+.annualExpensesTable tbody tr:nth-child(even){
+    background-color: #eaf6ff;
+}
+
 #gastosAnuaisModal .modal-dialog{
-    width: 80vw;
-    max-width: none;
+    width: calc(80vw + 280px);
+    max-width: calc(100vw - 30px);
 }
 
 .ScrollTable td,
@@ -929,6 +1014,30 @@ body.chat-page .chatSendButton:focus{
 .ScrollTable tr:nth-child(even),
 .concludedServicesTable tr:nth-child(even){
     background-color: #eaf6ff;
+}
+
+.completed-services-page .concludedServicesTable thead tr,
+.completed-services-page .concludedServicesTable thead td{
+    background-color: #d3d3d3;
+}
+
+.company-history-page .ScrollTable .history-table-header{
+    background-color: #d3d3d3;
+}
+
+.company-history-page .ScrollTable .history-table-header td{
+    background-color: #d3d3d3;
+}
+
+.company-history-page .ScrollTable{
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.company-history-page .history-pay-link{
+    color: #ff0000;
 }
 
 .divMensagensPago{

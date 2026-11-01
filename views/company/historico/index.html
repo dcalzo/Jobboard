@@ -7,40 +7,40 @@
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-      <title>board jobs (Historico de serviços)</title>
+      <title>Board Jobs (Service History)</title>
     </head>
-    <body>
-        <h1><b>historico de Serviços</b></h1><br />    
+    <body class="company-history-page">
+        <h1><b>Service History</b></h1><br />
         <div class="backForm">
-            <%=typeuser%>
             <table>
                 <tr>
                   <td style="width: 15%;">
                     <%- include('../../menu/menu.html') %>
+                  </div>
                   </td>
                   <td id="conteudo" name="conteudo"  >
                     <br><br>  
-                    <div style="width: 100%; height: 300px; overflow-y: scroll;">        
+                    <div style="width: 100%; height: 400px; overflow-y: scroll;">        
                       <table class="ScrollTable">
-                        <tr>
+                        <tr class="history-table-header">
                           <td style="width: 10%;">
-                            titulo
+                            Title
                           </td>
                           <td style="width: 10%;">
-                            Profissional
+                            Professional
                           </td>
                           <td style="width: 10%;">
-                            tipo de Pagamento
+                            Payment Method
                           </td>
                           <td style="width: 10%;">
-                            estado atual da task
+                            Current Status
                           </td>
                           <td style="width: 10%;">
-                            valor
+                            Amount
                           </td>    
                           <td style="width: 10%;"></td>                      
                           <td style="width: 10%;">
-                            ficha da task
+                            Service Details
                           </td>
                         </tr>
                         <%for(let x= 0; x<task.length;x++){%>
@@ -52,29 +52,32 @@
                             <%=task[x].developer%><br />  
                           </td>
                           <td style="width: 10%;">
-                            <%=task[x].tipoPagamento%><br />  
+                            <%=task[x].tipoPagamento === "bancodeposito" ? "Bank transfer" : task[x].tipoPagamento%><br />
                           </td>
                           <td style="width: 10%;">
-                            <%=task[x].column%><br />
+                            <%=task[x].column === "post" ? "Open" : task[x].column === "postDev" ? "In Progress" : task[x].column === "postRev" ? "Under Review" : task[x].column === "postEnd" ? "Completed" : ""%><br />
                           </td>
                           <td style="width: 10%;">
                             <%=task[x].valor%><br />
                           </td>    
                           <td style="width: 10%;">
-                            <%if(task[x].column == "postRev"){%>
-                              <a href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&idtask=<%=task[x].idtask%>&emailDev=<%=task[x].developer%>&estadoPg=postPag&tipoPagamento=<%=task[x].tipoPagamento%>">
-                                Pagar
-                              </a>                              
-                            <%}else if(task[x].column == "postEnd"){%>
-                              <%if(task[x].comprovante && task[x].comprovante.trim() && task[x].comprovantePlataforma && task[x].comprovantePlataforma.trim()){%>
-                                <div class="divMensagensPago">Pago</div>
-                              <%}else if(task[x].comprovante && task[x].comprovante.trim()){%>
-                                <div class="divMensagensPago">Pagou só o profissional</div><br />
-                              <%}else if(task[x].comprovantePlataforma && task[x].comprovantePlataforma.trim()){%>
-                                <div class="divMensagensPago">Pagou só a plataforma</div><br />
-                              <%}%>
+                            <%
+                              const profissionalPago = typeof task[x].comprovante === "string" && task[x].comprovante.trim().length > 0;
+                              const plataformaPaga = typeof task[x].comprovantePlataforma === "string" && task[x].comprovantePlataforma.trim().length > 0;
+                              if (profissionalPago && plataformaPaga) {
+                            %>
+                              <div class="divMensagensPago">Paid</div>
+                            <%}else if(profissionalPago){%>
+                              <div style="margin-left: 2;" class="divMensagensPago">Professional paid only</div><br />
+                            <%}else if(plataformaPaga){%>
+                              <div class="divMensagensPago">Platform paid only</div><br />
                             <%}%>
-                          </td>                                              
+                            <%if(task[x].column == "postRev"){%>
+                              <a class="history-pay-link" href="?menu=fincadCont&senha=<%=senha%>&email=<%=email%>&typeuser=<%=typeuser%>&idtask=<%=task[x].idtask%>&emailDev=<%=task[x].developer%>&estadoPg=postPag&tipoPagamento=<%=task[x].tipoPagamento%>">
+                                Pay
+                              </a>                              
+                            <%}%>
+                          </td>
                           <td style="width: 10%;">
                             <button type="button" data-toggle="modal" data-target="#myModal" 
                               onclick="jobTask(
@@ -84,7 +87,7 @@
                                   '<%=task[x].developer%>',
                                   '<%=task[x].email%>'
                                   )">
-                                  Ver Task
+                                  View Task
                               </button>
                           </td>                          
                         </tr>                        
@@ -136,33 +139,33 @@
               %>
               <div style="width: 80%; margin-left: 270px">
               <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#gastosAnuaisModal">
-                Gastos Anuais
+                Annual Expenses
               </button>
               <div class="modal fade" id="gastosAnuaisModal" role="dialog" aria-labelledby="gastosAnuaisTitulo">
                 <div class="modal-dialog modal-lg" role="document">
                   <div class="modal-content">
                     <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">&times;</button>
-                      <h4 class="modal-title" id="gastosAnuaisTitulo">Gastos Anuais</h4>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+                      <h4 class="modal-title" id="gastosAnuaisTitulo">Annual Expenses</h4>
                     </div>
                     <div class="modal-body" style="overflow-x: auto;">
-                      <p>Valores de serviços concluídos, agrupados pelo mês de criação e incluindo a taxa da plataforma de 15%.</p>
+                      <p>Completed service amounts grouped by creation month, including the 15% platform fee.</p>
                       <table class="concludedServicesTable annualExpensesTable">
                         <thead>
                           <tr>
-                            <th>Ano</th>
-                            <th>Janeiro</th>
-                            <th>Fevereiro</th>
-                            <th>Março</th>
-                            <th>Abril</th>
-                            <th>Maio</th>
-                            <th>Junho</th>
-                            <th>Julho</th>
-                            <th>Agosto</th>
-                            <th>Setembro</th>
-                            <th>Outubro</th>
-                            <th>Novembro</th>
-                            <th>Dezembro</th>
+                            <th>Year</th>
+                            <th>January</th>
+                            <th>February</th>
+                            <th>March</th>
+                            <th>April</th>
+                            <th>May</th>
+                            <th>June</th>
+                            <th>July</th>
+                            <th>August</th>
+                            <th>September</th>
+                            <th>October</th>
+                            <th>November</th>
+                            <th>December</th>
                             <th>Total</th>
                           </tr>
                         </thead>
@@ -190,15 +193,15 @@
               <br />
                <br />
                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#avaliarProfissionalModal">
-                 Avaliar profissional
+                 Rate a Professional
                </button>
                <br />
                <div class="modal fade" id="avaliarProfissionalModal" role="dialog" aria-labelledby="avaliarProfissionalTitulo">
                  <div class="modal-dialog" role="document">
                    <div class="modal-content">
                      <div class="modal-header">
-                       <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">&times;</button>
-                       <h4 class="modal-title" id="avaliarProfissionalTitulo">Avaliar profissional</h4>
+                       <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+                       <h4 class="modal-title" id="avaliarProfissionalTitulo">Rate a Professional</h4>
                      </div>
                      <div class="modal-body">
                        <%- include('../avaliacao/index.html', {
@@ -215,15 +218,15 @@
               </div>
               <div style="width: 80%; margin-left: 270px">
               <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#avaliacoesEmpresaModal">
-                Consultar avaliações
+                View Reviews
               </button>
               </div>
               <div class="modal fade" id="avaliacoesEmpresaModal" role="dialog" aria-labelledby="avaliacoesEmpresaTitulo">
                 <div class="modal-dialog" role="document">
                   <div class="modal-content">
                     <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">&times;</button>
-                      <h4 class="modal-title" id="avaliacoesEmpresaTitulo">Avaliações dos profissionais</h4>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+                      <h4 class="modal-title" id="avaliacoesEmpresaTitulo">Reviews from Professionals</h4>
                     </div>
                     <div class="modal-body">
                       <%
@@ -234,23 +237,23 @@
                         var mediaAvaliacoes = totalAvaliacoes > 0 ? (somaNotas / totalAvaliacoes) : 0;
                       %>
                       <% if (totalAvaliacoes === 0) { %>
-                        <p>A empresa ainda não recebeu avaliações dos profissionais.</p>
+                        <p>The company has not received any reviews from professionals yet.</p>
                       <% } else { %>
                         <div class="panel panel-info">
                           <div class="panel-heading">
-                            Média geral: <%=mediaAvaliacoes.toFixed(1)%>/5
+                            Overall rating: <%=mediaAvaliacoes.toFixed(1)%>/5
                           </div>
                           <div class="panel-body">
-                            Soma das notas: <%=somaNotas%> / <%=totalAvaliacoes * 5%> em <%=totalAvaliacoes%> avaliação<%=totalAvaliacoes === 1 ? "" : "es"%>.
+                            Total score: <%=somaNotas%> / <%=totalAvaliacoes * 5%> across <%=totalAvaliacoes%> review<%=totalAvaliacoes === 1 ? "" : "s"%>.
                           </div>
                         </div>
                         <% avaliacoesContratante.forEach(function(avaliacao) { %>
                           <div class="panel panel-default">
                             <div class="panel-heading">
-                              Nota: <%=avaliacao.nota%>/5
+                              Rating: <%=avaliacao.nota%>/5
                             </div>
                             <div class="panel-body">
-                              <%=avaliacao.comentario || "Sem comentário."%>
+                              <%=avaliacao.comentario || "No comment."%>
                             </div>
                           </div>
                         <% }); %>

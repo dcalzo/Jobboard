@@ -222,32 +222,50 @@ app.get("/", async (req,res)=>{
             }
             //-------------------------------------------------------Fim BOARD
             else if(req.query.menu == "createTask"){  
-                if( req.query.taskServ == "Salvar Serviço" ){
-                    msg = "serviço salvo com sucesso";
-                     try{
-                        task.collection.insertMany([
+                if( req.query.taskServ == "Save Service" || req.query.taskServ == "Salvar Serviço" ){
+                    const requiredServiceFields = [
+                        req.query.titleService,
+                        req.query.description,
+                        req.query.valor,
+                        req.query.gitLocal,
+                        req.query.urlDoc
+                    ];
+                    const paymentMethods = ["PIX", "Bitcoin", "bancodeposito"];
+                    const formIsComplete = requiredServiceFields.every(value =>
+                        typeof value === "string" && value.trim().length > 0
+                    ) && paymentMethods.includes(req.query.tipoPagamento);
+
+                    if (!formIsComplete) {
+                        msg = "Please fill in all fields and select a payment method.";
+                    } else {
+                        msg = "service saved successfully";
+                        try{
+                            task.collection.insertMany([
                         { 
                             email: req.query.email, 
                             company: req.query.LoginContractor,
                             idtask: req.query.count,
                             developer: "",
                             titleService: req.query.titleService,
-                            description: req.query.description,
+                            description: typeof req.query.description === "string" && req.query.description.trim()
+                                ? req.query.description
+                                : "",
                             valor: req.query.valor,
                             tipoPagamento: req.query.tipoPagamento,
                             gitLocal: req.query.gitLocal,
                             urlDoc: req.query.urlDoc,
                             column: req.query.column
                         }
-                    ]).then(function(){
-                        msg = "task salva"
-                        console.log(msg) 
-                    }).catch(function(error){
-                        console.log(error)    
-                    });
-                    }catch(e){
-                        console.log(e.error);
-                    }                    
+                            ]).then(function(){
+                                msg = "task salva"
+                                console.log(msg)
+                            }).catch(function(error){
+                                console.log(error)
+                            });
+                        }catch(e){
+                            console.log(e.error);
+                        }
+                    }
                 }  
                 task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
                 contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){
@@ -494,12 +512,16 @@ app.get("/", async (req,res)=>{
                         const idsTask = Number.isFinite(idtaskNumero)
                             ? [idtaskTexto, idtaskNumero]
                             : [idtaskTexto];
+                        const comprovanteProfissional = typeof req.query.comprovante === "string" &&
+                            req.query.comprovante.trim().length > 0;
+                        const comprovantePlataforma = typeof req.query.comprovantePlataforma === "string" &&
+                            req.query.comprovantePlataforma.trim().length > 0;
                         await task.collection.updateOne({
                             email: req.query.email,
                             idtask: { $in: idsTask }
                         }, {
                             $set: {
-                                column: req.query.column,
+                                column: comprovanteProfissional && comprovantePlataforma ? "postEnd" : "postRev",
                                 comprovante: req.query.comprovante,
                                 comprovantePlataforma: req.query.comprovantePlataforma
                             }
@@ -641,15 +663,16 @@ app.get("/", async (req,res)=>{
             });  
             }
             else  if(req.query.menu == "ProdutosCaju"){   
-                profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, profissional){                    
+                contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){                    
                     res.render("company/caju/index",{typeuser: req.query.typeuser, 
                     email:req.query.email, 
                     senha:req.query.senha,
-                    profissional: profissional
+                    contratante: contratante
                 }); 
             }); 
                       
             }else if(req.query.menu == "fichaCad"){
+                let mensagem = "";
                 if( req.query.alteraContractor == "Alterar" ){
                     try{
                         contratante.collection.updateOne({
@@ -667,22 +690,22 @@ app.get("/", async (req,res)=>{
                                 senha: req.query.senha,
                             }
                         });
-                        console.log("contratante alterado");
+                        mensagem="contratante alterado";
                     }catch(e){
                         console.log("Erro: "+e.message);
                     }                                        
                 }
                 contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){ 
-                    res.render("company/fichaCad/index",{                
-                        typeuser: "",
+                    res.render("company/fichaCad/index",{
+                        typeuser: "contractor",
                         logado: "", 
                         email:contratante[0].email,
-                        senha:contratante.senha,
+                        senha:req.query.senha,
                         contratante: contratante,
                         senha2: req.query.senha2,                
                         produto: contratante.produto,
-                        mensagem: msg,
-                        tipoPagamento: req.query.tipoPagamento});                   
+                        mensagem: mensagem,
+                        tipoPagamento: req.query.tipoPagamento});  
                 });
             }            
         }
