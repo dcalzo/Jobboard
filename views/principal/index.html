@@ -153,14 +153,14 @@
                           <label for="demo-payment-type"><b>Payment method:</b></label>
                            <select id="demo-payment-type" style="width: 50%;" aria-controls="demo-payment-pix demo-payment-bitcoin demo-payment-bank">
                               <option value="" selected ></option>
-                              <option value="PIX" >PIX</option>
+                              <option value="PIX" >Instant Payment</option>
                               <option value="Bitcoin" >Bitcoin</option>
                               <option value="bancodeposito" >Bank transfer</option>
                            </select>
                            <p>Choose a payment method to view the demo details.</p>
                            <section id="demo-payment-pix" class="demoPaymentForm" aria-labelledby="demo-payment-pix-title" hidden>
-                             <h3 id="demo-payment-pix-title">PIX Payment Details</h3>
-                             <label for="demo-pix-key-type">PIX key type</label>
+                             <h3 id="demo-payment-pix-title">Instant Payment Details</h3>
+                             <label for="demo-pix-key-type">Instant Payment key type</label>
                              <select id="demo-pix-key-type">
                                <option value="">Select a payment method</option>
                                <option value="cpf">CPF</option>
@@ -169,8 +169,8 @@
                                <option value="telefone">Phone number</option>
                                <option value="aleatoria">Random key</option>
                              </select>
-                             <label for="demo-pix-key">Chave PIX</label>
-                             <input id="demo-pix-key" type="text" placeholder="Enter PIX key">
+                             <label for="demo-pix-key">Instant Payment key</label>
+                             <input id="demo-pix-key" type="text" placeholder="Enter Instant Payment key">
                              <label for="demo-pix-holder">Account holder name</label>
                              <input id="demo-pix-holder" type="text" placeholder="Full name">
                            </section>
@@ -236,7 +236,7 @@
                           <li><a href="?demo2=demo-boardcont&demo=demo-cont">Board</a></li>
                           <li><a href="?demo2=demo-task&demo=demo-cont">Create a Service</a></li>
                           <li><a href="?demo2=demo-historico&demo=demo-cont">Service History</a></li>
-                          <li><a href="?demo2=demo-fincadcont&demo=demo-cont">Payment Details</a></li>
+                          <li><a href="?demo2=demo-fincadcont&demo=demo-cont">Financial Details</a></li>
                           <li><a href="?demo2=demo-concluidos&demo=demo-cont">Completed Services</a></li>
                           <li><a href="?demo2=demo-chatcont&demo=demo-cont">Chat</a></li>
                           <li><a href="?opcao=home">Back</a></li>
@@ -322,7 +322,7 @@
                               <label for="demo-service-payment">Payment method</label>
                               <select id="demo-service-payment" required>
                                 <option value="">Select a payment method</option>
-                                <option value="PIX">PIX</option>
+                                <option value="PIX">Instant Payment</option>
                                 <option value="Bitcoin">Bitcoin</option>
                                 <option value="Bank transfer">Bank transfer</option>
                               </select>
@@ -355,7 +355,7 @@
                                 <tr>
                                   <td>Restaurant website</td>
                                   <td>Marina Costa</td>
-                                  <td>PIX</td>
+                                  <td>Instant Payment</td>
                                   <td>In progress</td>
                                   <td>R$ 1.200,00</td>
                                   <td>12/08/2026</td>
@@ -381,49 +381,52 @@
                             <p class="demoPaymentNotice">Services and details are fictional and shown for demonstration purposes.</p>
                           </div>
                          <%} else if(demo2 == "demo-fincadcont"){%>
-                          <p>Payment Details</p>
-                          <section class="demoPaymentForm">
-                            <h3>Contractor Payment Method</h3>
-                            <label for="demo-contractor-payment-type">Payment method</label>
-                            <select id="demo-contractor-payment-type">
-                              <option value="">Select a payment method</option>
-                              <option value="pix">PIX</option>
-                              <option value="bitcoin">Bitcoin</option>
-                              <option value="bank">Bank transfer</option>
-                            </select>
-                            <div id="demo-contractor-pix" hidden>
-                              <label for="demo-contractor-pix-key">Chave PIX</label>
-                              <input id="demo-contractor-pix-key" type="text" placeholder="PIX key used for payments">
-                              <label for="demo-contractor-pix-holder">Account holder name</label>
-                              <input id="demo-contractor-pix-holder" type="text" placeholder="Full name">
-                            </div>
-                            <div id="demo-contractor-bitcoin" hidden>
-                              <label for="demo-contractor-bitcoin-network">Network</label>
-                              <select id="demo-contractor-bitcoin-network">
-                                <option value="bitcoin">Bitcoin</option>
-                                <option value="lightning">Lightning</option>
-                              </select>
-                              <label for="demo-contractor-bitcoin-wallet">Bitcoin wallet</label>
-                              <input id="demo-contractor-bitcoin-wallet" type="text" placeholder="Wallet address for payments">
-                            </div>
-                            <div id="demo-contractor-bank" hidden>
-                              <label for="demo-contractor-bank-name">Bank</label>
-                              <input id="demo-contractor-bank-name" type="text" placeholder="Bank name">
-                              <label for="demo-contractor-bank-agency">Branch</label>
-                              <input id="demo-contractor-bank-agency" type="text" placeholder="Branch number">
-                              <label for="demo-contractor-bank-account">Account</label>
-                              <input id="demo-contractor-bank-account" type="text" placeholder="Account number and check digit">
-                              <label for="demo-contractor-bank-account-type">Account type</label>
-                              <select id="demo-contractor-bank-account-type">
-                                <option value="corrente">Checking</option>
-                                <option value="poupanca">Savings</option>
-                              </select>
-                              <label for="demo-contractor-bank-holder">Account holder name</label>
-                              <input id="demo-contractor-bank-holder" type="text" placeholder="Full name">
-                            </div>
-                            <button id="demo-contractor-payment-save" type="button" disabled>Save demo details</button>
-                            <p class="demoPaymentNotice" id="demo-contractor-payment-notice" role="status" aria-live="polite">Choose a method and enter the details to simulate registration. Nothing will be submitted or saved.</p>
-                          </section>
+                          <p>Financial Details</p>
+                          <h3>Expense Overview</h3>
+                          <p>Service amounts and the 15% platform fee.</p>
+                          <div class="demoHistory">
+                            <table class="demoGainsTable">
+                              <thead>
+                                <tr>
+                                  <td><b>Service</b></td>
+                                  <td><b>Stage</b></td>
+                                  <td><b>Service Amount</b></td>
+                                  <td><b>Platform Fee (15%)</b></td>
+                                  <td><b>Total</b></td>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>Restaurant website</td>
+                                  <td>In progress</td>
+                                  <td>R$ 1.200,00</td>
+                                  <td>R$ 180,00</td>
+                                  <td>R$ 1.380,00</td>
+                                </tr>
+                                <tr>
+                                  <td>Spreadsheet automation</td>
+                                  <td>In review</td>
+                                  <td>R$ 450,00</td>
+                                  <td>R$ 67,50</td>
+                                  <td>R$ 517,50</td>
+                                </tr>
+                                <tr>
+                                  <td>Store visual identity</td>
+                                  <td>Completed</td>
+                                  <td>R$ 800,00</td>
+                                  <td>R$ 120,00</td>
+                                  <td>R$ 920,00</td>
+                                </tr>
+                                <tr>
+                                  <td colspan="2"><b>Total</b></td>
+                                  <td><b>R$ 2.450,00</b></td>
+                                  <td><b>R$ 367,50</b></td>
+                                  <td><b>R$ 2.817,50</b></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                          <p class="demoPaymentNotice">Demo: service and payment amounts are fictional and shown for demonstration purposes.</p>
                          <%} else if(demo2 == "demo-concluidos"){%>
                           <p>Completed Services</p>
                           <div class="demoHistory">
@@ -505,39 +508,6 @@
             Object.entries(paymentForms).forEach(([type, form]) => {
               form.hidden = type !== paymentType.value;
             });
-          });
-        }
-
-        const contractorPaymentType = document.getElementById("demo-contractor-payment-type");
-        if (contractorPaymentType) {
-          const contractorPaymentForms = {
-            pix: document.getElementById("demo-contractor-pix"),
-            bitcoin: document.getElementById("demo-contractor-bitcoin"),
-            bank: document.getElementById("demo-contractor-bank")
-          };
-          const savePaymentButton = document.getElementById("demo-contractor-payment-save");
-          const paymentNotice = document.getElementById("demo-contractor-payment-notice");
-
-          contractorPaymentType.addEventListener("change", () => {
-            Object.entries(contractorPaymentForms).forEach(([type, form]) => {
-              form.hidden = type !== contractorPaymentType.value;
-            });
-            savePaymentButton.disabled = !contractorPaymentType.value;
-            paymentNotice.textContent = "Enter the details for the selected method and save to complete the demo.";
-          });
-
-          savePaymentButton.addEventListener("click", () => {
-            const selectedForm = contractorPaymentForms[contractorPaymentType.value];
-            const requiredFields = Array.from(selectedForm.querySelectorAll("input"));
-            const invalidField = requiredFields.find((field) => !field.value.trim());
-            if (invalidField) {
-              invalidField.setCustomValidity("Fill in this field to continue.");
-              invalidField.reportValidity();
-              invalidField.addEventListener("input", () => invalidField.setCustomValidity(""), { once: true });
-              return;
-            }
-
-            paymentNotice.textContent = "Demo payment details saved. The information was not submitted or stored.";
           });
         }
 

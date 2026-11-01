@@ -101,13 +101,13 @@
                         <tr>
                           <td style="width: 40%;">    
                               <label>Professional payment</label>
-                              <img class="qr-code" src="data:<%= retornoPagamento.qrCodeMimeType || 'image/png' %>;base64,<%= retornoPagamento.qrCodeBase64 %>" alt="QR Code PIX" />
+                              <img class="qr-code" src="data:<%= retornoPagamento.qrCodeMimeType || 'image/png' %>;base64,<%= retornoPagamento.qrCodeBase64 %>" alt="Instant Payment QR code" />
                               <p><b>Copy and paste:</b></p>
                               <textarea rows="4" cols="70" readonly><%= retornoPagamento.qrCode %></textarea>
                               <p>Transaction ID: <%= retornoPagamento.id %></p>
                           </td>
                           <td style="width: 20%;">
-                            <label>PIX generated</label><br />
+                            <label>Instant Payment generated</label><br />
                             <p>Service: R$ <%= retornoPagamento.valorServico.replace('.', ',') %></p>
                             <p>Platform fee (15%): R$ <%= retornoPagamento.taxaPlataforma.replace('.', ',') %></p>
                             <p><b>Total: R$ <%= retornoPagamento.valorTotal.replace('.', ',') %></b></p> 

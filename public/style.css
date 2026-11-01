@@ -444,6 +444,24 @@ body.company-profile-page input[type="submit"]{
 .boardtable .columntable:last-child{
     border-right: 0;
 }
+.demo-board .post{
+    overflow: hidden;
+    border: 0;
+    border-radius: 2px;
+    background: #fff176 !important;
+    color: #5d5200;
+    box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.2);
+}
+.demo-board .post::after{
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #fff9c4 0 48%, #ddca58 50% 100%);
+    clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
 .boardbody{
     width: 97%;
     height: 500px;

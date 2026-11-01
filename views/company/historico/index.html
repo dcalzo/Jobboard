@@ -52,7 +52,7 @@
                             <%=task[x].developer%><br />  
                           </td>
                           <td style="width: 10%;">
-                            <%=task[x].tipoPagamento === "bancodeposito" ? "Bank transfer" : task[x].tipoPagamento%><br />
+                            <%=task[x].tipoPagamento === "bancodeposito" ? "Bank transfer" : task[x].tipoPagamento === "PIX" ? "Instant Payment" : task[x].tipoPagamento%><br />
                           </td>
                           <td style="width: 10%;">
                             <%=task[x].column === "post" ? "Open" : task[x].column === "postDev" ? "In Progress" : task[x].column === "postRev" ? "Under Review" : task[x].column === "postEnd" ? "Completed" : ""%><br />
