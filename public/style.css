@@ -93,7 +93,8 @@ body.payment-details-page .about-menu a[href*="menu=fincadCont"]{
 }
 
 body.payment-details-page .payment-save-success,
-body.professional-profile-page .payment-save-success{
+body.professional-profile-page .payment-save-success,
+body.bug-report-page .payment-save-success{
     position: fixed;
     top: 16px;
     left: 50%;
@@ -247,6 +248,16 @@ body.company-profile-page input[type="submit"]{
 .company-task-page textarea,
 .company-task-page select{
     background-color: #f2fce1;
+    border-radius: 8px;
+}
+
+.bug-report-page input[type="text"],
+.bug-report-page textarea{
+    background-color: #f2fce1;
+    border-radius: 8px;
+}
+
+.bug-report-page input[type="submit"]{
     border-radius: 8px;
 }
 

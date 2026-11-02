@@ -5,6 +5,7 @@ const path = require("path");
 const contratante = require("./contratante");
 const task = require("./task.js");
 const contabilidade = require("./contabilidade.js");
+const bug = require("./bug.js");
 const chatmensagem = require("./views/chat/mensagens.js");
 const profissional = require("./views/professional/cadastro/profissional");
 const contasPagamentos = require("./contasPagamento.js");
@@ -709,18 +710,35 @@ app.get("/", async (req,res)=>{
                     });  
                 });
             }else if(req.query.menu == "bug"){
-                contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){ 
-                    res.render("company/fichaCad/index",{
-                        typeuser: "contractor",
-                        logado: "", 
-                        email:contratante[0].email,
+                const mensagemBug = req.query.bugReport === "Submit Bug Report"
+                    ? "Bug reported."
+                    : null;
+                if(mensagemBug){
+                    try{
+                            bug.collection.insertMany([
+                        { 
+                            email: req.query.email, 
+                            titleService: req.query.bug,
+                            description: req.query.bugDescription
+                        }
+                            ]).then(function(){
+                                msg = "bug reportado"
+                                console.log(msg)
+                            }).catch(function(error){
+                                console.log(error)
+                            });
+                        }catch(e){
+                            console.log(e.error);
+                        }
+                }
+                 contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){                    
+                    res.render("bug/index",{
+                        typeuser: req.query.typeuser, 
+                        email:req.query.email, 
                         senha:req.query.senha,
-                        contratante: contratante,
-                        senha2: req.query.senha2,                
-                        produto: contratante.produto,
-                        mensagem: mensagem,
-                        tipoPagamento: req.query.tipoPagamento
-                    });  
+                        mensagemBug: mensagemBug,
+                        contratante: contratante
+                    }); 
                 });
             }        
         }
@@ -789,24 +807,59 @@ app.get("/", async (req,res)=>{
                 }     
                 task.find({}).exec(function(err, task){  
                 if(req.query.column == null){
-                    res.render("board/index",{typeuser: req.query.typeuser, 
+                    res.render("board/index",{
+                        typeuser: req.query.typeuser, 
                         email:req.query.email, 
                         taskList: task,
                         senha:req.query.senha, 
                         column: req.query.column, 
-                        aviso: msg});
+                        aviso: msg
+                    });
                 }else{
-                    res.render("board/index",{typeuser: req.query.typeuser, 
+                    res.render("board/index",{
+                        typeuser: req.query.typeuser, 
                         email:req.query.email, 
                         senha:req.query.senha, 
                         taskList: task,
                         column:task[0].column, 
-                        aviso: msg});
+                        aviso: msg
+                    });
                 }               
             }); 
             }
             //---------------------------------------------------Fim Board
-            else  if(req.query.menu == "ProdutosCaju"){     
+            else if(req.query.menu == "bug"){
+                const mensagemBug = req.query.bugReport === "Submit Bug Report"
+                    ? "Bug reported."
+                    : null;
+                if(mensagemBug){
+                    try{
+                            bug.collection.insertMany([
+                        { 
+                            email: req.query.email, 
+                            titleService: req.query.bug,
+                            description: req.query.bugDescription
+                        }
+                            ]).then(function(){
+                                msg = "bug reportado"
+                                console.log(msg)
+                            }).catch(function(error){
+                                console.log(error)
+                            });
+                        }catch(e){
+                            console.log(e.error);
+                        }
+                }
+                 profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, profissional){                    
+                    res.render("bug/index",{
+                        typeuser: req.query.typeuser, 
+                        email:req.query.email, 
+                        senha:req.query.senha,
+                        mensagemBug: mensagemBug,
+                        profissional: profissional
+                    }); 
+                });
+            } else  if(req.query.menu == "ProdutosCaju"){     
                 profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, profissional){
                     res.render("professional/caju/index",{
                         typeuser: req.query.typeuser,
