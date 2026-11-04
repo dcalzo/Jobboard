@@ -5,6 +5,7 @@ var bug = new Schema({
     idtask: Number,
     email: String,
     titleService: String,
+    dataCriacao: { type: Date, default: Date.now },
     description: String
 },{collection:"bug"})
 

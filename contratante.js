@@ -12,6 +12,8 @@ var contratante = new Schema({
     email: String,
     senha: String,
     tipoPagamento: String,
+    dataCriacao: { type: Date, default: Date.now },
+    emailBloqueado: { type: Boolean, default: false },
     produto: String
 },{collection:"contratante"})
 

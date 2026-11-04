@@ -17,6 +17,7 @@ var contasPagamento = new Schema({
     senha: String,
     valor: Number,
     observacao: String,
+    dataCriacao: { type: Date, default: Date.now },
     produto: String
 },{collection:"contasPagamento"})
 

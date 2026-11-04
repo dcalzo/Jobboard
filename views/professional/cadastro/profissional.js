@@ -26,6 +26,8 @@ var profissional = new Schema({
     agencia: String,
     banco: String,
     tipoconta: String,
+    dataCriacao: { type: Date, default: Date.now },
+    emailBloqueado: { type: Boolean, default: false },
     produto: String
 },{collection:"profissional"})
 

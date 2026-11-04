@@ -10,6 +10,7 @@ var contabilidade = new Schema({
     ano: String,
     mes: String,
     dia: String,
+    dataCriacao: { type: Date, default: Date.now },
     valor: String
 },{collection:"contabilidade"})
 
