@@ -15,6 +15,7 @@ var task = new Schema({
     column: String,
     codigo: String,
     comprovante: String,
+    dataCriacao: { type: Date, default: Date.now },
     comprovantePlataforma: String
 },{collection:"task"})
 
