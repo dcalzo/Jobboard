@@ -91,6 +91,7 @@ app.set("views", path.join(__dirname,"/views"));
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use((req, res, next) => {
     const send = res.send;
     res.send = function(body) {
