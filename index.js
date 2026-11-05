@@ -172,7 +172,7 @@ app.get("/", async (req,res)=>{
                     senha:req.query.senha,
                     taskList: task,
                     column: "",
-                    aviso: msg});
+                    aviso: null});
                 });
             }  
             else if(req.query.opcao == "Entrar" && task.idtask != undefined){              
@@ -184,20 +184,32 @@ app.get("/", async (req,res)=>{
                     senha:req.query.senha,
                     taskList: "task",
                     column: "",
-                    aviso: msg});
+                    aviso: null});
                 });
             }  
             else if(req.query.menu == "board"){                
+                let avisoMover = null;
                 if(req.query.taskServ == "altera"){  
                     try{
-                        await task.updateOne({
-                            _id: req.query.id
-                        }, {
-                            $set: {
-                                column: req.query.column
+                        let podeMover = true;
+                        if(req.query.column == "postEnd"){
+                            const tarefaMovida = await task.findOne({ _id: req.query.id, email: req.query.email }).exec();
+                            const preenchido = (valor) => typeof valor === "string" && valor.trim().length > 0;
+                            if(!tarefaMovida || !preenchido(tarefaMovida.comprovante) || !preenchido(tarefaMovida.comprovantePlataforma)){
+                                podeMover = false;
+                                avisoMover = "A service can only be moved to Concluded after all payments have been made.";
                             }
-                        });
-                        console.log("task alterada");
+                        }
+                        if(podeMover){
+                            await task.updateOne({
+                                _id: req.query.id
+                            }, {
+                                $set: {
+                                    column: req.query.column
+                                }
+                            });
+                            console.log("task alterada");
+                        }
                     }catch(e){
                         console.log("Erro: "+e.message);
                     }
@@ -210,7 +222,7 @@ app.get("/", async (req,res)=>{
                             senha:req.query.senha,
                             taskList: task,
                             column: req.query.column,
-                            aviso: msg});
+                            aviso: avisoMover});
                     }else{
                         res.render("board/index",{
                             typeuser: req.query.typeuser, 
@@ -218,7 +230,7 @@ app.get("/", async (req,res)=>{
                             senha:req.query.senha,
                             taskList: task,
                             column: task[0].column,
-                            aviso: msg});
+                            aviso: avisoMover});
                     }
                 });                 
             }
@@ -247,6 +259,7 @@ app.get("/", async (req,res)=>{
                             email: req.query.email, 
                             company: req.query.LoginContractor,
                             idtask: req.query.count,
+                            dataCriacao: new Date(),
                             developer: "",
                             titleService: req.query.titleService,
                             description: typeof req.query.description === "string" && req.query.description.trim()
@@ -284,12 +297,12 @@ app.get("/", async (req,res)=>{
             }
             else if(req.query.menu == "fincadCont" || req.query.tipoPagamento != null){
                 let comprovante = ""; 
-                if(req.query.buttonPay == "Pagar"){                    
+                if(req.query.buttonPay == "Pay" || req.query.buttonPay == "Pagar"){                    
                     if(req.query.tipoPagamento == "PIX"){
                         let tarefaPagamento;
                         try {
                             tarefaPagamento = await task.findOne({
-                                company: req.query.email,
+                                email: req.query.email,
                                 titleService: req.query.taskservice,
                                 developer: req.query.profissionalSel
                             }).exec();
@@ -302,9 +315,9 @@ app.get("/", async (req,res)=>{
                         } catch (error) {
                             const detalhesErro = error && typeof error === "object" ? error : {};
                             // teste de pagamento inválido, exibir prévia do QR Code PIX sem criar o pagamento
-                            if (process.env.NODE_ENV !== "production" && detalhesErro.code === "INVALID_PAYER_EMAIL" && tarefaPagamento) {
+                            if (process.env.NODE_ENV !== "production" && tarefaPagamento) {
                                 comprovante = JSON.stringify(criarPreviaPagamentoPix(tarefaPagamento));
-                                console.info("Exibindo pré-visualização dos QR codes PIX; nenhum pagamento foi criado.");
+                                console.info("Exibindo pré-visualização dos QR codes PIX; nenhum pagamento foi criado.", detalhesErro.message || detalhesErro.error || error);
                             // teste de pagamento inválido, exibir prévia do QR Code PIX sem criar o pagamento
                             } else {
                                 comprovante = JSON.stringify({
@@ -320,7 +333,7 @@ app.get("/", async (req,res)=>{
                         let tarefaPagamento;
                         try {
                             tarefaPagamento = await task.findOne({
-                                company: req.query.email,
+                                email: req.query.email,
                                 titleService: req.query.taskservice,
                                 developer: req.query.profissionalSel
                             }).exec();
@@ -351,7 +364,7 @@ app.get("/", async (req,res)=>{
                         let contaProfissional;
                         try {
                             tarefaPagamento = await task.findOne({
-                                company: req.query.email,
+                                email: req.query.email,
                                 titleService: req.query.taskservice,
                                 developer: req.query.profissionalSel
                             }).exec();
@@ -398,8 +411,9 @@ app.get("/", async (req,res)=>{
                         }
                     }                     
                 }
-                task.find({company: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
-                    profissional.find({email: task.map((t) => t.developer)}).sort({"_id":1}).exec(function(err, profissional){
+                task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
+                    const desenvolvedoresPagamento = task.filter((t) => t.developer && ["postRev", "postEnd"].includes(t.column)).map((t) => t.developer);
+                    profissional.find({email: {$in: desenvolvedoresPagamento}}).sort({"_id":1}).exec(function(err, profissional){
                         contasPagamentos.find({email: req.query.profissionalSel}).sort({"_id":1}).exec(function(err, pagamento){
                             res.render("company/pagamento/index",{
                                 profissional: profissional,
@@ -421,7 +435,7 @@ app.get("/", async (req,res)=>{
                 });
             } 
             else if(req.query.menu == "historico"){
-              if(req.query.enviaNota == "Enviar Avaliação"){
+              if(req.query.enviaNota == "Enviar Avaliação" || req.query.enviaNota == "Submit Review"){
                 console.log("salvar avaliação");
                     if(!req.query.profissionalSel || !["1", "2", "3", "4", "5"].includes(String(req.query.nota))){
                         return res.status(400).send("Selecione um profissional e uma nota para avaliar.");
@@ -435,7 +449,9 @@ app.get("/", async (req,res)=>{
                             return res.status(400).send("O profissional selecionado não foi contratado por este contratante.");
                         }
                         await avaliar.collection.insertOne({
-                            contato: req.query.profissionalSel,
+                            contato: req.query.email,
+                            developer: req.query.profissionalSel,
+                            autor: "contratante",
                             comentario: req.query.comentarioProf,
                             nota: req.query.nota
                         });
@@ -467,7 +483,7 @@ app.get("/", async (req,res)=>{
                         }
                         contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){
                             contabilidade.find({contato:{$in: emailsProfissionais}}).sort({ano:-1, _id:-1}).exec(function(err, contabilidade){
-                                avaliar.find({contato: req.query.email}).sort({"_id":-1}).exec(function(err, avaliacoesContratante){
+                                avaliar.find({contato: req.query.email, autor: {$ne: "contratante"}}).sort({"_id":-1}).exec(function(err, avaliacoesContratante){
                                     if(err){
                                         console.error("Erro ao buscar avaliações da empresa:", err.message);
                                         return res.status(500).send("Não foi possível carregar as avaliações da empresa.");
@@ -746,6 +762,7 @@ app.get("/", async (req,res)=>{
         else  if(req.query.typeuser == "professional"){
             if(req.query.opcao == "Entrar"){
             //-------------------------------------Inicio Board  
+                let avisoMover = null;
                 if(req.query.taskServ == "altera"){   
                     try{
                         const previousColumnByDestination = {
@@ -754,17 +771,21 @@ app.get("/", async (req,res)=>{
                         };
                         const previousColumn = previousColumnByDestination[req.query.column];
                         if (previousColumn && typeof req.query.id === "string") {
-                            const result = await task.updateOne({
-                                _id: req.query.id,
-                                column: previousColumn
-                            }, {
+                            const filtro = { _id: req.query.id, column: previousColumn };
+                            if (previousColumn !== "post") {
+                                filtro.developer = req.query.email;
+                            }
+                            const result = await task.updateOne(filtro, {
                                 $set: {
                                     developer: req.query.email,
                                     column: req.query.column
                                 }
                             });
                             if (result.matchedCount === 0) {
-                                console.warn("Task não movida: ela já não está na coluna de origem.");
+                                console.warn("Task não movida: ela já não está na coluna de origem ou pertence a outro profissional.");
+                                if (previousColumn !== "post") {
+                                    avisoMover = "You cannot move a task that belongs to another professional.";
+                                }
                             }
                         }
                     }catch(e){
@@ -777,10 +798,11 @@ app.get("/", async (req,res)=>{
                     senha:req.query.senha, 
                     taskList: task,
                     column: "", 
-                    aviso: null});
+                    aviso: avisoMover});
                 });
             }else if(req.query.menu == "board"){
                 let msg = null;         
+                let avisoMover = null;
                 if(req.query.taskServ == "altera"){   
                     try{
                         const previousColumnByDestination = {
@@ -789,17 +811,21 @@ app.get("/", async (req,res)=>{
                         };
                         const previousColumn = previousColumnByDestination[req.query.column];
                         if (previousColumn && typeof req.query.id === "string") {
-                            const result = await task.updateOne({
-                                _id: req.query.id,
-                                column: previousColumn
-                            }, {
+                            const filtro = { _id: req.query.id, column: previousColumn };
+                            if (previousColumn !== "post") {
+                                filtro.developer = req.query.email;
+                            }
+                            const result = await task.updateOne(filtro, {
                                 $set: {
                                     developer: req.query.email,
                                     column: req.query.column
                                 }
                             });
                             if (result.matchedCount === 0) {
-                                console.warn("Task não movida: ela já não está na coluna de origem.");
+                                console.warn("Task não movida: ela já não está na coluna de origem ou pertence a outro profissional.");
+                                if (previousColumn !== "post") {
+                                    avisoMover = "You cannot move a task that belongs to another professional.";
+                                }
                             }
                         }
                     }catch(e){
@@ -814,7 +840,7 @@ app.get("/", async (req,res)=>{
                         taskList: task,
                         senha:req.query.senha, 
                         column: req.query.column, 
-                        aviso: msg
+                        aviso: avisoMover
                     });
                 }else{
                     res.render("board/index",{
@@ -823,7 +849,7 @@ app.get("/", async (req,res)=>{
                         senha:req.query.senha, 
                         taskList: task,
                         column:task[0].column, 
-                        aviso: msg
+                        aviso: avisoMover
                     });
                 }               
             }); 
@@ -938,6 +964,8 @@ app.get("/", async (req,res)=>{
                         }
                         await avaliar.collection.insertOne({
                             contato: req.query.contratanteSel,
+                            developer: req.query.email,
+                            autor: "profissional",
                             comentario: req.query.comentarioConta,
                             nota: req.query.nota
                         });
@@ -964,7 +992,7 @@ app.get("/", async (req,res)=>{
                             }
                             profissional.find({email: req.query.email}).sort({"_id":1}).exec(function(err, profissional){
                                 contabilidade.find({contato:req.query.email}).sort({"_id":1}).exec(function(err, contabilidade){
-                                    avaliar.find({contato: req.query.email}).sort({"_id":-1}).exec(function(err, avaliacoesProfissional){
+                                    avaliar.find({$or: [{autor: "contratante", developer: req.query.email}, {autor: null, contato: req.query.email}]}).sort({"_id":-1}).exec(function(err, avaliacoesProfissional){
                                         if(err){
                                             console.error("Erro ao buscar avaliações do profissional:", err.message);
                                             return res.status(500).send("Não foi possível carregar as avaliações.");

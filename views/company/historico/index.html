@@ -101,7 +101,16 @@
               <%
                 var gastosPorAno = {};
                 task.forEach(function(servico) {
-                  if (servico.column !== "postEnd" || !servico._id || typeof servico._id.getTimestamp !== "function") {
+                  if (!servico._id || typeof servico._id.getTimestamp !== "function") {
+                    return;
+                  }
+                  var temComprovante = function(valor) {
+                    return typeof valor === "string" && valor.trim().length > 0;
+                  };
+                  var profissionalPago = temComprovante(servico.comprovante);
+                  var plataformaPaga = temComprovante(servico.comprovantePlataforma);
+                  var concluida = servico.column === "postEnd";
+                  if (!concluida && !profissionalPago && !plataformaPaga) {
                     return;
                   }
 
@@ -120,7 +129,11 @@
                   if (!gastosPorAno[ano]) {
                     gastosPorAno[ano] = Array(12).fill(0);
                   }
-                  gastosPorAno[ano][mes] += Math.round(valorServico * 1.15 * 100);
+                  var valorEmCentavos = Math.round(valorServico * 100);
+                  var gastoServico = concluida
+                    ? Math.round(valorServico * 1.15 * 100)
+                    : (profissionalPago ? valorEmCentavos : 0) + (plataformaPaga ? Math.round(valorServico * 0.15 * 100) : 0);
+                  gastosPorAno[ano][mes] += gastoServico;
                 });
                 var anosComGastos = Object.keys(gastosPorAno).sort(function(a, b) {
                   return Number(b) - Number(a);

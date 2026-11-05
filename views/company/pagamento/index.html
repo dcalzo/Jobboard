@@ -36,8 +36,7 @@
               <%for(var x=0;x<task.length;x++){
                 const comprovanteProfissional = typeof task[x].comprovante === "string" && task[x].comprovante.trim().length > 0;
                 const comprovantePlataforma = typeof task[x].comprovantePlataforma === "string" && task[x].comprovantePlataforma.trim().length > 0;
-                const pagamentoPendente = task[x].column === "postRev" ||
-                  (task[x].column === "postEnd" && comprovanteProfissional !== comprovantePlataforma);
+                const pagamentoPendente = task[x].column === "postRev" || task[x].column === "postEnd";
               %>
                 <%if( (pagamentoPendente || estadoPg == "postPag") && profissionalSel == task[x].developer || taskservice == task[x].titleService ){%>
                   <option value="<%=task[x].titleService%>" <%= taskservice == task[x].titleService ? "selected" : "" %> ><%=task[x].titleService%></option>

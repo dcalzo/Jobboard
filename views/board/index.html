@@ -11,6 +11,15 @@
     </head>
     <body class="about-page board-page">
         <h1><b>Board</b></h1><br />    
+        <% if (typeof aviso !== "undefined" && aviso) { %>
+          <p class="board-warning" role="alert" style="color: #b00020; font-weight: bold;"><%= aviso %></p>
+          <script>
+            window.setTimeout(function() {
+              var message = document.querySelector(".board-warning");
+              if (message) message.remove();
+            }, 5000);
+          </script>
+        <% } %>
         <form class="backForm"> 
             <table style="width: 100%;">
                 <tr>
@@ -185,6 +194,7 @@
                   </td>
                 </tr>
               </table>  
+              click and drag the task to move it to the next column
               <script>
                                 document.querySelector(".backForm").addEventListener("submit", function(event) {
                                     event.preventDefault();

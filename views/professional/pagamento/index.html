@@ -6,6 +6,12 @@
       <title>board jobs</title>
     </head>
     <body class="payment-details-page">
+        <%
+          var contaSelecionada = (contasSalvas || []).find(function(conta) { return conta.tipo === tipoPagamento; });
+          var contaSalva = !!contaSelecionada;
+          var dadosPagamento = [contaSelecionada || {}];
+          dadosPagamento[2] = dadosPagamento[0];
+        %>
         <h1><b>Financial Details</b></h1><br />    
         <form>            
             <% if (mensagemPagamento) { %>
@@ -61,19 +67,19 @@
                                   <tr>
                                     <td style="padding: 10px;">
                                       <label for="nomeTitularPix"><b>Account holder name:</b></label><br />
-                                      <input type="text" id="nome" name="nome" value="<%=contasSalvas[0].nome%>" style="width: 400px; padding: 5px;" placeholder="Enter your full name" required /><br /><br />
+                                      <input type="text" id="nome" name="nome" value="<%=dadosPagamento[0].nome%>" style="width: 400px; padding: 5px;" placeholder="Enter your full name" required /><br /><br />
                                     </td>
                                   </tr>
                                   <tr>
                                     <td style="padding: 10px;">
                                       <label for="cpfcnpjPix"><b>Document:</b></label><br />
-                                      <input type="text" id="documento" name="documento" value="<%=contasSalvas[0].documento%>" style="width: 400px; padding: 5px;" placeholder="Enter your document" required /><br /><br />
+                                      <input type="text" id="documento" name="documento" value="<%=dadosPagamento[0].documento%>" style="width: 400px; padding: 5px;" placeholder="Enter your document" required /><br /><br />
                                     </td>
                                   </tr>
                                   <tr>
                                     <td>
                                       <label for="tipoChavePix"><b>Instant Payment key type:</b></label><br />
-                                      <% var tipoChaveSalva = String(contasSalvas[0].tipochave || "").trim().toLowerCase(); %>
+                                      <% var tipoChaveSalva = String(dadosPagamento[0].tipochave || "").trim().toLowerCase(); %>
                                       <select id="tipochave" name="tipochave" style="width: 230px; padding: 5px;" required>
                                         <option value="" <%= tipoChaveSalva ? '' : 'selected' %>>Select a type</option>
                                         <option value="cpf" <%= tipoChaveSalva === 'cpf' ? 'selected' : '' %>>Document</option>
@@ -87,13 +93,13 @@
                                   <tr>
                                     <td>
                                       <label for="chavePix"><b>Instant Payment key:</b></label><br />
-                                      <input type="text" id="chave" name="chave" value="<%=contasSalvas[0].chave%>" style="width: 230px; padding: 5px;" placeholder="Enter your Instant Payment key" required /><br /><br />
+                                      <input type="text" id="chave" name="chave" value="<%=dadosPagamento[0].chave%>" style="width: 230px; padding: 5px;" placeholder="Enter your Instant Payment key" required /><br /><br />
                                     </td>
                                   </tr>
                                    <tr>
                                     <td>  
                                       <br />
-                                      <%if(contasSalvas[0].tipo === "PIX"){%>
+                                      <%if(contaSalva){%>
                                         <input type="submit" id="cadastraPagamento" name="cadastraPagamento" style="width: 200px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;" value="Update Payment" />
                                       <%}else{%>
                                         <input type="submit" id="cadastraPagamento" name="cadastraPagamento" style="width: 200px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;" value="Save Payment" />
@@ -110,13 +116,13 @@
                                     <tr>
                                       <td style="width: 100%; padding: 10px;">
                                         <label for="nomeTitularBitcoin"><b>Account holder name:</b></label><br />
-                                        <input type="text" id="nome" name="nome" value="<%=contasSalvas[2].nome%>" style="width: 600px; padding: 5px;" placeholder="Enter your full name" required /><br /><br />
+                                        <input type="text" id="nome" name="nome" value="<%=dadosPagamento[0].nome%>" style="width: 600px; padding: 5px;" placeholder="Enter your full name" required /><br /><br />
                                       </td>
                                     </tr>
                                     <tr>
                                       <td style="width: 100%; padding: 10px;">
                                         <label for="cpfcnpjBitcoin"><b>Document:</b></label><br />
-                                        <input type="text" id="documento" name="documento" value="<%=contasSalvas[2].documento%>" style="width: 600px; padding: 5px;" placeholder="Enter your Document" required /><br /><br />
+                                        <input type="text" id="documento" name="documento" value="<%=dadosPagamento[0].documento%>" style="width: 600px; padding: 5px;" placeholder="Enter your Document" required /><br /><br />
                                       </td>
                                     </tr>
                                     <tr>
@@ -124,26 +130,26 @@
                                         <label for="bitcoinNetwork"><b>Bitcoin network:</b></label><br />
                                         <select id="redeBTC" name="redeBTC" style="width: 200px; margin-left: 20; padding: 5px;" required>
                                           <option value="">Select a network</option>
-                                          <option value="btc" <%= (contasSalvas[1].redeBTC === 'btc') ? 'selected' : '' %>>Bitcoin (BTC)</option>
-                                          <option value="testnet" <%= (contasSalvas[1].redeBTC === 'testnet') ? 'selected' : '' %>>Testnet</option>
+                                          <option value="btc" <%= (dadosPagamento[0].redeBTC === 'btc') ? 'selected' : '' %>>Bitcoin (BTC)</option>
+                                          <option value="testnet" <%= (dadosPagamento[0].redeBTC === 'testnet') ? 'selected' : '' %>>Testnet</option>
                                         </select><br /><br />
                                       </td>
                                       <td style="width: 48%; padding: 10px; display: inline-block; margin-left: 4%;">
                                         <label style="margin-left: -20;" for="enderecoBitcoin"><b>Bitcoin address:</b></label><br />
-                                        <input type="text" id="enderecoBTC" name="enderecoBTC" value="<%=contasSalvas[1].enderecoBTC%>" style="width: 200px; margin-left: -5; padding: 5px;" placeholder="Enter your Bitcoin address" required /><br /><br />
+                                        <input type="text" id="enderecoBTC" name="enderecoBTC" value="<%=dadosPagamento[0].enderecoBTC%>" style="width: 200px; margin-left: -5; padding: 5px;" placeholder="Enter your Bitcoin address" required /><br /><br />
                                       </td>
                                     </tr>
                                     <tr>
                                       <td style="width: 100%; padding: 10px;">
                                         <label for="observacoesBitcoin"><b>Notes:</b></label><br />
-                                        <textarea id="observacao" name="observacao" style="width: 600px; padding: 5px;" rows="4" placeholder="Additional information (optional)"><%= contasSalvas[1].observacao ? contasSalvas[1].observacao.trim() : '' %></textarea><br /><br />
+                                        <textarea id="observacao" name="observacao" style="width: 600px; padding: 5px;" rows="4" placeholder="Additional information (optional)"><%= dadosPagamento[0].observacao ? dadosPagamento[0].observacao.trim() : '' %></textarea><br /><br />
                                       </td>
                                     </tr>
                                   </table>
-                                <%if(contasSalvas[0].tipo === "Bitcoin"){%>
-                                  <input type="submit" id="cadastraPagamento" name="cadastraPagamento" style="width: 200px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;" value="Save Payment" />
-                                <%}else{%>
+                                <%if(contaSalva){%>
                                   <input type="submit" id="cadastraPagamento" name="cadastraPagamento" style="width: 200px; margin-left: -220; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;" value="Update Payment" />
+                                <%}else{%>
+                                  <input type="submit" id="cadastraPagamento" name="cadastraPagamento" style="width: 200px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;" value="Save Payment" />
                                 <%}%>
                                 <%}else if(tipoPagamento == "bancodeposito"){%>
                                   <table style="width: 80%;">
@@ -153,56 +159,56 @@
                                     <tr>
                                       <td style="width: 10%; padding: 10px;">
                                         <label for="nomeTitularTED"><b>Account holder name:</b></label><br />
-                                        <input type="text" id="nome" name="nome" value="<%=contasSalvas[2].nome%>" style="width: 400px; padding: 5px;" placeholder="Enter your full name" required /><br /><br />
+                                        <input type="text" id="nome" name="nome" value="<%=dadosPagamento[0].nome%>" style="width: 400px; padding: 5px;" placeholder="Enter your full name" required /><br /><br />
                                       </td>
                                     </tr>
                                     <tr>
                                       <td style="width: 10%; padding: 10px;">
                                         <label for="cpfcnpjTED"><b>Document:</b></label><br />
-                                        <input type="text" id="documento" name="documento" value="<%=contasSalvas[2].documento%>" style="width: 400px; padding: 5px;" placeholder="Enter your document" required /><br /><br />
+                                        <input type="text" id="documento" name="documento" value="<%=dadosPagamento[0].documento%>" style="width: 400px; padding: 5px;" placeholder="Enter your document" required /><br /><br />
                                       </td>
                                     </tr>
                                     <tr>
                                       <td style="width: 48%; padding: 10px; display: inline-block;">
                                         <label for="bancoTED"><b>Bank:</b></label><br />
                                         <select id="banco" name="banco" style="width: 400px; padding: 5px;" required>
-                                          <option value="" <%= !(contasSalvas && contasSalvas[2] && contasSalvas[2].banco) ? "selected" : "" %>>Select a bank</option>
-                                          <option value="001" <%= contasSalvas && contasSalvas[2] && contasSalvas[2].banco == "001" ? "selected" : "" %>>001 - Banco do Brasil</option>
-                                          <option value="033" <%= contasSalvas && contasSalvas[2] && contasSalvas[2].banco == "033" ? "selected" : "" %>>033 - Banco Santander</option>
-                                          <option value="104" <%= contasSalvas && contasSalvas[2] && contasSalvas[2].banco == "104" ? "selected" : "" %>>104 - Caixa Econômica Federal</option>
-                                          <option value="237" <%= contasSalvas && contasSalvas[2] && contasSalvas[2].banco == "237" ? "selected" : "" %>>237 - Banco Bradesco</option>
-                                          <option value="341" <%= contasSalvas && contasSalvas[2] && contasSalvas[2].banco == "341" ? "selected" : "" %>>341 - Banco Itaú</option>
-                                          <option value="389" <%= contasSalvas && contasSalvas[2] && contasSalvas[2].banco == "389" ? "selected" : "" %>>389 - Banco Mercantil</option>
-                                          <option value="422" <%= contasSalvas && contasSalvas[2] && contasSalvas[2].banco == "422" ? "selected" : "" %>>422 - Banco Safra</option>
-                                          <option value="633" <%= contasSalvas && contasSalvas[2] && contasSalvas[2].banco == "633" ? "selected" : "" %>>633 - Banco Inter</option>
-                                          <option value="655" <%= contasSalvas && contasSalvas[2] && contasSalvas[2].banco == "655" ? "selected" : "" %>>655 - Banco Votorantim</option>
-                                          <option value="707" <%= contasSalvas && contasSalvas[2] && contasSalvas[2].banco == "707" ? "selected" : "" %>>707 - Banco Daycoval</option>
+                                          <option value="" <%= !(dadosPagamento && dadosPagamento[0] && dadosPagamento[0].banco) ? "selected" : "" %>>Select a bank</option>
+                                          <option value="001" <%= dadosPagamento && dadosPagamento[0] && dadosPagamento[0].banco == "001" ? "selected" : "" %>>001 - Banco do Brasil</option>
+                                          <option value="033" <%= dadosPagamento && dadosPagamento[0] && dadosPagamento[0].banco == "033" ? "selected" : "" %>>033 - Banco Santander</option>
+                                          <option value="104" <%= dadosPagamento && dadosPagamento[0] && dadosPagamento[0].banco == "104" ? "selected" : "" %>>104 - Caixa Econômica Federal</option>
+                                          <option value="237" <%= dadosPagamento && dadosPagamento[0] && dadosPagamento[0].banco == "237" ? "selected" : "" %>>237 - Banco Bradesco</option>
+                                          <option value="341" <%= dadosPagamento && dadosPagamento[0] && dadosPagamento[0].banco == "341" ? "selected" : "" %>>341 - Banco Itaú</option>
+                                          <option value="389" <%= dadosPagamento && dadosPagamento[0] && dadosPagamento[0].banco == "389" ? "selected" : "" %>>389 - Banco Mercantil</option>
+                                          <option value="422" <%= dadosPagamento && dadosPagamento[0] && dadosPagamento[0].banco == "422" ? "selected" : "" %>>422 - Banco Safra</option>
+                                          <option value="633" <%= dadosPagamento && dadosPagamento[0] && dadosPagamento[0].banco == "633" ? "selected" : "" %>>633 - Banco Inter</option>
+                                          <option value="655" <%= dadosPagamento && dadosPagamento[0] && dadosPagamento[0].banco == "655" ? "selected" : "" %>>655 - Banco Votorantim</option>
+                                          <option value="707" <%= dadosPagamento && dadosPagamento[0] && dadosPagamento[0].banco == "707" ? "selected" : "" %>>707 - Banco Daycoval</option>
                                         </select><br /><br />
                                       </td>
                                       <td style="width: 48%; padding: 10px; display: inline-block; margin-left: 4%;">
                                         <label style=" margin-left: -20;" for="agenciaTED"><b>Branch:</b></label><br />
-                                        <input type="text" id="agencia" name="agencia" value="<%=contasSalvas[2].agencia%>" style="width: 400px; margin-left: -20; padding: 5px;" placeholder="Branch number" required /><br /><br />
+                                        <input type="text" id="agencia" name="agencia" value="<%=dadosPagamento[2].agencia%>" style="width: 400px; margin-left: -20; padding: 5px;" placeholder="Branch number" required /><br /><br />
                                       </td>
                                     </tr>
                                     <tr>
                                       <td style="width: 48%; padding: 10px; display: inline-block;">
                                         <label for="contaTED"><b>Account:</b></label><br />
-                                        <input type="text" id="conta" name="conta" value="<%=contasSalvas[2].numeroConta%>" style="width: 400px; padding: 5px;" placeholder="Account number" required /><br /><br />
+                                        <input type="text" id="conta" name="conta" value="<%=dadosPagamento[2].numeroConta%>" style="width: 400px; padding: 5px;" placeholder="Account number" required /><br /><br />
                                       </td>
                                       <td style="width: 48%; padding: 10px; display: inline-block; margin-left: 4%;">
                                         <label for="tipoContaTED"><b>Account type:</b></label><br />
                                         <select id="tipoConta" name="tipoConta" style="width: 400px; margin-left: -20; padding: 5px;" required>
                                           <option value="">Select an account type</option>
-                                          <option value="Corrente" <%= contasSalvas[2] && contasSalvas[2].tipoConta == "Corrente" ? "selected" : "" %>>Checking</option>
-                                          <option value="Poupança" <%= contasSalvas[2] && contasSalvas[2].tipoConta == "Poupança" ? "selected" : "" %>>Savings</option>
+                                          <option value="Corrente" <%= dadosPagamento[2] && dadosPagamento[2].tipoConta == "Corrente" ? "selected" : "" %>>Checking</option>
+                                          <option value="Poupança" <%= dadosPagamento[2] && dadosPagamento[2].tipoConta == "Poupança" ? "selected" : "" %>>Savings</option>
                                         </select><br /><br />
                                       </td>
                                     </tr>
                                   </table>
-                                <%if(contasSalvas[0].tipo === "bancodeposito"){%>
-                                  <input type="submit" id="cadastraPagamento" name="cadastraPagamento" style="width: 200px; margin-left: -180; ;padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;" value="Save Payment" />
-                                <%}else{%>
+                                <%if(contaSalva){%>
                                   <input type="submit" id="cadastraPagamento" name="cadastraPagamento" style="width: 200px; margin-left: -180; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;" value="Update Payment" />
+                                <%}else{%>
+                                  <input type="submit" id="cadastraPagamento" name="cadastraPagamento" style="width: 200px; margin-left: -180; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;" value="Save Payment" />
                                 <%}%>                               
                               <%}%>  
                      </td>
