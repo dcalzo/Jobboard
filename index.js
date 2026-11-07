@@ -186,7 +186,8 @@ app.get("/", async (req,res)=>{
                     senha:req.query.senha,
                     taskList: task,
                     column: "",
-                    aviso: null});
+                    aviso: null,
+                    urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&company=${encodeURIComponent(req.query.company || '')}&menu=board`});
                 });
             }  
             else if(req.query.opcao == "Entrar" && task.idtask != undefined){              
@@ -198,9 +199,10 @@ app.get("/", async (req,res)=>{
                     senha:req.query.senha,
                     taskList: "task",
                     column: "",
-                    aviso: null});
+                    aviso: null,
+                    urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&company=${encodeURIComponent(req.query.company || '')}&menu=board`});
                 });
-            }  
+            }
             else if(req.query.menu == "board"){                
                 let avisoMover = null;
                 if(req.query.taskServ == "altera"){  
@@ -236,7 +238,8 @@ app.get("/", async (req,res)=>{
                             senha:req.query.senha,
                             taskList: task,
                             column: req.query.column,
-                            aviso: avisoMover});
+                            aviso: avisoMover,
+                            urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&menu=board`});
                     }else{
                         res.render("board/index",{
                             typeuser: req.query.typeuser, 
@@ -244,7 +247,8 @@ app.get("/", async (req,res)=>{
                             senha:req.query.senha,
                             taskList: task,
                             column: task[0].column,
-                            aviso: avisoMover});
+                            aviso: avisoMover,
+                            urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&menu=board`});
                     }
                 });                 
             }
@@ -812,7 +816,8 @@ app.get("/", async (req,res)=>{
                     senha:req.query.senha, 
                     taskList: task,
                     column: "", 
-                    aviso: avisoMover});
+                    aviso: avisoMover,
+                    urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&menu=board`});
                 });
             }else if(req.query.menu == "board"){
                 let msg = null;         
@@ -854,8 +859,8 @@ app.get("/", async (req,res)=>{
                         taskList: task,
                         senha:req.query.senha, 
                         column: req.query.column, 
-                        aviso: avisoMover
-                    });
+                        aviso: avisoMover,
+                        urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&menu=board`});
                 }else{
                     res.render("board/index",{
                         typeuser: req.query.typeuser, 
@@ -863,8 +868,8 @@ app.get("/", async (req,res)=>{
                         senha:req.query.senha, 
                         taskList: task,
                         column:task[0].column, 
-                        aviso: avisoMover
-                    });
+                        aviso: avisoMover,
+                        urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&menu=board`});
                 }               
             }); 
             }

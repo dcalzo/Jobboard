@@ -288,7 +288,15 @@
                     </div>                
                   </div>
                 </div>            
-              </div>   
+              </div>
+              <script>
+                  document.addEventListener("DOMContentLoaded", function() {
+                      const urlParams = "<%- typeof urlParams !== 'undefined' ? urlParams : '' %>";
+                      if (urlParams) {
+                          window.history.replaceState({}, document.title, "/?"+urlParams);
+                      }
+                  });
+              </script>   
         </form>
     </body>
 </html>
