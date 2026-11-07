@@ -179,6 +179,13 @@ app.get("/", async (req,res)=>{
             //----------------------------------------Inicio Board--------------
             if(req.query.opcao == "Entrar" && task.idtask == undefined){
                 task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
+                const encryptedParams = urlEncryption.encryptQuery({
+                    typeuser: req.query.typeuser,
+                    email: req.query.email,
+                    senha: req.query.senha,
+                    company: req.query.company || '',
+                    menu: 'board'
+                });
                 res.render("board/index",{
                     typeuser: req.query.typeuser, 
                     email:req.query.email, 
@@ -187,11 +194,18 @@ app.get("/", async (req,res)=>{
                     taskList: task,
                     column: "",
                     aviso: null,
-                    urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&company=${encodeURIComponent(req.query.company || '')}&menu=board`});
+                    encryptedParams: encryptedParams});
                 });
             }  
             else if(req.query.opcao == "Entrar" && task.idtask != undefined){              
                 task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){  
+                const encryptedParams = urlEncryption.encryptQuery({
+                    typeuser: req.query.typeuser,
+                    email: req.query.email,
+                    senha: req.query.senha,
+                    company: req.query.company || '',
+                    menu: 'board'
+                });
                 res.render("board/index",{
                     typeuser: req.query.typeuser, 
                     email:req.query.email, 
@@ -200,7 +214,7 @@ app.get("/", async (req,res)=>{
                     taskList: "task",
                     column: "",
                     aviso: null,
-                    urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&company=${encodeURIComponent(req.query.company || '')}&menu=board`});
+                    encryptedParams: encryptedParams});
                 });
             }
             else if(req.query.menu == "board"){                
@@ -231,6 +245,12 @@ app.get("/", async (req,res)=>{
                     }
                 }
                 task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){  
+                    const encryptedParams = urlEncryption.encryptQuery({
+                        typeuser: req.query.typeuser,
+                        email: req.query.email,
+                        senha: req.query.senha,
+                        menu: 'board'
+                    });
                     if(req.query.column == null){
                         res.render("board/index",{
                             typeuser: req.query.typeuser, 
@@ -239,7 +259,7 @@ app.get("/", async (req,res)=>{
                             taskList: task,
                             column: req.query.column,
                             aviso: avisoMover,
-                            urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&menu=board`});
+                            encryptedParams: encryptedParams});
                     }else{
                         res.render("board/index",{
                             typeuser: req.query.typeuser, 
@@ -248,7 +268,7 @@ app.get("/", async (req,res)=>{
                             taskList: task,
                             column: task[0].column,
                             aviso: avisoMover,
-                            urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&menu=board`});
+                            encryptedParams: encryptedParams});
                     }
                 });                 
             }
@@ -810,14 +830,20 @@ app.get("/", async (req,res)=>{
                         console.log("Erro: "+e.message);
                     }
                 }
-                task.find({}).exec(function(err, task){     
+                task.find({}).exec(function(err, task){
+                    const encryptedParams = urlEncryption.encryptQuery({
+                        typeuser: req.query.typeuser,
+                        email: req.query.email,
+                        senha: req.query.senha,
+                        menu: 'board'
+                    });
                 res.render("board/index",{typeuser: req.query.typeuser, 
                     email:req.query.email, 
                     senha:req.query.senha, 
                     taskList: task,
                     column: "", 
                     aviso: avisoMover,
-                    urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&menu=board`});
+                    encryptedParams: encryptedParams});
                 });
             }else if(req.query.menu == "board"){
                 let msg = null;         
@@ -851,7 +877,13 @@ app.get("/", async (req,res)=>{
                         console.log("Erro: "+e.message);
                     }
                 }     
-                task.find({}).exec(function(err, task){  
+                task.find({}).exec(function(err, task){
+                    const encryptedParams = urlEncryption.encryptQuery({
+                        typeuser: req.query.typeuser,
+                        email: req.query.email,
+                        senha: req.query.senha,
+                        menu: 'board'
+                    });
                 if(req.query.column == null){
                     res.render("board/index",{
                         typeuser: req.query.typeuser, 
@@ -860,7 +892,7 @@ app.get("/", async (req,res)=>{
                         senha:req.query.senha, 
                         column: req.query.column, 
                         aviso: avisoMover,
-                        urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&menu=board`});
+                        encryptedParams: encryptedParams});
                 }else{
                     res.render("board/index",{
                         typeuser: req.query.typeuser, 
@@ -869,7 +901,7 @@ app.get("/", async (req,res)=>{
                         taskList: task,
                         column:task[0].column, 
                         aviso: avisoMover,
-                        urlParams: `typeuser=${encodeURIComponent(req.query.typeuser)}&email=${encodeURIComponent(req.query.email)}&senha=${encodeURIComponent(req.query.senha)}&menu=board`});
+                        encryptedParams: encryptedParams});
                 }               
             }); 
             }

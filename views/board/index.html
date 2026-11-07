@@ -291,9 +291,10 @@
               </div>
               <script>
                   document.addEventListener("DOMContentLoaded", function() {
-                      const urlParams = "<%- typeof urlParams !== 'undefined' ? urlParams : '' %>";
-                      if (urlParams) {
-                          window.history.replaceState({}, document.title, "/?"+urlParams);
+                      const encryptedParams = "<%- typeof encryptedParams !== 'undefined' ? encryptedParams : '' %>";
+                      if (encryptedParams) {
+                          // Atualizar URL com parâmetros criptografados
+                          window.history.replaceState({}, document.title, "/?q="+encryptedParams);
                       }
                   });
               </script>   
