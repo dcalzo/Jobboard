@@ -144,6 +144,7 @@ app.use((req, res, next) => {
 
 app.get("/", async (req,res)=>{    
     let usuarioAutenticado = null;
+    let emailBloqueado = false;
     if (typeof req.query.email === "string" &&
         typeof req.query.senha === "string" &&
         (req.query.typeuser === "contractor" || req.query.typeuser === "professional")) {
@@ -153,10 +154,23 @@ app.get("/", async (req,res)=>{
                 email: req.query.email,
                 senha: req.query.senha
             }).exec();
+            
+            if (usuarioAutenticado && usuarioAutenticado.emailBloqueado === true) {
+                emailBloqueado = true;
+                usuarioAutenticado = null;
+            }
         } catch (error) {
             console.error("Erro ao consultar as credenciais no banco:", error.message);
             return res.status(500).send("Não foi possível verificar o login. Tente novamente.");
         }
+    }
+
+    if (emailBloqueado) {
+        return res.status(403).render("login/index", {
+            logado: "",
+            user: req.query.typeuser,
+            mensagem: "This account has been blocked. Please contact the platform support for assistance."
+        });
     }
 
     if (usuarioAutenticado &&

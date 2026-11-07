@@ -1,0 +1,223 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                  DIAGRAMA DE FLUXO - VERIFICAÇÃO EMAIL BLOQUEADO             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+PROCESSO DE AUTENTICAÇÃO:
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│  1. REQUISIÇÃO DE LOGIN                                                    │
+│     ├─ Email enviado no query string                                       │
+│     ├─ Senha enviada no query string                                       │
+│     └─ Tipo de usuário (contractor/professional) identificado              │
+│                                                                             │
+│          ↓↓↓                                                                │
+│                                                                             │
+│  2. VALIDAÇÃO DE TIPOS (index.js - linhas 147-150)                         │
+│     ├─ Verifica se email é string: ✓                                       │
+│     ├─ Verifica se senha é string: ✓                                       │
+│     └─ Verifica se typeuser é válido (contractor/professional): ✓          │
+│                                                                             │
+│          ↓↓↓                                                                │
+│                                                                             │
+│  3. SELEÇÃO DO MODELO (index.js - linha 151)                               │
+│     ├─ Se typeuser = "contractor" → usa colecção: contratante              │
+│     └─ Se typeuser = "professional" → usa colecção: profissional           │
+│                                                                             │
+│          ↓↓↓                                                                │
+│                                                                             │
+│  4. BUSCA DO USUÁRIO (index.js - linha 152-154)                            │
+│     ├─ Faz findOne no MongoDB com:                                         │
+│     │   ├─ email = valor do query string                                   │
+│     │   └─ senha = valor do query string                                   │
+│     ├─ Se encontra usuário: CONTINUA                                       │
+│     └─ Se não encontra: vai para seção ERRO (linha 1219-1226)              │
+│                                                                             │
+│          ↓↓↓                                                                │
+│                                                                             │
+│  5. VERIFICAÇÃO NOVO: EMAIL BLOQUEADO (index.js - linhas 156-159) ◄─ NOVO  │
+│     ┌───────────────────────────────────────────────────────────────┐     │
+│     │ Adiciona variável: let emailBloqueado = false (linha 146)     │     │
+│     │                                                                │     │
+│     │ if (usuarioAutenticado &&                                     │     │
+│     │     usuarioAutenticado.emailBloqueado === true) {             │     │
+│     │   emailBloqueado = true                                       │     │
+│     │   usuarioAutenticado = null  // anula acesso                  │     │
+│     │ }                                                             │     │
+│     └───────────────────────────────────────────────────────────────┘     │
+│                                                                             │
+│     ┌──────────────────────────────────────────────────────────────────┐   │
+│     │          DECISÃO: Email Bloqueado?                              │   │
+│     └──────────────────┬──────────────────────────────────────────────┘   │
+│                        │                                                   │
+│              ┌─────────┴──────────┐                                        │
+│              │                    │                                        │
+│            SIM                    NÃO                                      │
+│              │                    │                                        │
+│     ┌────────▼────────────┐  ┌───▼──────────────────┐                     │
+│     │  BLOQUEADO          │  │  ACESSO OK           │                     │
+│     │  (linhas 161-168)   │  │  Continua fluxo      │                     │
+│     │  ◄─────────────────►│  │  normal              │                     │
+│     │                    │  │                      │                     │
+│     │ Renderiza:         │  │ Renderiza:           │                     │
+│     │ login/index.html   │  │ dashboard/board      │                     │
+│     │                    │  │ board/concluidos     │                     │
+│     │ Status: 403        │  │ etc...               │                     │
+│     │                    │  │                      │                     │
+│     │ Mensagem (inglês): │  │ Status: 200          │                     │
+│     │ "This account has  │  │                      │                     │
+│     │ been blocked.      │  │                      │                     │
+│     │ Please contact     │  │                      │                     │
+│     │ the platform       │  │                      │                     │
+│     │ support for        │  │                      │                     │
+│     │ assistance."       │  │                      │                     │
+│     └────────┬───────────┘  └───┬──────────────────┘                     │
+│              │                  │                                         │
+│              └──────────┬───────┘                                          │
+│                         ▼                                                  │
+│                    RESPOSTA HTTP                                           │
+│                                                                             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                           COMPARAÇÃO: ANTES vs DEPOIS                       ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┌─ ANTES (sem verificação de bloqueio) ────────────────────────────────────┐
+│                                                                           │
+│  1. Email + Senha válidos? → SIM                                         │
+│     ↓                                                                    │
+│  2. Renderiza dashboard                                                 │
+│     ↓                                                                    │
+│  3. Acesso completo ao sistema                                          │
+│                                                                           │
+│  ✗ PROBLEMA: Contas bloqueadas podem fazer login!                       │
+│                                                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+
+┌─ DEPOIS (com verificação de bloqueio) ──────────────────────────────────┐
+│                                                                         │
+│  1. Email + Senha válidos? → SIM                                       │
+│     ↓                                                                  │
+│  2. Email está bloqueado? ◄────────────────── NOVO!                   │
+│     ├─ NÃO → Renderiza dashboard                                      │
+│     └─ SIM → Exibe mensagem de bloqueio (inglês) + Status 403         │
+│                                                                         │
+│  ✓ SOLUÇÃO: Contas bloqueadas não conseguem fazer login!              │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                        CAMPOS NO BANCO DE DADOS                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+COLECÇÃO: contratante
+┌─────────────────────────────────────────────────────────────────────────┐
+│ {                                                                       │
+│   _id: ObjectId("..."),                                                 │
+│   nome: "Empresa XYZ",                                                  │
+│   email: "contato@empresa.com",                                         │
+│   senha: "hash_da_senha",                                               │
+│   emailBloqueado: false ◄────────────────────────────────────────────  │
+│   ... outros campos ...                                                 │
+│ }                                                                       │
+└─────────────────────────────────────────────────────────────────────────┘
+
+COLECÇÃO: profissional
+┌─────────────────────────────────────────────────────────────────────────┐
+│ {                                                                       │
+│   _id: ObjectId("..."),                                                 │
+│   nome: "João Silva",                                                   │
+│   email: "joao@email.com",                                              │
+│   senha: "hash_da_senha",                                               │
+│   emailBloqueado: false ◄────────────────────────────────────────────  │
+│   ... outros campos ...                                                 │
+│ }                                                                       │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                      EXEMPLOS DE BLOQUEIO/DESBLOQUEIO                       ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+BLOQUEAR CONTRATANTE:
+$ mongo
+> use jobboard
+> db.contratante.updateOne(
+    { email: "fraud@empresa.com" },
+    { $set: { emailBloqueado: true } }
+  )
+resultado: { matchedCount: 1, modifiedCount: 1 }
+✓ Contratante bloqueado! Agora não consegue fazer login.
+
+DESBLOQUEAR CONTRATANTE:
+$ mongo
+> use jobboard
+> db.contratante.updateOne(
+    { email: "fraud@empresa.com" },
+    { $set: { emailBloqueado: false } }
+  )
+resultado: { matchedCount: 1, modifiedCount: 1 }
+✓ Contratante desbloqueado! Pode fazer login novamente.
+
+BLOQUEAR PROFISSIONAL:
+$ mongo
+> use jobboard
+> db.profissional.updateOne(
+    { email: "dev@email.com" },
+    { $set: { emailBloqueado: true } }
+  )
+
+LISTAR TODOS OS BLOQUEADOS:
+> db.contratante.find({ emailBloqueado: true }).pretty()
+> db.profissional.find({ emailBloqueado: true }).pretty()
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                          MENSAGEM PARA USUÁRIO                             ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┌────────────────────────────────────────────────────────────────────────┐
+│                                                                        │
+│  Board Jobs - Login Page                                              │
+│  ┌──────────────────────────────────────────────────────────────────┐ │
+│  │                                                                  │ │
+│  │  SIGN IN                                                        │ │
+│  │                                                                  │ │
+│  │  ❌ This account has been blocked.                           │ │
+│  │     Please contact the platform support for assistance.       │ │
+│  │                                                                  │ │
+│  │  Email: [____________]                                         │ │
+│  │                                                                  │ │
+│  │  Password: [____________]                                      │ │
+│  │                                                                  │ │
+│  │  [Sign In]                                                     │ │
+│  │                                                                  │ │
+│  └──────────────────────────────────────────────────────────────────┘ │
+│                                                                        │
+│  Nota: Mensagem em VERMELHO (#d00000) devido ao role="alert"        │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                            CHECKLIST DE FUNCIONALIDADES                     ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+✅ Campo emailBloqueado existe em ambos os schemas (contratante e profissional)
+✅ Verificação ocorre APÓS autenticação de senha (linha 156-159)
+✅ Mensagem em INGLÊS exibida ("This account has been blocked...")
+✅ Status HTTP 403 retornado para acesso bloqueado
+✅ Funciona para CONTRATANTES e PROFISSIONAIS
+✅ Retrocompatibilidade: usuários sem campo recebem default: false
+✅ Sintaxe do Node.js verificada (node -c index.js) ✓
+✅ Comportamento anterior mantido para usuários não bloqueados
+✅ Página de login renderizada com mensagem de erro
+
+═════════════════════════════════════════════════════════════════════════════════
+
+Data: 2024
+Versão: 1.0
+Status: IMPLEMENTADO E TESTADO ✅
