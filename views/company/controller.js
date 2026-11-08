@@ -600,6 +600,35 @@ async function handleFichaCad(req, models) {
 }
 
 /**
+ * Handler para menu "profissionais"
+ * Exibe lista de profissionais para avaliação
+ */
+async function handleProfissionais(req, models) {
+    const { task, profissional } = models;
+    
+    // Get all tasks for the contractor to find which professionals worked with them
+    const tasks = await task.find({ email: req.query.email }).exec();
+    
+    // Extract unique professional emails from tasks
+    const professionalEmails = [...new Set(
+        tasks.map((t) => t.developer).filter(Boolean)
+    )];
+    
+    // Get professional data
+    const profissionais = await profissional.find({ email: { $in: professionalEmails } }).exec();
+    
+    return {
+        template: "company/avaliacao/index",
+        data: {
+            typeuser: req.query.typeuser,
+            email: req.query.email,
+            senha: req.query.senha,
+            profissionais: profissionais
+        }
+    };
+}
+
+/**
  * Handler para menu "bug"
  * Relatório de bugs
  */
@@ -650,6 +679,7 @@ async function handleCompanyMenu(req, models, dependencies) {
         "chatC": () => handleChatC(req, models),
         "ProdutosCaju": () => handleProdutosCaju(req, models),
         "fichaCad": () => handleFichaCad(req, models),
+        "profissionais": () => handleProfissionais(req, models),
         "bug": () => handleBug(req, models)
     };
 
@@ -673,5 +703,6 @@ module.exports = {
     handleChatC,
     handleProdutosCaju,
     handleFichaCad,
+    handleProfissionais,
     handleBug
 };

@@ -341,6 +341,12 @@ app.get("/", async (req,res)=>{
                     return res.render(result.template, result.data);
                 }
             }
+            else if(req.query.menu == "profissionais"){
+                const result = await companyController.handleProfissionais(req, models);
+                if (result && result.template) {
+                    return res.render(result.template, result.data);
+                }
+            }
             else if(req.query.menu == "bug"){
                 const result = await companyController.handleBug(req, models);
                 if (result && result.template) {
@@ -556,6 +562,12 @@ app.get("/", async (req,res)=>{
         }  
     }    
 }); 
+
+// Middleware para logar requisições 404
+app.use((req, res, next) => {
+    console.error(`⚠️  404 Not Found: ${req.method} ${req.path}`);
+    res.status(404).send("Página não encontrada");
+});
 
 app.listen(porta,()=>{
    console.log(`funcionando\nhttp://localhost:${porta}/`);    
