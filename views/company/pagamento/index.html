@@ -14,8 +14,9 @@
       <% try { retornoPagamento = comprovante ? JSON.parse(comprovante) : null; } catch (e) {} %>
       <h1><b>Financial Details</b></h1><br />
       <br />
-      <form>
-      <table style="width: 98%;">
+      <form method="POST">
+      <input type="hidden" name="q" value="<%=encryptedParams%>" />
+      <table style="width: 98%%;">
         <tr>
           <td class="no-print" style="width: 20%;">
               <%if(typeuser=="contractor"){%>
@@ -199,10 +200,6 @@
               <%})%>
             <%}%>
           <br />     
-          <input type="hidden" id="typeuser" name="typeuser" value="<%=typeuser%>" />
-          <input type="hidden" id="email" name="email" value="<%=email%>" />
-          <input type="hidden" id="senha" name="senha" value="<%=senha%>" />
-          <input type="hidden" id="menu" name="menu" value="fincadCont" />
           <br /><br /> 
         </td>
       </tr>

@@ -221,7 +221,13 @@ async function handlePayments(req, models, { urlEncryption, criarPagamentoPix, c
             email: req.query.email,
             senha: req.query.senha,
             tipoPagamento: req.query.tipoPagamento,
-            comprovante: comprovante
+            comprovante: comprovante,
+            encryptedParams: urlEncryption.encryptQuery({
+                typeuser: req.query.typeuser,
+                email: req.query.email,
+                senha: req.query.senha,
+                menu: 'fincadCont'
+            })
         }
     };
 }
