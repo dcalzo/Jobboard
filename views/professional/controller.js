@@ -41,7 +41,7 @@ async function handleProfessionalMenu(req, models, dependencies) {
             return await handleProdutosCaju(req, models, dependencies);
         } else if (req.query.menu === "ganho") {
             return await handleGanho(req, models, dependencies);
-        } else if (req.query.menu === "pagamento") {
+        } else if (req.query.menu === "pagamento" || req.query.menu === "fincadPro") {
             return await handlePagamento(req, models, dependencies);
         } else if (req.query.menu === "chatP") {
             return await handleChatP(req, models, dependencies);
