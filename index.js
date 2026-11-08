@@ -14,6 +14,7 @@ const { criarPagamentoBitcoinLightning, criarPreviaPagamentoBitcoin } = require(
 const { criarPagamentoPix, criarPreviaPagamentoPix } = require("./views/tiposPagamentos/pix.js");
 const env = require("./dev.env.js");
 const avaliar = require("./views/avaliar/avaliar.js");
+const companyController = require("./views/company/controller.js");
 const { createUrlEncryption, queryParameter, resolveEncryptionSecret } = require("./urlEncryption");
 const app = express();
 const porta = 8080;
@@ -176,6 +177,18 @@ app.get("/", async (req,res)=>{
     if (usuarioAutenticado &&
      (req.query.cadastroProf != "Salvar" || req.query.cadastroContractor !="Salvar")){
         if(req.query.typeuser == "contractor"){
+            // Preparar modelos e dependências para o controller
+            const models = {
+                task, contratante, profissional, contasPagamentos,
+                chatmensagem, avaliar, bug, contabilidade
+            };
+            const dependencies = {
+                urlEncryption, criarPagamentoPix, criarPreviaPagamentoPix,
+                criarPagamentoBitcoinLightning, criarPreviaPagamentoBitcoin,
+                criarTransferenciaPagBank, criarPreviaTransferenciaPagBank,
+                lerDadosBancarios, salvarLancamentoContabilidade
+            };
+            
             //----------------------------------------Inicio Board--------------
             if(req.query.opcao == "Entrar" && task.idtask == undefined){
                 task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
@@ -274,528 +287,65 @@ app.get("/", async (req,res)=>{
             }
             //-------------------------------------------------------Fim BOARD
             else if(req.query.menu == "createTask"){  
-                if( req.query.taskServ == "Save Service" || req.query.taskServ == "Salvar Serviço" ){
-                    const requiredServiceFields = [
-                        req.query.titleService,
-                        req.query.description,
-                        req.query.valor,
-                        req.query.gitLocal,
-                        req.query.urlDoc
-                    ];
-                    const paymentMethods = ["PIX", "Bitcoin", "bancodeposito"];
-                    const formIsComplete = requiredServiceFields.every(value =>
-                        typeof value === "string" && value.trim().length > 0
-                    ) && paymentMethods.includes(req.query.tipoPagamento);
-
-                    if (!formIsComplete) {
-                        msg = "Please fill in all fields and select a payment method.";
-                    } else {
-                        msg = "service saved successfully";
-                        try{
-                            task.collection.insertMany([
-                        { 
-                            email: req.query.email, 
-                            company: req.query.LoginContractor,
-                            idtask: req.query.count,
-                            dataCriacao: new Date(),
-                            developer: "",
-                            titleService: req.query.titleService,
-                            description: typeof req.query.description === "string" && req.query.description.trim()
-                                ? req.query.description
-                                : "",
-                            valor: req.query.valor,
-                            tipoPagamento: req.query.tipoPagamento,
-                            gitLocal: req.query.gitLocal,
-                            urlDoc: req.query.urlDoc,
-                            column: req.query.column
-                        }
-                            ]).then(function(){
-                                msg = "task salva"
-                                console.log(msg)
-                            }).catch(function(error){
-                                console.log(error)
-                            });
-                        }catch(e){
-                            console.log(e.error);
-                        }
-                    }
-                }  
-                task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
-                contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){
-                    login =  req.query.email.split("@");
-                    res.render("company/task/index",{ 
-                        typeuser: req.query.typeuser, 
-                        count: task,
-                        Login: login[0],
-                        email:req.query.email, 
-                        senha:req.query.senha,
-                        msg: msg});
-                });
-                });
+                const result = await companyController.handleCreateTask(req, models);
+                if (result && result.template) {
+                    return res.render(result.template, result.data);
+                }
             }
             else if(req.query.menu == "fincadCont" || req.query.tipoPagamento != null){
-                let comprovante = ""; 
-                if(req.query.buttonPay == "Pay" || req.query.buttonPay == "Pagar"){                    
-                    if(req.query.tipoPagamento == "PIX"){
-                        let tarefaPagamento;
-                        try {
-                            tarefaPagamento = await task.findOne({
-                                email: req.query.email,
-                                titleService: req.query.taskservice,
-                                developer: req.query.profissionalSel
-                            }).exec();
-
-                            if (!tarefaPagamento) {
-                                throw new Error("Serviço não encontrado para pagamento.");
-                            }
-
-                            comprovante = JSON.stringify(await criarPagamentoPix(tarefaPagamento, req.query.email));
-                        } catch (error) {
-                            const detalhesErro = error && typeof error === "object" ? error : {};
-                            // teste de pagamento inválido, exibir prévia do QR Code PIX sem criar o pagamento
-                            if (process.env.NODE_ENV !== "production" && tarefaPagamento) {
-                                comprovante = JSON.stringify(criarPreviaPagamentoPix(tarefaPagamento));
-                                console.info("Exibindo pré-visualização dos QR codes PIX; nenhum pagamento foi criado.", detalhesErro.message || detalhesErro.error || error);
-                            // teste de pagamento inválido, exibir prévia do QR Code PIX sem criar o pagamento
-                            } else {
-                                comprovante = JSON.stringify({
-                                    erro: detalhesErro.message || detalhesErro.error || String(error),
-                                    codigo: detalhesErro.error,
-                                    status: detalhesErro.status,
-                                    detalhes: Array.isArray(detalhesErro.cause) ? detalhesErro.cause : []
-                                });
-                                console.error("Erro ao criar pagamento PIX:", comprovante);
-                            }
-                        }
-                    }else if(req.query.tipoPagamento == "Bitcoin"){
-                        let tarefaPagamento;
-                        try {
-                            tarefaPagamento = await task.findOne({
-                                email: req.query.email,
-                                titleService: req.query.taskservice,
-                                developer: req.query.profissionalSel
-                            }).exec();
-
-                            if (!tarefaPagamento) {
-                                throw new Error("Serviço não encontrado para pagamento.");
-                            }
-
-                            comprovante = JSON.stringify(await criarPagamentoBitcoinLightning(tarefaPagamento));
-                        } catch (error) {
-                            const detalhesErro = error && typeof error === "object" ? error : {};
-                            const valorTexto = tarefaPagamento ? String(tarefaPagamento.valor).trim() : "";
-                            const valor = Number(valorTexto.includes(",")
-                                ? valorTexto.replace(/\./g, "").replace(",", ".")
-                                : valorTexto);
-                            // teste de pagamento inválido, exibir prévia do QR Code Bitcoin sem criar o pagamento
-                            if (process.env.NODE_ENV !== "production" && tarefaPagamento && Number.isFinite(valor) && valor > 0 && Math.round(valor * 0.15 * 100) / 100 > 0) {
-                                comprovante = JSON.stringify(criarPreviaPagamentoBitcoin(tarefaPagamento));
-                                console.info("Exibindo pré-visualização da tela Bitcoin; nenhuma invoice foi criada.", detalhesErro.message);
-                            // teste de pagamento inválido, exibir prévia do QR Code Bitcoin sem criar o pagamento
-                            } else {
-                                comprovante = JSON.stringify({ erro: detalhesErro.message || String(error) });
-                                console.error("Erro ao criar pagamento Bitcoin Lightning:", detalhesErro.message || error);
-                            }
-                        }
-                    }else if(req.query.tipoPagamento == "bancodeposito"){
-                        let tarefaPagamento;
-                        let contaProfissional;
-                        try {
-                            tarefaPagamento = await task.findOne({
-                                email: req.query.email,
-                                titleService: req.query.taskservice,
-                                developer: req.query.profissionalSel
-                            }).exec();
-                            if (!tarefaPagamento) {
-                                throw new Error("Serviço não encontrado para pagamento.");
-                            }
-                            const dadosBancarios = lerDadosBancarios(tarefaPagamento.codigo);
-                            contaProfissional = await contasPagamentos.findOne({
-                                email: tarefaPagamento.developer,
-                                tipo: "bancodeposito"
-                            }).exec();
-                            if (!contaProfissional) {
-                                throw new Error("Os dados do titular da conta bancária não foram cadastrados.");
-                            }
-
-                            comprovante = JSON.stringify(await criarTransferenciaPagBank(tarefaPagamento, {
-                                nome: contaProfissional.nome,
-                                documento: contaProfissional.documento,
-                                banco: dadosBancarios.banco,
-                                agencia: dadosBancarios.agencia,
-                                numeroConta: dadosBancarios.numeroConta,
-                                tipoConta: dadosBancarios.tipoConta,
-                                ispb: contaProfissional.ispb
-                            }));
-                        } catch (error) {
-                            const detalhesErro = error && typeof error === "object" ? error : {};
-                            const valorTexto = tarefaPagamento ? String(tarefaPagamento.valor).trim() : "";
-                            const valor = Number(valorTexto.includes(",")
-                                ? valorTexto.replace(/\./g, "").replace(",", ".")
-                                : valorTexto);
-                            // teste de pagamento inválido, exibir prévia da transferência PagBank sem criar a transferência
-                            if (process.env.NODE_ENV !== "production" && tarefaPagamento && Number.isFinite(valor) && valor > 0 && Math.round(valor * 0.15 * 100) / 100 > 0) {
-                                comprovante = JSON.stringify(criarPreviaTransferenciaPagBank(
-                                    tarefaPagamento,
-                                    contaProfissional || {},
-                                    detalhesErro.message || String(error)
-                                ));
-                                console.info("Exibindo prévia da transferência PagBank; nenhuma transferência foi enviada.", detalhesErro.message || error);
-                            // teste de pagamento inválido, exibir prévia da transferência PagBank sem criar a transferência
-                            } else {
-                                comprovante = JSON.stringify({ erro: detalhesErro.message || String(error) });
-                                console.error("Erro ao criar transferência PagBank:", detalhesErro.message || error);
-                            }
-                        }
-                    }                     
+                const result = await companyController.handlePayments(req, models, dependencies);
+                if (result && result.template) {
+                    return res.render(result.template, result.data);
                 }
-                task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){ 
-                    const desenvolvedoresPagamento = task.filter((t) => t.developer && ["postRev", "postEnd"].includes(t.column)).map((t) => t.developer);
-                    profissional.find({email: {$in: desenvolvedoresPagamento}}).sort({"_id":1}).exec(function(err, profissional){
-                        contasPagamentos.find({email: req.query.profissionalSel}).sort({"_id":1}).exec(function(err, pagamento){
-                            res.render("company/pagamento/index",{
-                                profissional: profissional,
-                                idtask: req.query.idtask,
-                                dadosPagamento: pagamento,
-                                task: task,
-                                profissionalSel: req.query.profissionalSel,
-                                taskservice: req.query.taskservice,
-                                estadoPg: req.query.estadoPg,
-                                typeuser: req.query.typeuser,
-                                nome: req.query.nome,
-                                email:req.query.email,
-                                senha:req.query.senha,
-                                tipoPagamento: req.query.tipoPagamento,
-                                comprovante: comprovante
-                            }); 
-                        });                        
-                    });                    
-                });
-            } 
+            }
             else if(req.query.menu == "historico"){
-              if(req.query.enviaNota == "Enviar Avaliação" || req.query.enviaNota == "Submit Review"){
-                console.log("salvar avaliação");
-                    if(!req.query.profissionalSel || !["1", "2", "3", "4", "5"].includes(String(req.query.nota))){
-                        return res.status(400).send("Selecione um profissional e uma nota para avaliar.");
-                    }
-                    try{
-                        const servicoAvaliado = await task.findOne({
-                            email: req.query.email,
-                            developer: req.query.profissionalSel
-                        });
-                        if(!servicoAvaliado){
-                            return res.status(400).send("O profissional selecionado não foi contratado por este contratante.");
-                        }
-                        await avaliar.collection.insertOne({
-                            contato: req.query.email,
-                            developer: req.query.profissionalSel,
-                            autor: "contratante",
-                            comentario: req.query.comentarioProf,
-                            nota: req.query.nota
-                        });
-                        msg = "Avaliação salva";
-                        const historicoQuery = urlEncryption.encryptQuery({
-                            typeuser: req.query.typeuser,
-                            email: req.query.email,
-                            senha: req.query.senha,
-                            menu: "historico"
-                        });
-                        return res.redirect(`/?${queryParameter}=${historicoQuery}`);
-                    }catch(error){
-                        console.error("Erro ao salvar avaliação do profissional:", error.message);
-                        return res.status(500).send("Não foi possível salvar a avaliação.");
-                    }
+                const result = await companyController.handleHistorico(req, models, dependencies);
+                if (result && result.redirect) {
+                    return res.redirect(result.redirect);
+                } else if (result && result.error) {
+                    return res.status(result.statusCode || 500).send(result.error);
+                } else if (result && result.template) {
+                    return res.render(result.template, result.data);
                 }
-                task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, tasks){
-                    if(err){
-                        console.error("Erro ao buscar serviços do histórico:", err.message);
-                        return res.status(500).send("Não foi possível carregar o histórico.");
-                    }
-                    const emailsProfissionais = [...new Set(
-                        tasks.map((service) => service.developer).filter(Boolean)
-                    )];
-                    profissional.find({email: {$in: emailsProfissionais}}).sort({"_id":1}).exec(function(err, profissionais){
-                        if(err){
-                            console.error("Erro ao buscar profissionais do histórico:", err.message);
-                            return res.status(500).send("Não foi possível carregar os profissionais do histórico.");
-                        }
-                        contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){
-                            contabilidade.find({contato:{$in: emailsProfissionais}}).sort({ano:-1, _id:-1}).exec(function(err, contabilidade){
-                                avaliar.find({contato: req.query.email, autor: {$ne: "contratante"}}).sort({"_id":-1}).exec(function(err, avaliacoesContratante){
-                                    if(err){
-                                        console.error("Erro ao buscar avaliações da empresa:", err.message);
-                                        return res.status(500).send("Não foi possível carregar as avaliações da empresa.");
-                                    }
-                                    res.render("company/historico/index",{
-                                        typeuser: req.query.typeuser,
-                                        email:req.query.email,
-                                        senha:req.query.senha,
-                                        profissionais: profissionais,
-                                        contratante: contratante,
-                                        contabilidade: contabilidade,
-                                        avaliacoesContratante: avaliacoesContratante,
-                                        task: tasks
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            } 
+            }
             else if(req.query.menu == "fichaCont" || req.query.cadastroContractor == "Salvar"){                               
-                res.render("company/cadastroCont/index",{typeuser: req.query.typeuser, 
-                    email:req.query.email, 
-                    ficha: {
-                        nome: req.query.nome,
-                        endereco: req.query.endereco,
-                        cidade: req.query.cidade,
-                        estado: req.query.estado,
-                        cep: req.query.cep,
-                        pais: req.query.pais,
-                        cpf_cnpj: req.query.cpf_cnpj,
-                        email: req.query.email,
-                        senha: req.query.senha
-                    },
-                    senha:req.query.senha,
-                    senha2: req.query.senha2, 
-                    seletor: req.query.seletor});
+                const result = await companyController.handleFichaCont(req);
+                if (result && result.template) {
+                    return res.render(result.template, result.data);
+                }
             }
             else if(req.query.menu == "concluidos"){ 
-                if(req.query.taskServ == "altera"){
-                    try{
-                        const idtaskTexto = String(req.query.count || "").trim();
-                        const idtaskNumero = Number(idtaskTexto);
-                        const idsTask = Number.isFinite(idtaskNumero)
-                            ? [idtaskTexto, idtaskNumero]
-                            : [idtaskTexto];
-                        const comprovanteProfissional = typeof req.query.comprovante === "string" &&
-                            req.query.comprovante.trim().length > 0;
-                        const comprovantePlataforma = typeof req.query.comprovantePlataforma === "string" &&
-                            req.query.comprovantePlataforma.trim().length > 0;
-                        await task.collection.updateOne({
-                            email: req.query.email,
-                            idtask: { $in: idsTask }
-                        }, {
-                            $set: {
-                                column: comprovanteProfissional && comprovantePlataforma ? "postEnd" : "postRev",
-                                comprovante: req.query.comprovante,
-                                comprovantePlataforma: req.query.comprovantePlataforma
-                            }
-                        });
-                        console.log("task atualizada");
-                    }catch(e){
-                        console.log("Erro: "+e.message);
-                    }
+                const result = await companyController.handleConcluidos(req, models, dependencies);
+                if (result && result.error) {
+                    return res.status(result.statusCode || 500).send(result.error);
+                } else if (result && result.template) {
+                    return res.render(result.template, result.data);
                 }
-                if(req.query.contabilidade == "comprovante"){
-                    try{
-                        const idtaskTexto = String(req.query.count || "").trim();
-                        const idtaskNumero = Number(idtaskTexto);
-                        const idsTask = Number.isFinite(idtaskNumero)
-                            ? [idtaskTexto, idtaskNumero]
-                            : [idtaskTexto];
-                        const servico = await task.collection.findOne({
-                            email: req.query.email,
-                            idtask: { $in: idsTask },
-                            developer: req.query.developer
-                        });
-                        if(!idtaskTexto || !servico){
-                            return res.status(404).send("Serviço não encontrado para contabilizar o pagamento.");
-                        }
-                        const dataAtual = new Date();
-                        const dataLancamento = {
-                            ano: String(dataAtual.getFullYear()),
-                            mes: String(dataAtual.getMonth() + 1),
-                            dia: String(dataAtual.getDate())
-                        };
-                        await salvarLancamentoContabilidade({
-                            ...dataLancamento,
-                            contato: req.query.developer,
-                            tipo: "rendaProfissional",
-                            servico: servico,
-                            valor: servico.valor
-                        });
-                    }catch(error){
-                        console.error("Erro ao contabilizar pagamento do profissional:", error.message);
-                        return res.status(500).send("Não foi possível atualizar os gastos anuais.");
-                    }
-                }                
-                if(req.query.contabilidade == "comprovantePlataforma"){
-                    try{
-                        const idtaskTexto = String(req.query.count || "").trim();
-                        const idtaskNumero = Number(idtaskTexto);
-                        const idsTask = Number.isFinite(idtaskNumero)
-                            ? [idtaskTexto, idtaskNumero]
-                            : [idtaskTexto];
-                        const servico = await task.collection.findOne({
-                            email: req.query.email,
-                            idtask: { $in: idsTask }
-                        });
-                        if(!idtaskTexto || !servico){
-                            return res.status(404).send("Serviço não encontrado para contabilizar a taxa da plataforma.");
-                        }
-                        const valorTexto = String(servico.valor || "").trim();
-                        const valorServico = Number(valorTexto.includes(",")
-                            ? valorTexto.replace(/\./g, "").replace(",", ".")
-                            : valorTexto);
-                        if(!Number.isFinite(valorServico)){
-                            return res.status(400).send("O valor do serviço não é válido para contabilizar a taxa.");
-                        }
-                        const dataAtual = new Date();
-                        await salvarLancamentoContabilidade({
-                            contato: req.query.email,
-                            tipo: "despesaPlataforma",
-                            servico: servico,
-                            ano: String(dataAtual.getFullYear()),
-                            mes: String(dataAtual.getMonth() + 1),
-                            dia: String(dataAtual.getDate()),
-                            valor: (valorServico * 0.15).toFixed(2)
-                        });
-                    }catch(error){
-                        console.error("Erro ao contabilizar taxa da plataforma:", error.message);
-                        return res.status(500).send("Não foi possível atualizar os gastos anuais.");
-                    }
-                }                
-                contratante.find({email:req.query.email}).sort({"_id":1}).exec(function(err, contratante){
-                    task.find({email:req.query.email}).sort({"_id":1}).exec(function(err, tasks){
-                        if(err){
-                            console.error("Erro ao buscar serviços concluídos:", err.message);
-                            return res.status(500).send("Não foi possível carregar os serviços concluídos.");
-                        }
-                        const emailsProfissionais = [...new Set(
-                            tasks.map((service) => service.developer).filter(Boolean)
-                        )];
-                        profissional.find({email: {$in: emailsProfissionais}}).sort({"_id":1}).exec(function(err, profissionais){
-                            if(err){
-                                console.error("Erro ao buscar profissionais contratados:", err.message);
-                                return res.status(500).send("Não foi possível carregar os profissionais contratados.");
-                            }
-                            res.render("company/concluidos/index",{
-                                typeuser: req.query.typeuser,
-                                task: tasks,
-                                contratante: contratante,
-                                profissionais: profissionais,
-                                email:req.query.email,
-                                senha:req.query.senha
-                            });
-                        });
-                    });
-                });
             }
             else  if(req.query.menu == "chatC"){  
-                if( req.query.conversa == "Send"){
-                    try{
-                        chatmensagem.collection.insertMany([
-                        {           
-                            remetente: req.query.email,
-                            destinatario: req.query.usuario,
-                            mensagem: req.query.mensagem                  
-                        }
-                    ]).then(function(){
-                        msg = "mensagem salva"
-                        console.log(msg) 
-                    }).catch(function(error){
-                        console.log(error)    
-                    });
-                    }catch(e){
-                        console.log(e.error);
-                    }              
-                }           
-            contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){
-                chatmensagem.find({}).sort({"_id":1}).exec(function(err, chatmensagem){
-                    task.find({email: req.query.email}).sort({"_id":1}).exec(function(err, task){
-                        res.render("chat/index",{
-                            task: task,
-                            chatmensagem: chatmensagem,
-                            mensagem: req.query.mensagem,
-                            remetente: req.query.email,
-                            usuario: req.query.usuario,
-                            typeuser: req.query.typeuser,
-                            email:req.query.email,
-                            senha:req.query.senha
-                        });
-                    });
-                });
-            });  
+                const result = await companyController.handleChatC(req, models);
+                if (result && result.template) {
+                    return res.render(result.template, result.data);
+                }
             }
             else  if(req.query.menu == "ProdutosCaju"){   
-                contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){                    
-                    res.render("company/caju/index",{typeuser: req.query.typeuser, 
-                    email:req.query.email, 
-                    senha:req.query.senha,
-                    contratante: contratante
-                }); 
-            }); 
-                      
-            }else if(req.query.menu == "fichaCad"){
-                let mensagem = "";
-                if( req.query.alteraContractor == "Alterar" ){
-                    try{
-                        contratante.collection.updateOne({
-                            email: req.query.email
-                        }, {
-                            $set: {
-                                nome: req.query.nome,
-                                endereco: req.query.endereco,
-                                cidade: req.query.cidade,
-                                estado: req.query.estado,
-                                cep: req.query.cep,
-                                pais: req.query.pais,
-                                cpf_cnpj: req.query.cpf_cnpj,
-                                email: req.query.email,
-                                senha: req.query.senha,
-                            }
-                        });
-                        mensagem="contratante alterado";
-                    }catch(e){
-                        console.log("Erro: "+e.message);
-                    }                                        
+                const result = await companyController.handleProdutosCaju(req, models);
+                if (result && result.template) {
+                    return res.render(result.template, result.data);
                 }
-                contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){ 
-                    res.render("company/fichaCad/index",{
-                        typeuser: "contractor",
-                        logado: "", 
-                        email:contratante[0].email,
-                        senha:req.query.senha,
-                        contratante: contratante,
-                        senha2: req.query.senha2,                
-                        produto: contratante.produto,
-                        mensagem: mensagem,
-                        tipoPagamento: req.query.tipoPagamento
-                    });  
-                });
-            }else if(req.query.menu == "bug"){
-                const mensagemBug = req.query.bugReport === "Submit Bug Report"
-                    ? "Bug reported."
-                    : null;
-                if(mensagemBug){
-                    try{
-                            bug.collection.insertMany([
-                        { 
-                            email: req.query.email, 
-                            titleService: req.query.bug,
-                            description: req.query.bugDescription
-                        }
-                            ]).then(function(){
-                                msg = "bug reportado"
-                                console.log(msg)
-                            }).catch(function(error){
-                                console.log(error)
-                            });
-                        }catch(e){
-                            console.log(e.error);
-                        }
+            }
+            else if(req.query.menu == "fichaCad"){
+                const result = await companyController.handleFichaCad(req, models);
+                if (result && result.template) {
+                    return res.render(result.template, result.data);
                 }
-                 contratante.find({email: req.query.email}).sort({"_id":1}).exec(function(err, contratante){                    
-                    res.render("bug/index",{
-                        typeuser: req.query.typeuser, 
-                        email:req.query.email, 
-                        senha:req.query.senha,
-                        mensagemBug: mensagemBug,
-                        contratante: contratante
-                    }); 
-                });
-            }        
+            }
+            else if(req.query.menu == "bug"){
+                const result = await companyController.handleBug(req, models);
+                if (result && result.template) {
+                    return res.render(result.template, result.data);
+                }
+            }
         }
         else  if(req.query.typeuser == "professional"){
             if(req.query.opcao == "Entrar"){
