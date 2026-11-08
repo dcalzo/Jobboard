@@ -15,6 +15,7 @@ const { criarPagamentoPix, criarPreviaPagamentoPix } = require("./views/tiposPag
 const env = require("./dev.env.js");
 const avaliar = require("./views/avaliar/avaliar.js");
 const companyController = require("./views/company/controller.js");
+const professionalController = require("./views/professional/controller.js");
 const { createUrlEncryption, queryParameter, resolveEncryptionSecret } = require("./urlEncryption");
 const app = express();
 const porta = 8080;
