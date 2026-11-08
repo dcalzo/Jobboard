@@ -295,7 +295,9 @@ app.get("/", async (req,res)=>{
             }
             else if(req.query.menu == "fincadCont" || req.query.tipoPagamento != null){
                 const result = await companyController.handlePayments(req, models, dependencies);
-                if (result && result.template) {
+                if (result && result.redirect) {
+                    return res.redirect(result.redirect);
+                } else if (result && result.template) {
                     return res.render(result.template, result.data);
                 }
             }

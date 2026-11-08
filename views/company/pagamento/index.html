@@ -8,14 +8,26 @@
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>      
       <title>Board Jobs (Payments)</title>
+      <script>
+        function handleSelectionChange() {
+          const profissionalSel = document.getElementById('profissionalSel').value;
+          const taskservice = document.getElementById('taskservice').value;
+          
+          // Submit the form to create encrypted URL with selections
+          if (profissionalSel && taskservice) {
+            document.getElementById('paymentForm').submit();
+          }
+        }
+      </script>
     </head>
     <body class="payment-details-page">
       <% let retornoPagamento = null; %>
       <% try { retornoPagamento = comprovante ? JSON.parse(comprovante) : null; } catch (e) {} %>
       <h1><b>Financial Details</b></h1><br />
       <br />
-      <form method="POST">
+      <form method="POST" id="paymentForm">
       <input type="hidden" name="q" value="<%=encryptedParams%>" />
+      <input type="hidden" name="menu" value="fincadCont" />
       <table style="width: 98%%;">
         <tr>
           <td class="no-print" style="width: 20%;">
@@ -25,14 +37,14 @@
           </td>
           <td id="conteudo" name="conteudo" style="width: 80%;">
             Professional:
-            <select  name="profissionalSel" id="profissionalSel" onchange="this.form.submit()">
+            <select  name="profissionalSel" id="profissionalSel" onchange="handleSelectionChange()">
               <option value="" <%= profissionalSel ? "" : "selected" %>></option>
               <%for(var x=0;x < profissional.length;x++){%>
                 <option value="<%=profissional[x].email%>" <%= profissionalSel == profissional[x].email ? "selected" : "" %>><%=profissional[x].nome%></option>
               <%}%>
             </select>
             Service:
-            <select  name="taskservice" id="taskservice" onchange="this.form.submit()">
+            <select  name="taskservice" id="taskservice" onchange="handleSelectionChange()">
               <option value="" ></option>
               <%for(var x=0;x<task.length;x++){
                 const comprovanteProfissional = typeof task[x].comprovante === "string" && task[x].comprovante.trim().length > 0;

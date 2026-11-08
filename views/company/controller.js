@@ -87,6 +87,22 @@ async function handlePayments(req, models, { urlEncryption, criarPagamentoPix, c
     const { task, profissional, contasPagamentos } = models;
     let comprovante = "";
 
+    // If professional and service selected via form submission, redirect with encrypted URL containing selections
+    if ((req.query.profissionalSel || req.query.taskservice) && !req.query.buttonPay) {
+        const newParams = {
+            typeuser: req.query.typeuser,
+            email: req.query.email,
+            senha: req.query.senha,
+            menu: 'fincadCont',
+            profissionalSel: req.query.profissionalSel || '',
+            taskservice: req.query.taskservice || ''
+        };
+        const newEncryptedParams = urlEncryption.encryptQuery(newParams);
+        return {
+            redirect: `/?q=${encodeURIComponent(newEncryptedParams)}`
+        };
+    }
+
     if (req.query.buttonPay == "Pay" || req.query.buttonPay == "Pagar") {
         if (req.query.tipoPagamento == "PIX") {
             let tarefaPagamento;
